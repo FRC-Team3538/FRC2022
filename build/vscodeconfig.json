@@ -1,0 +1,381 @@
+[
+  {
+    "name": "linuxathena",
+    "architecture": "arm-v7",
+    "operatingSystem": "linux",
+    "flavor": "default",
+    "buildType": "debug",
+    "cppPath": "/home/dereck/wpilib/2022/roborio/bin/arm-frc2022-linux-gnueabi-g++",
+    "cPath": "/home/dereck/wpilib/2022/roborio/bin/arm-frc2022-linux-gnueabi-gcc",
+    "msvc": false,
+    "gcc": true,
+    "systemCppMacros": [],
+    "systemCppArgs": [],
+    "systemCMacros": [],
+    "systemCArgs": [],
+    "allLibFiles": [
+      "/home/dereck/.gradle/caches/transforms-3/caf9e393ba2b262697297d01f1ce2ecc/transformed/wpilibNewCommands-cpp-2022.1.1-rc-1-headers/",
+      "/home/dereck/.gradle/caches/transforms-3/79cc369c21c38262076fdf16c8d8c231/transformed/wpilibc-cpp-2022.1.1-rc-1-headers/",
+      "/home/dereck/.gradle/caches/transforms-3/038deb59fdc79fb669f454c1fed40c44/transformed/ntcore-cpp-2022.1.1-rc-1-headers/",
+      "/home/dereck/.gradle/caches/transforms-3/470c4d61f35660c457dfab5f0bcf8a19/transformed/hal-cpp-2022.1.1-rc-1-headers/",
+      "/home/dereck/.gradle/caches/transforms-3/ecf10d2674dc835ba3cad8e867233e66/transformed/wpimath-cpp-2022.1.1-rc-1-headers/",
+      "/home/dereck/.gradle/caches/transforms-3/229c9be65ba7288649f827d04938d82d/transformed/wpiutil-cpp-2022.1.1-rc-1-headers/",
+      "/home/dereck/.gradle/caches/transforms-3/17ee0805de2d2d01b9b3dcc31c06d368/transformed/netcomm-2022.2.3-headers/",
+      "/home/dereck/.gradle/caches/transforms-3/e24f2c33471e71c1ca014e09e200cbde/transformed/chipobject-2022.2.3-headers/",
+      "/home/dereck/.gradle/caches/transforms-3/68a44743116c2531a1290cdf1924e50f/transformed/visa-2022.2.3-headers/",
+      "/home/dereck/.gradle/caches/transforms-3/735f151e72594bde9e6841143ffff7df/transformed/cameraserver-cpp-2022.1.1-rc-1-headers/",
+      "/home/dereck/.gradle/caches/transforms-3/acbf9b9df742c210589302403e071a8e/transformed/cscore-cpp-2022.1.1-rc-1-headers/",
+      "/home/dereck/.gradle/caches/transforms-3/bd73d711ee86f865bc0ca99bb5351498/transformed/opencv-cpp-4.5.2-1-headers/",
+      "/home/dereck/projects/FRC2021-Imported/src/main/include/",
+      "/home/dereck/.gradle/caches/transforms-3/ed54c42543c73f31467cf1a668077d09/transformed/wpilibNewCommands-cpp-2022.1.1-rc-1-sources/",
+      "/home/dereck/.gradle/caches/transforms-3/d530d6ab24b3501eb37e60e061b9dfb5/transformed/wpilibc-cpp-2022.1.1-rc-1-sources/",
+      "/home/dereck/.gradle/caches/transforms-3/e11f8971e5ace1b0d266a6f7913ef8d6/transformed/ntcore-cpp-2022.1.1-rc-1-sources/",
+      "/home/dereck/.gradle/caches/transforms-3/a31c189d6cdf64efe8860485a2ae985a/transformed/hal-cpp-2022.1.1-rc-1-sources/",
+      "/home/dereck/.gradle/caches/transforms-3/afeb7649a81694dd761ba9e06609b911/transformed/wpimath-cpp-2022.1.1-rc-1-sources/",
+      "/home/dereck/.gradle/caches/transforms-3/13c1ef9cff1db34cb89e66e36473631f/transformed/wpiutil-cpp-2022.1.1-rc-1-sources/",
+      "/home/dereck/.gradle/caches/transforms-3/374bacdb687a5a0e844e8863a5cb9ced/transformed/cameraserver-cpp-2022.1.1-rc-1-sources/",
+      "/home/dereck/.gradle/caches/transforms-3/846ac7e98b21a9b831a550f79369ab6e/transformed/cscore-cpp-2022.1.1-rc-1-sources/",
+      "/home/dereck/.gradle/caches/transforms-3/324bb9c62a45d11128c4776b0be52ecc/transformed/opencv-cpp-4.5.2-1-sources/"
+    ],
+    "allLibSources": [
+      "/home/dereck/.gradle/caches/transforms-3/ed54c42543c73f31467cf1a668077d09/transformed/wpilibNewCommands-cpp-2022.1.1-rc-1-sources/",
+      "/home/dereck/.gradle/caches/transforms-3/d530d6ab24b3501eb37e60e061b9dfb5/transformed/wpilibc-cpp-2022.1.1-rc-1-sources/",
+      "/home/dereck/.gradle/caches/transforms-3/e11f8971e5ace1b0d266a6f7913ef8d6/transformed/ntcore-cpp-2022.1.1-rc-1-sources/",
+      "/home/dereck/.gradle/caches/transforms-3/a31c189d6cdf64efe8860485a2ae985a/transformed/hal-cpp-2022.1.1-rc-1-sources/",
+      "/home/dereck/.gradle/caches/transforms-3/afeb7649a81694dd761ba9e06609b911/transformed/wpimath-cpp-2022.1.1-rc-1-sources/",
+      "/home/dereck/.gradle/caches/transforms-3/13c1ef9cff1db34cb89e66e36473631f/transformed/wpiutil-cpp-2022.1.1-rc-1-sources/",
+      "/home/dereck/.gradle/caches/transforms-3/374bacdb687a5a0e844e8863a5cb9ced/transformed/cameraserver-cpp-2022.1.1-rc-1-sources/",
+      "/home/dereck/.gradle/caches/transforms-3/846ac7e98b21a9b831a550f79369ab6e/transformed/cscore-cpp-2022.1.1-rc-1-sources/",
+      "/home/dereck/.gradle/caches/transforms-3/324bb9c62a45d11128c4776b0be52ecc/transformed/opencv-cpp-4.5.2-1-sources/"
+    ],
+    "allLibHeaders": [
+      "/home/dereck/.gradle/caches/transforms-3/caf9e393ba2b262697297d01f1ce2ecc/transformed/wpilibNewCommands-cpp-2022.1.1-rc-1-headers/",
+      "/home/dereck/.gradle/caches/transforms-3/79cc369c21c38262076fdf16c8d8c231/transformed/wpilibc-cpp-2022.1.1-rc-1-headers/",
+      "/home/dereck/.gradle/caches/transforms-3/038deb59fdc79fb669f454c1fed40c44/transformed/ntcore-cpp-2022.1.1-rc-1-headers/",
+      "/home/dereck/.gradle/caches/transforms-3/470c4d61f35660c457dfab5f0bcf8a19/transformed/hal-cpp-2022.1.1-rc-1-headers/",
+      "/home/dereck/.gradle/caches/transforms-3/ecf10d2674dc835ba3cad8e867233e66/transformed/wpimath-cpp-2022.1.1-rc-1-headers/",
+      "/home/dereck/.gradle/caches/transforms-3/229c9be65ba7288649f827d04938d82d/transformed/wpiutil-cpp-2022.1.1-rc-1-headers/",
+      "/home/dereck/.gradle/caches/transforms-3/17ee0805de2d2d01b9b3dcc31c06d368/transformed/netcomm-2022.2.3-headers/",
+      "/home/dereck/.gradle/caches/transforms-3/e24f2c33471e71c1ca014e09e200cbde/transformed/chipobject-2022.2.3-headers/",
+      "/home/dereck/.gradle/caches/transforms-3/68a44743116c2531a1290cdf1924e50f/transformed/visa-2022.2.3-headers/",
+      "/home/dereck/.gradle/caches/transforms-3/735f151e72594bde9e6841143ffff7df/transformed/cameraserver-cpp-2022.1.1-rc-1-headers/",
+      "/home/dereck/.gradle/caches/transforms-3/acbf9b9df742c210589302403e071a8e/transformed/cscore-cpp-2022.1.1-rc-1-headers/",
+      "/home/dereck/.gradle/caches/transforms-3/bd73d711ee86f865bc0ca99bb5351498/transformed/opencv-cpp-4.5.2-1-headers/",
+      "/home/dereck/projects/FRC2021-Imported/src/main/include/"
+    ],
+    "binaries": [
+      {
+        "componentName": "frcUserProgram",
+        "sourceSets": [
+          {
+            "source": {
+              "srcDirs": [
+                "/home/dereck/projects/FRC2021-Imported/src/main/cpp/"
+              ],
+              "includes": [
+                "**/*.cpp",
+                "**/*.cc"
+              ],
+              "excludes": []
+            },
+            "exportedHeaders": {
+              "srcDirs": [
+                "/home/dereck/projects/FRC2021-Imported/src/main/include/"
+              ],
+              "includes": [],
+              "excludes": []
+            },
+            "cpp": true,
+            "args": [
+              "-Wall",
+              "-Wextra",
+              "-std=c++17",
+              "-Wformat=2",
+              "-pedantic",
+              "-Wno-psabi",
+              "-Wno-unused-parameter",
+              "-Wno-error=deprecated-declarations",
+              "-fPIC",
+              "-rdynamic",
+              "-pthread",
+              "-Og",
+              "-g"
+            ],
+            "macros": []
+          }
+        ],
+        "libHeaders": [
+          "/home/dereck/.gradle/caches/transforms-3/caf9e393ba2b262697297d01f1ce2ecc/transformed/wpilibNewCommands-cpp-2022.1.1-rc-1-headers/",
+          "/home/dereck/.gradle/caches/transforms-3/79cc369c21c38262076fdf16c8d8c231/transformed/wpilibc-cpp-2022.1.1-rc-1-headers/",
+          "/home/dereck/.gradle/caches/transforms-3/038deb59fdc79fb669f454c1fed40c44/transformed/ntcore-cpp-2022.1.1-rc-1-headers/",
+          "/home/dereck/.gradle/caches/transforms-3/470c4d61f35660c457dfab5f0bcf8a19/transformed/hal-cpp-2022.1.1-rc-1-headers/",
+          "/home/dereck/.gradle/caches/transforms-3/ecf10d2674dc835ba3cad8e867233e66/transformed/wpimath-cpp-2022.1.1-rc-1-headers/",
+          "/home/dereck/.gradle/caches/transforms-3/229c9be65ba7288649f827d04938d82d/transformed/wpiutil-cpp-2022.1.1-rc-1-headers/",
+          "/home/dereck/.gradle/caches/transforms-3/17ee0805de2d2d01b9b3dcc31c06d368/transformed/netcomm-2022.2.3-headers/",
+          "/home/dereck/.gradle/caches/transforms-3/e24f2c33471e71c1ca014e09e200cbde/transformed/chipobject-2022.2.3-headers/",
+          "/home/dereck/.gradle/caches/transforms-3/68a44743116c2531a1290cdf1924e50f/transformed/visa-2022.2.3-headers/",
+          "/home/dereck/.gradle/caches/transforms-3/735f151e72594bde9e6841143ffff7df/transformed/cameraserver-cpp-2022.1.1-rc-1-headers/",
+          "/home/dereck/.gradle/caches/transforms-3/acbf9b9df742c210589302403e071a8e/transformed/cscore-cpp-2022.1.1-rc-1-headers/",
+          "/home/dereck/.gradle/caches/transforms-3/bd73d711ee86f865bc0ca99bb5351498/transformed/opencv-cpp-4.5.2-1-headers/",
+          "/home/dereck/projects/FRC2021-Imported/src/main/include/"
+        ],
+        "sharedLibrary": false,
+        "executable": true
+      }
+    ],
+    "sourceBinaries": [
+      {
+        "source": {
+          "srcDirs": [
+            "/home/dereck/projects/FRC2021-Imported/src/main/cpp/"
+          ],
+          "includes": [
+            "**/*.cpp",
+            "**/*.cc"
+          ],
+          "excludes": []
+        },
+        "componentName": "frcUserProgram",
+        "cpp": true,
+        "args": [
+          "-Wall",
+          "-Wextra",
+          "-std=c++17",
+          "-Wformat=2",
+          "-pedantic",
+          "-Wno-psabi",
+          "-Wno-unused-parameter",
+          "-Wno-error=deprecated-declarations",
+          "-fPIC",
+          "-rdynamic",
+          "-pthread",
+          "-Og",
+          "-g"
+        ],
+        "macros": [],
+        "sharedLibrary": false,
+        "executable": true
+      },
+      {
+        "source": {
+          "srcDirs": [
+            "/home/dereck/projects/FRC2021-Imported/src/main/include/"
+          ],
+          "includes": [],
+          "excludes": []
+        },
+        "componentName": "frcUserProgram",
+        "cpp": true,
+        "args": [
+          "-Wall",
+          "-Wextra",
+          "-std=c++17",
+          "-Wformat=2",
+          "-pedantic",
+          "-Wno-psabi",
+          "-Wno-unused-parameter",
+          "-Wno-error=deprecated-declarations",
+          "-fPIC",
+          "-rdynamic",
+          "-pthread",
+          "-Og",
+          "-g"
+        ],
+        "macros": [],
+        "sharedLibrary": false,
+        "executable": true
+      }
+    ],
+    "nameBinaryMap": {
+      "frcUserProgram": 0
+    }
+  },
+  {
+    "name": "linuxathena",
+    "architecture": "arm-v7",
+    "operatingSystem": "linux",
+    "flavor": "default",
+    "buildType": "release",
+    "cppPath": "/home/dereck/wpilib/2022/roborio/bin/arm-frc2022-linux-gnueabi-g++",
+    "cPath": "/home/dereck/wpilib/2022/roborio/bin/arm-frc2022-linux-gnueabi-gcc",
+    "msvc": false,
+    "gcc": true,
+    "systemCppMacros": [],
+    "systemCppArgs": [],
+    "systemCMacros": [],
+    "systemCArgs": [],
+    "allLibFiles": [
+      "/home/dereck/.gradle/caches/transforms-3/caf9e393ba2b262697297d01f1ce2ecc/transformed/wpilibNewCommands-cpp-2022.1.1-rc-1-headers/",
+      "/home/dereck/.gradle/caches/transforms-3/79cc369c21c38262076fdf16c8d8c231/transformed/wpilibc-cpp-2022.1.1-rc-1-headers/",
+      "/home/dereck/.gradle/caches/transforms-3/038deb59fdc79fb669f454c1fed40c44/transformed/ntcore-cpp-2022.1.1-rc-1-headers/",
+      "/home/dereck/.gradle/caches/transforms-3/470c4d61f35660c457dfab5f0bcf8a19/transformed/hal-cpp-2022.1.1-rc-1-headers/",
+      "/home/dereck/.gradle/caches/transforms-3/ecf10d2674dc835ba3cad8e867233e66/transformed/wpimath-cpp-2022.1.1-rc-1-headers/",
+      "/home/dereck/.gradle/caches/transforms-3/229c9be65ba7288649f827d04938d82d/transformed/wpiutil-cpp-2022.1.1-rc-1-headers/",
+      "/home/dereck/.gradle/caches/transforms-3/17ee0805de2d2d01b9b3dcc31c06d368/transformed/netcomm-2022.2.3-headers/",
+      "/home/dereck/.gradle/caches/transforms-3/e24f2c33471e71c1ca014e09e200cbde/transformed/chipobject-2022.2.3-headers/",
+      "/home/dereck/.gradle/caches/transforms-3/68a44743116c2531a1290cdf1924e50f/transformed/visa-2022.2.3-headers/",
+      "/home/dereck/.gradle/caches/transforms-3/735f151e72594bde9e6841143ffff7df/transformed/cameraserver-cpp-2022.1.1-rc-1-headers/",
+      "/home/dereck/.gradle/caches/transforms-3/acbf9b9df742c210589302403e071a8e/transformed/cscore-cpp-2022.1.1-rc-1-headers/",
+      "/home/dereck/.gradle/caches/transforms-3/bd73d711ee86f865bc0ca99bb5351498/transformed/opencv-cpp-4.5.2-1-headers/",
+      "/home/dereck/projects/FRC2021-Imported/src/main/include/",
+      "/home/dereck/.gradle/caches/transforms-3/ed54c42543c73f31467cf1a668077d09/transformed/wpilibNewCommands-cpp-2022.1.1-rc-1-sources/",
+      "/home/dereck/.gradle/caches/transforms-3/d530d6ab24b3501eb37e60e061b9dfb5/transformed/wpilibc-cpp-2022.1.1-rc-1-sources/",
+      "/home/dereck/.gradle/caches/transforms-3/e11f8971e5ace1b0d266a6f7913ef8d6/transformed/ntcore-cpp-2022.1.1-rc-1-sources/",
+      "/home/dereck/.gradle/caches/transforms-3/a31c189d6cdf64efe8860485a2ae985a/transformed/hal-cpp-2022.1.1-rc-1-sources/",
+      "/home/dereck/.gradle/caches/transforms-3/afeb7649a81694dd761ba9e06609b911/transformed/wpimath-cpp-2022.1.1-rc-1-sources/",
+      "/home/dereck/.gradle/caches/transforms-3/13c1ef9cff1db34cb89e66e36473631f/transformed/wpiutil-cpp-2022.1.1-rc-1-sources/",
+      "/home/dereck/.gradle/caches/transforms-3/374bacdb687a5a0e844e8863a5cb9ced/transformed/cameraserver-cpp-2022.1.1-rc-1-sources/",
+      "/home/dereck/.gradle/caches/transforms-3/846ac7e98b21a9b831a550f79369ab6e/transformed/cscore-cpp-2022.1.1-rc-1-sources/",
+      "/home/dereck/.gradle/caches/transforms-3/324bb9c62a45d11128c4776b0be52ecc/transformed/opencv-cpp-4.5.2-1-sources/"
+    ],
+    "allLibSources": [
+      "/home/dereck/.gradle/caches/transforms-3/ed54c42543c73f31467cf1a668077d09/transformed/wpilibNewCommands-cpp-2022.1.1-rc-1-sources/",
+      "/home/dereck/.gradle/caches/transforms-3/d530d6ab24b3501eb37e60e061b9dfb5/transformed/wpilibc-cpp-2022.1.1-rc-1-sources/",
+      "/home/dereck/.gradle/caches/transforms-3/e11f8971e5ace1b0d266a6f7913ef8d6/transformed/ntcore-cpp-2022.1.1-rc-1-sources/",
+      "/home/dereck/.gradle/caches/transforms-3/a31c189d6cdf64efe8860485a2ae985a/transformed/hal-cpp-2022.1.1-rc-1-sources/",
+      "/home/dereck/.gradle/caches/transforms-3/afeb7649a81694dd761ba9e06609b911/transformed/wpimath-cpp-2022.1.1-rc-1-sources/",
+      "/home/dereck/.gradle/caches/transforms-3/13c1ef9cff1db34cb89e66e36473631f/transformed/wpiutil-cpp-2022.1.1-rc-1-sources/",
+      "/home/dereck/.gradle/caches/transforms-3/374bacdb687a5a0e844e8863a5cb9ced/transformed/cameraserver-cpp-2022.1.1-rc-1-sources/",
+      "/home/dereck/.gradle/caches/transforms-3/846ac7e98b21a9b831a550f79369ab6e/transformed/cscore-cpp-2022.1.1-rc-1-sources/",
+      "/home/dereck/.gradle/caches/transforms-3/324bb9c62a45d11128c4776b0be52ecc/transformed/opencv-cpp-4.5.2-1-sources/"
+    ],
+    "allLibHeaders": [
+      "/home/dereck/.gradle/caches/transforms-3/caf9e393ba2b262697297d01f1ce2ecc/transformed/wpilibNewCommands-cpp-2022.1.1-rc-1-headers/",
+      "/home/dereck/.gradle/caches/transforms-3/79cc369c21c38262076fdf16c8d8c231/transformed/wpilibc-cpp-2022.1.1-rc-1-headers/",
+      "/home/dereck/.gradle/caches/transforms-3/038deb59fdc79fb669f454c1fed40c44/transformed/ntcore-cpp-2022.1.1-rc-1-headers/",
+      "/home/dereck/.gradle/caches/transforms-3/470c4d61f35660c457dfab5f0bcf8a19/transformed/hal-cpp-2022.1.1-rc-1-headers/",
+      "/home/dereck/.gradle/caches/transforms-3/ecf10d2674dc835ba3cad8e867233e66/transformed/wpimath-cpp-2022.1.1-rc-1-headers/",
+      "/home/dereck/.gradle/caches/transforms-3/229c9be65ba7288649f827d04938d82d/transformed/wpiutil-cpp-2022.1.1-rc-1-headers/",
+      "/home/dereck/.gradle/caches/transforms-3/17ee0805de2d2d01b9b3dcc31c06d368/transformed/netcomm-2022.2.3-headers/",
+      "/home/dereck/.gradle/caches/transforms-3/e24f2c33471e71c1ca014e09e200cbde/transformed/chipobject-2022.2.3-headers/",
+      "/home/dereck/.gradle/caches/transforms-3/68a44743116c2531a1290cdf1924e50f/transformed/visa-2022.2.3-headers/",
+      "/home/dereck/.gradle/caches/transforms-3/735f151e72594bde9e6841143ffff7df/transformed/cameraserver-cpp-2022.1.1-rc-1-headers/",
+      "/home/dereck/.gradle/caches/transforms-3/acbf9b9df742c210589302403e071a8e/transformed/cscore-cpp-2022.1.1-rc-1-headers/",
+      "/home/dereck/.gradle/caches/transforms-3/bd73d711ee86f865bc0ca99bb5351498/transformed/opencv-cpp-4.5.2-1-headers/",
+      "/home/dereck/projects/FRC2021-Imported/src/main/include/"
+    ],
+    "binaries": [
+      {
+        "componentName": "frcUserProgram",
+        "sourceSets": [
+          {
+            "source": {
+              "srcDirs": [
+                "/home/dereck/projects/FRC2021-Imported/src/main/cpp/"
+              ],
+              "includes": [
+                "**/*.cpp",
+                "**/*.cc"
+              ],
+              "excludes": []
+            },
+            "exportedHeaders": {
+              "srcDirs": [
+                "/home/dereck/projects/FRC2021-Imported/src/main/include/"
+              ],
+              "includes": [],
+              "excludes": []
+            },
+            "cpp": true,
+            "args": [
+              "-Wall",
+              "-Wextra",
+              "-std=c++17",
+              "-Wformat=2",
+              "-pedantic",
+              "-Wno-psabi",
+              "-Wno-unused-parameter",
+              "-Wno-error=deprecated-declarations",
+              "-fPIC",
+              "-rdynamic",
+              "-pthread",
+              "-O2"
+            ],
+            "macros": []
+          }
+        ],
+        "libHeaders": [
+          "/home/dereck/.gradle/caches/transforms-3/caf9e393ba2b262697297d01f1ce2ecc/transformed/wpilibNewCommands-cpp-2022.1.1-rc-1-headers/",
+          "/home/dereck/.gradle/caches/transforms-3/79cc369c21c38262076fdf16c8d8c231/transformed/wpilibc-cpp-2022.1.1-rc-1-headers/",
+          "/home/dereck/.gradle/caches/transforms-3/038deb59fdc79fb669f454c1fed40c44/transformed/ntcore-cpp-2022.1.1-rc-1-headers/",
+          "/home/dereck/.gradle/caches/transforms-3/470c4d61f35660c457dfab5f0bcf8a19/transformed/hal-cpp-2022.1.1-rc-1-headers/",
+          "/home/dereck/.gradle/caches/transforms-3/ecf10d2674dc835ba3cad8e867233e66/transformed/wpimath-cpp-2022.1.1-rc-1-headers/",
+          "/home/dereck/.gradle/caches/transforms-3/229c9be65ba7288649f827d04938d82d/transformed/wpiutil-cpp-2022.1.1-rc-1-headers/",
+          "/home/dereck/.gradle/caches/transforms-3/17ee0805de2d2d01b9b3dcc31c06d368/transformed/netcomm-2022.2.3-headers/",
+          "/home/dereck/.gradle/caches/transforms-3/e24f2c33471e71c1ca014e09e200cbde/transformed/chipobject-2022.2.3-headers/",
+          "/home/dereck/.gradle/caches/transforms-3/68a44743116c2531a1290cdf1924e50f/transformed/visa-2022.2.3-headers/",
+          "/home/dereck/.gradle/caches/transforms-3/735f151e72594bde9e6841143ffff7df/transformed/cameraserver-cpp-2022.1.1-rc-1-headers/",
+          "/home/dereck/.gradle/caches/transforms-3/acbf9b9df742c210589302403e071a8e/transformed/cscore-cpp-2022.1.1-rc-1-headers/",
+          "/home/dereck/.gradle/caches/transforms-3/bd73d711ee86f865bc0ca99bb5351498/transformed/opencv-cpp-4.5.2-1-headers/",
+          "/home/dereck/projects/FRC2021-Imported/src/main/include/"
+        ],
+        "sharedLibrary": false,
+        "executable": true
+      }
+    ],
+    "sourceBinaries": [
+      {
+        "source": {
+          "srcDirs": [
+            "/home/dereck/projects/FRC2021-Imported/src/main/cpp/"
+          ],
+          "includes": [
+            "**/*.cpp",
+            "**/*.cc"
+          ],
+          "excludes": []
+        },
+        "componentName": "frcUserProgram",
+        "cpp": true,
+        "args": [
+          "-Wall",
+          "-Wextra",
+          "-std=c++17",
+          "-Wformat=2",
+          "-pedantic",
+          "-Wno-psabi",
+          "-Wno-unused-parameter",
+          "-Wno-error=deprecated-declarations",
+          "-fPIC",
+          "-rdynamic",
+          "-pthread",
+          "-O2"
+        ],
+        "macros": [],
+        "sharedLibrary": false,
+        "executable": true
+      },
+      {
+        "source": {
+          "srcDirs": [
+            "/home/dereck/projects/FRC2021-Imported/src/main/include/"
+          ],
+          "includes": [],
+          "excludes": []
+        },
+        "componentName": "frcUserProgram",
+        "cpp": true,
+        "args": [
+          "-Wall",
+          "-Wextra",
+          "-std=c++17",
+          "-Wformat=2",
+          "-pedantic",
+          "-Wno-psabi",
+          "-Wno-unused-parameter",
+          "-Wno-error=deprecated-declarations",
+          "-fPIC",
+          "-rdynamic",
+          "-pthread",
+          "-O2"
+        ],
+        "macros": [],
+        "sharedLibrary": false,
+        "executable": true
+      }
+    ],
+    "nameBinaryMap": {
+      "frcUserProgram": 0
+    }
+  }
+]
