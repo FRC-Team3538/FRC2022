@@ -94,8 +94,8 @@ namespace rj
             auto middle_accel = drivetrain_model.State(speed).wheel_acceleration;
 
             return {
-                minAcceleration : -drivetrain_model.MaxAccel(),
-                maxAcceleration : middle_accel
+                -drivetrain_model.MaxAccel(),
+                middle_accel
             };
         }
     };

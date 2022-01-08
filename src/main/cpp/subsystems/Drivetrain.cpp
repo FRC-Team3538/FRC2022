@@ -11,27 +11,27 @@ void Drivetrain::SetSpeeds(const frc::DifferentialDriveWheelSpeeds &speeds)
   auto leftFeedforward = m_feedforward.Calculate(speeds.left);
   auto rightFeedforward = m_feedforward.Calculate(speeds.right);
 
-  double leftRate = 0.0;
-  double rightRate = 0.0;
+  // double leftRate = 0.0;
+  // double rightRate = 0.0;
 
-  if (m_isSimulation)
-  {
-    leftRate = m_leftEncoder.GetRate();
-    rightRate = m_rightEncoder.GetRate();
-  }
-  else
-  {
-    leftRate = m_driveL0.GetSelectedSensorVelocity(0) * m_leftEncoder.GetDistancePerPulse() * 10.0;
-    rightRate = m_driveR0.GetSelectedSensorVelocity(0) * m_leftEncoder.GetDistancePerPulse() * 10.0;
-  }
+  // if (m_isSimulation)
+  // {
+  //   leftRate = m_leftEncoder.GetRate();
+  //   rightRate = m_rightEncoder.GetRate();
+  // }
+  // else
+  // {
+  //   leftRate = m_driveL0.GetSelectedSensorVelocity(0) * m_leftEncoder.GetDistancePerPulse() * 10.0;
+  //   rightRate = m_driveR0.GetSelectedSensorVelocity(0) * m_leftEncoder.GetDistancePerPulse() * 10.0;
+  // }
 
-  double leftOutput = m_leftPIDController.Calculate(
-      leftRate,
-      speeds.left.to<double>());
+  // double leftOutput = m_leftPIDController.Calculate(
+  //     leftRate,
+  //     speeds.left.to<double>());
 
-  double rightOutput = m_rightPIDController.Calculate(
-      rightRate,
-      speeds.right.to<double>());
+  // double rightOutput = m_rightPIDController.Calculate(
+  //     rightRate,
+  //     speeds.right.to<double>());
 
   // m_leftGroup.SetVoltage(units::volt_t{leftOutput} + leftFeedforward);
   // m_rightGroup.SetVoltage(units::volt_t{rightOutput} + rightFeedforward);
@@ -58,11 +58,11 @@ void Drivetrain::UpdateOdometry()
   auto left = m_driveL0.GetSelectedSensorPosition(0) * m_leftEncoder.GetDistancePerPulse();
   auto right = m_driveR0.GetSelectedSensorPosition(0) * m_rightEncoder.GetDistancePerPulse();
 
-  m_odometry.Update(-m_imu.GetRotation2d(),
+  m_odometry.Update(-m_imu.GetAngle(),
                     units::meter_t(left),
                     units::meter_t(right));
 #else
-  m_odometry.Update(m_gyro.GetRotation2d() /*m_gyro.GetRotation2d()*/,
+  m_odometry.Update(m_gyro.GetAngle() /*m_gyro.GetRotation2d()*/,
                     units::meter_t(m_leftEncoder.GetDistance()),
                     units::meter_t(m_rightEncoder.GetDistance()));
 #endif
@@ -108,7 +108,7 @@ void Drivetrain::Periodic()
 {
   UpdateOdometry();
   //m_fieldSim.SetRobotPose(m_odometry.GetPose());
-  double angle = /*m_imu.GetAngle();*/ acos(m_imu.GetRotation2d().Cos()) * (180.0 / wpi::numbers::pi);
+  double angle = m_imu.GetAngle().value(); //acos(m_imu.GetRotation2d().Cos()) * (180.0 / wpi::numbers::pi);
   double distL = (m_driveL0.GetSelectedSensorPosition(0));// * m_leftEncoder.GetDistancePerPulse());
   double distR = (m_driveR0.GetSelectedSensorPosition(0));// * m_rightEncoder.GetDistancePerPulse());
   frc::SmartDashboard::PutNumber("Dist L", distL);

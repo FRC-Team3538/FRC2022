@@ -1,22 +1,4 @@
-See file:///home/dereck/projects/FRC2021-Imported/build/tmp/compileFrcUserProgramDebugExecutableFrcUserProgramCpp/output.txt for all output for compileFrcUserProgramDebugExecutableFrcUserProgramCpp.
-compiling UDPLogger.cpp failed.
-In file included from /home/dereck/projects/FRC2021-Imported/src/main/cpp/UDPLogger.cpp:13:0:
-/home/dereck/projects/FRC2021-Imported/src/main/include/UDPLogger.hpp:16:10: fatal error: ctre/Phoenix.h: No such file or directory
- #include <ctre/Phoenix.h>
-          ^~~~~~~~~~~~~~~~
-compilation terminated.
+See file:///home/dereck/projects/FRC2022/build/tmp/compileFrcUserProgramDebugExecutableFrcUserProgramCpp/output.txt for all output for compileFrcUserProgramDebugExecutableFrcUserProgramCpp.
+compiling Robot.cpp successful.
 
-compiling Robot.cpp failed.
-/home/dereck/projects/FRC2021-Imported/src/main/cpp/Robot.cpp:12:10: fatal error: frc2/Timer.h: No such file or directory
- #include <frc2/Timer.h>
-          ^~~~~~~~~~~~~~
-compilation terminated.
-
-compiling Drivetrain.cpp failed.
-In file included from /home/dereck/projects/FRC2021-Imported/src/main/cpp/subsystems/Drivetrain.cpp:5:0:
-/home/dereck/projects/FRC2021-Imported/src/main/include/subsystems/Drivetrain.h:28:10: fatal error: ctre/Phoenix.h: No such file or directory
- #include "ctre/Phoenix.h"
-          ^~~~~~~~~~~~~~~~
-compilation terminated.
-
-Finished compileFrcUserProgramDebugExecutableFrcUserProgramCpp, see full log file:///home/dereck/projects/FRC2021-Imported/build/tmp/compileFrcUserProgramDebugExecutableFrcUserProgramCpp/output.txt.
+Finished compileFrcUserProgramDebugExecutableFrcUserProgramCpp, see full log file:///home/dereck/projects/FRC2022/build/tmp/compileFrcUserProgramDebugExecutableFrcUserProgramCpp/output.txt.

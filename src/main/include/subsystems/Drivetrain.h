@@ -7,7 +7,7 @@
 #include <frc/AnalogGyro.h>
 #include <frc/Encoder.h>
 #include <frc/motorcontrol/PWMVictorSPX.h>
-#include <frc/SpeedControllerGroup.h>
+#include <frc/motorcontrol/MotorControllerGroup.h>
 #include <frc/controller/PIDController.h>
 #include <frc/controller/SimpleMotorFeedforward.h>
 #include <frc/kinematics/DifferentialDriveKinematics.h>
@@ -18,6 +18,7 @@
 #include <frc/smartdashboard/Field2d.h>
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <frc/system/plant/LinearSystemId.h>
+#include <frc/ADIS16470_IMU.h>
 #include <units/angle.h>
 #include <units/angular_velocity.h>
 #include <units/length.h>
@@ -26,13 +27,12 @@
 #include <math.h>
 
 #include "ctre/Phoenix.h"
-#include "adi/ADIS16470_IMU.h"
-#include <lib/Loggable.hpp>
+
 
 /**
  * Represents a differential drive style drivetrain.
  */
-class Drivetrain : public rj::Loggable
+class Drivetrain
 {
 public:
     Drivetrain(bool isSimulation)
@@ -47,7 +47,6 @@ public:
         m_driveR2.ConfigFactoryDefault();
 
         double pidIdx = 0;
-        double timeoutMs = 18;
         m_driveL0.ConfigSelectedFeedbackSensor(FeedbackDevice::IntegratedSensor, pidIdx);
         m_driveL0.SetStatusFramePeriod(ctre::phoenix::motorcontrol::StatusFrameEnhanced::Status_3_Quadrature, 18);
 
@@ -109,22 +108,6 @@ public:
     {
         impel.Set(speed);
         impel2.Set(speed);
-    }
-
-    void Log(UDPLogger &logger)
-    {
-        logger.LogExternalDevice(m_driveL0);
-        logger.LogExternalDevice(m_driveL1);
-        logger.LogExternalDevice(m_driveL2);
-        logger.LogExternalDevice(m_driveR0);
-        logger.LogExternalDevice(m_driveR1);
-        logger.LogExternalDevice(m_driveR2);
-        //logger.LogExternalDevice(impel);
-        logger.LogExternalDevice(impel2);
-
-#ifdef __FRC_ROBORIO__
-        logger.LogExternalDevice(m_imu);
-#endif
     }
 
     double GetVel()
@@ -193,14 +176,14 @@ private:
     WPI_TalonFX m_driveR2{5};
 
     // Controller Groups
-    frc::SpeedControllerGroup m_leftGroup{
+    frc::MotorControllerGroup m_leftGroup{
         m_leftLeader,
         m_leftFollower,
         m_driveL0,
         m_driveL1,
         m_driveL2};
 
-    frc::SpeedControllerGroup m_rightGroup{
+    frc::MotorControllerGroup m_rightGroup{
         m_rightLeader,
         m_rightFollower,
         m_driveR0,
@@ -218,14 +201,14 @@ private:
     frc::ADIS16470_IMU m_imu{
         frc::ADIS16470_IMU::IMUAxis::kZ, //kZ
         frc::SPI::Port::kOnboardCS0,
-        frc::ADIS16470CalibrationTime::_2s};
+        frc::ADIS16470_IMU::CalibrationTime::_2s};
 #endif
 
     //
     // Dynamics
     //
     frc::DifferentialDriveKinematics m_kinematics{kTrackWidth};
-    frc::DifferentialDriveOdometry m_odometry{-m_imu.GetRotation2d()};
+    frc::DifferentialDriveOdometry m_odometry{-m_imu.GetAngle()};
     frc::SimpleMotorFeedforward<units::meters> m_feedforward{kStatic, kVlinear, kAlinear};
 
     //
@@ -234,7 +217,7 @@ private:
     frc::LinearSystem<2, 2, 2> m_drivetrainSystem =
         frc::LinearSystemId::IdentifyDrivetrainSystem(
             kVlinear, kAlinear,
-            kVangular, kAangular);
+            kVangular, kAangular, kTrackWidth);
 
     frc::sim::DifferentialDrivetrainSim m_drivetrainSimulator{
         m_drivetrainSystem,

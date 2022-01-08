@@ -9,19 +9,16 @@
 #include <frc/Preferences.h>
 #include <frc/trajectory/TrajectoryGenerator.h>
 #include <frc/smartdashboard/SendableChooser.h>
-#include <frc2/Timer.h>
 #include <frc/Timer.h>
 #include <frc/Filesystem.h>
 #include <frc/trajectory/TrajectoryUtil.h>
-#include <wpi/Path.h>
+#include <wpi/fs.h>
 #include <wpi/SmallString.h>
 #include <wpi/json.h>
 #include <frc/DigitalInput.h>
 #include <frc/Servo.h>
 
 #include "subsystems/Drivetrain.h"
-#include "subsystems/GlobalDevices.h"
-#include <UDPLogger.hpp>
 
 #include <lib/DiffyDriveTrajectoryConstraint.hpp>
 #include <DrivetrainModel.hpp>
@@ -33,26 +30,9 @@
 
 #include <memory>
 #include <thread>
+#include <vector>
 
-void logToUDPLogger(UDPLogger &logger, std::vector<std::shared_ptr<rj::Loggable>> &loggables)
-{
-  auto target =
-      std::chrono::steady_clock::now() + std::chrono::milliseconds(20);
-  logger.InitLogger();
-  while (true)
-  {
-    logger.CheckForNewClient();
-
-    for (auto &loggable : loggables)
-    {
-      loggable->Log(logger);
-    }
-
-    logger.FlushLogBuffer();
-    std::this_thread::sleep_until(target);
-    target = std::chrono::steady_clock::now() + std::chrono::milliseconds(20);
-  }
-}
+using namespace std;
 
 frc::Trajectory LoadWaypointCSV(std::string path, frc::TrajectoryConfig &config)
 {
@@ -94,22 +74,12 @@ public:
     m_chooser.AddOption("PowerPort", "PowerPort");
     frc::SmartDashboard::PutData(&m_chooser);
 
-    // Robot Preferences
-    prefs = frc::Preferences::GetInstance();
-
     frc::SmartDashboard::PutNumber("VoltageL", 0.0);
     frc::SmartDashboard::PutNumber("VoltageR", 0.0);
     frc::SmartDashboard::PutNumber("Left Rate", 0.0);
     frc::SmartDashboard::PutNumber("Right Rate", 0.0);
     frc::SmartDashboard::PutString("Reference", "");
     frc::SmartDashboard::PutString("Pose", "");
-
-    auto time_point = std::chrono::system_clock::now();
-    auto time = std::chrono::system_clock::to_time_t(time_point);
-    m_udp_logger.SetTitle(std::ctime(&time));
-    m_logging_thread =
-        std::thread(logToUDPLogger, std::ref(m_udp_logger), std::ref(loggables));
-    m_logging_thread.detach();
 
     SupplyCurrentLimitConfiguration config{true, 30.0, 40.0, 0.0};
     intake.ConfigSupplyCurrentLimit(config);
@@ -732,22 +702,22 @@ public:
     else if (path == "TEST")
     {
       // Get path from preferences for testing & tuning
-      auto x0 = units::inch_t(prefs->GetDouble("x0", 0));
-      auto y0 = units::inch_t(prefs->GetDouble("y0", 0));
-      auto r0 = units::degree_t(prefs->GetDouble("r0", 0));
+      auto x0 = units::inch_t(frc::Preferences::GetDouble("x0", 0));
+      auto y0 = units::inch_t(frc::Preferences::GetDouble("y0", 0));
+      auto r0 = units::degree_t(frc::Preferences::GetDouble("r0", 0));
 
-      auto x1 = units::inch_t(prefs->GetDouble("x1", 0));
-      auto y1 = units::inch_t(prefs->GetDouble("y1", 0));
+      auto x1 = units::inch_t(frc::Preferences::GetDouble("x1", 0));
+      auto y1 = units::inch_t(frc::Preferences::GetDouble("y1", 0));
 
-      auto x2 = units::inch_t(prefs->GetDouble("x2", 0));
-      auto y2 = units::inch_t(prefs->GetDouble("y2", 0));
+      auto x2 = units::inch_t(frc::Preferences::GetDouble("x2", 0));
+      auto y2 = units::inch_t(frc::Preferences::GetDouble("y2", 0));
 
-      auto x3 = units::inch_t(prefs->GetDouble("x3", 0));
-      auto y3 = units::inch_t(prefs->GetDouble("y3", 0));
-      auto r3 = units::degree_t(prefs->GetDouble("r3", 0));
+      auto x3 = units::inch_t(frc::Preferences::GetDouble("x3", 0));
+      auto y3 = units::inch_t(frc::Preferences::GetDouble("y3", 0));
+      auto r3 = units::degree_t(frc::Preferences::GetDouble("r3", 0));
 
-      auto vel = units::meters_per_second_t(prefs->GetDouble("v", 2));
-      auto accel = units::meters_per_second_squared_t(prefs->GetDouble("a", 2));
+      auto vel = units::meters_per_second_t(frc::Preferences::GetDouble("v", 2));
+      auto accel = units::meters_per_second_squared_t(frc::Preferences::GetDouble("a", 2));
 
       m_trajectory = frc::TrajectoryGenerator::GenerateTrajectory(
           frc::Pose2d(x0, y0, r0), {frc::Translation2d(x1, y1), frc::Translation2d(x2, y2)},
@@ -840,7 +810,7 @@ public:
 
       frc::SmartDashboard::PutString("Reference", reference_json);
 
-      std::cout << reference.pose.X().value() << "," << reference.pose.Y().value() << "," << reference.pose.Rotation().Degrees().value() /* << "," << m_drive.GetPose().X().value() << "," << m_drive.GetPose().Y().value() << "," << m_drive.GetPose().Rotation().Degrees().value()*/ << "," << speeds.vx.value() << "," << speeds.omega.value() << std::endl;
+      //std::cout << reference.pose.X().value() << "," << reference.pose.Y().value() << "," << reference.pose.Rotation().Degrees().value() /* << "," << m_drive.GetPose().X().value() << "," << m_drive.GetPose().Y().value() << "," << m_drive.GetPose().Rotation().Degrees().value()*/ << "," << speeds.vx.value() << "," << speeds.omega.value() << std::endl;
     }
   }
 
@@ -915,7 +885,7 @@ public:
     slewOS = false;
     impelOS = false;
     m_speedLimiter.Reset(0.0);
-    if (brakeTimer.Get() > 2.0)
+    if (brakeTimer.Get() > 2.0_s)
     {
     }
   }
@@ -933,7 +903,7 @@ public:
   void AutoPowerPort()
   {
 
-    auto delay = units::second_t(prefs->GetDouble("Load_Delay", 3.0));
+    auto delay = units::second_t(frc::Preferences::GetDouble("Load_Delay", 3.0));
 
     if (m_autoState == 0)
     {
@@ -983,7 +953,7 @@ public:
   void AutoAccuracy()
   {
     // Load Delay
-    auto delay = units::second_t(prefs->GetDouble("Load_Delay", 3.0));
+    auto delay = units::second_t(frc::Preferences::GetDouble("Load_Delay", 3.0));
 
     // Pathing
     auto elapsed = m_autoTimer.Get();
@@ -1005,32 +975,22 @@ private:
   // TODO(Dereck): Change to PS4 controller
   frc::XboxController m_controller{0};
 
-  UDPLogger m_udp_logger;
-  std::thread m_logging_thread;
-
   frc::Timer Slew;
   bool slewOS = false;
   bool impelOS = false;
-
-  std::vector<std::shared_ptr<rj::Loggable>> loggables{
-      std::shared_ptr<rj::Loggable>(&m_globals),
-      std::shared_ptr<rj::Loggable>(&m_drive),
-  };
 
   // Slew rate limiters to make joystick inputs more gentle; 1/3 sec from 0 to 1.
   frc::SlewRateLimiter<units::scalar> m_speedLimiter{2 / 1_s};
   frc::SlewRateLimiter<units::scalar> m_rotLimiter{2 / 1_s};
 
   Drivetrain m_drive{IsSimulation()};
-  GlobalDevices m_globals;
 
   frc::Trajectory m_trajectory;
   frc::Trajectory m_trajectory_PP;
   frc::Trajectory m_trajectory_IA[10];
-  frc::RamseteController m_ramsete{2.0, 0.7};
-  frc2::Timer m_autoTimer;
-
-  frc::Preferences *prefs;
+  frc::RamseteController m_ramsete{units::unit_t<frc::RamseteController::b_unit>{2.0},
+                                   units::unit_t<frc::RamseteController::zeta_unit>{0.7}};
+  frc::Timer m_autoTimer;
 
   frc::SendableChooser<std::string> m_chooser;
 
