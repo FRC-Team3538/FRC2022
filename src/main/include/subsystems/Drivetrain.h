@@ -54,10 +54,7 @@ public:
         m_driveR0.SetStatusFramePeriod(ctre::phoenix::motorcontrol::StatusFrameEnhanced::Status_3_Quadrature, 18);
 
         m_gyro.Reset();
-
-#ifdef __FRC_ROBORIO__
         m_imu.Reset();
-#endif
 
         // Set the distance per pulse for the drive encoders. We can simply use the
         // distance traveled for one rotation of the wheel divided by the encoder
@@ -194,15 +191,11 @@ private:
     frc::Encoder m_leftEncoder{0, 1};
     frc::Encoder m_rightEncoder{2, 3};
 
-    // Simulated Gyro
-    frc::AnalogGyro m_gyro{0};
-
-#ifdef __FRC_ROBORIO__
     frc::ADIS16470_IMU m_imu{
         frc::ADIS16470_IMU::IMUAxis::kZ, //kZ
         frc::SPI::Port::kOnboardCS0,
         frc::ADIS16470_IMU::CalibrationTime::_2s};
-#endif
+
 
     //
     // Dynamics
@@ -226,6 +219,7 @@ private:
         kGearRatio,
         kWheelRadius};
 
+    frc::AnalogGyro m_gyro{0};
     frc::sim::AnalogGyroSim m_gyroSim{m_gyro};
     frc::sim::EncoderSim m_leftEncoderSim{m_leftEncoder};
     frc::sim::EncoderSim m_rightEncoderSim{m_rightEncoder};
