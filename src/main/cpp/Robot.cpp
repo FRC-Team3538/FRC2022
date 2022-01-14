@@ -17,6 +17,7 @@
 #include <wpi/json.h>
 #include <frc/DigitalInput.h>
 #include <frc/Servo.h>
+#include <frc/PS4Controller.h>
 
 #include "subsystems/Drivetrain.h"
 
@@ -132,6 +133,8 @@ public:
 
     frc::SmartDashboard::PutNumber("topVel", topVel);
     frc::SmartDashboard::PutNumber("topAcc", topAcc);
+
+    shooterVolts = frc::SmartDashboard::GetNumber("Shooter Voltage", frc::SmartDashboard::PutNumber("Shooter Voltage", 0.0));
   }
 
   void AutonomousInit() override
@@ -409,24 +412,37 @@ public:
     m_drive.impel.ConfigSupplyCurrentLimit(config);
     m_drive.impel2.ConfigSupplyCurrentLimit(config);
     intakeRetention.SetAngle(150.0);
+
+    shooterB.SetInverted(true);
   }
 
   void TeleopPeriodic() override
   {
-    double forward = deadband(pow(m_controller.GetRawAxis(1), 1));
+    double forward = deadband(m_controller.GetLeftY());
 
-    m_drive.Arcade(forward, deadband(0.5 * pow(m_controller.GetRawAxis(2), 1)));
-    double intakeSpd = ((m_controller.GetRawAxis(3) / 2.0) + 0.5) - ((m_controller.GetRawAxis(4) / 2.0) + 0.5);
+    m_drive.Arcade(forward, deadband(0.5 * pow(m_controller.GetRightX(), 1)));
 
-    if (m_controller.GetRightBumper())
-      m_drive.SetImpel(-1.0);
+    auto volts = units::volt_t{shooterVolts};
+
+    shooterA.SetVoltage(volts);
+    shooterB.SetVoltage(volts);
+
+    if(m_controller.GetTriangleButton())
+      feeder.Set(1.0);
     else
-      m_drive.SetImpel(0.0);
+      feeder.Set(0.0);
 
-    if (m_controller.GetLeftBumper())
-      intakeRetention.SetAngle(100.0);
+    // double intakeSpd = ((m_controller.GetRawAxis(3) / 2.0) + 0.5) - ((m_controller.GetRawAxis(4) / 2.0) + 0.5);
 
-    intake.Set(intakeSpd);
+    // if (m_controller.GetRightBumper())
+    //   m_drive.SetImpel(-1.0);
+    // else
+    //   m_drive.SetImpel(0.0);
+
+    // if (m_controller.GetLeftBumper())
+    //   intakeRetention.SetAngle(100.0);
+
+    // intake.Set(intakeSpd);
   }
 
   void DisabledInit() override
@@ -529,8 +545,16 @@ public:
   }
 
 private:
+
+  WPI_TalonFX shooterA {10};
+  WPI_TalonFX shooterB {11};
+
+  WPI_TalonFX feeder {12};
+
+  double shooterVolts = 0.0;
+
   // TODO(Dereck): Change to PS4 controller
-  frc::XboxController m_controller{0};
+  frc::PS4Controller m_controller{0};
 
   frc::Timer Slew;
   bool slewOS = false;
