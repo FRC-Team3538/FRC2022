@@ -1,6 +1,7 @@
 #pragma once
 
 #include <subsystems/Drivetrain.hpp>
+#include <subsystems/Shooter.hpp>
 #include <vector>
 #include <frc/controller/RamseteController.h>
 
@@ -12,11 +13,13 @@ private:
 public:
     // *** PUT SUBSYSTEMS HERE ***
     Drivetrain drivetrain{false};
+    Shooter shooter;
 
     // *** ALSO PUT SUBSYSTEMS HERE ***
     Robotmap()
     {
         subsystems.push_back(&drivetrain);
+        subsystems.push_back(&shooter);
     }
 
     void UpdateSmartDash();

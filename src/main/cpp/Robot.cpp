@@ -4,17 +4,25 @@
 
 #include "Robot.h"
 
-void Robot::RobotInit() {}
+void Robot::RobotInit()
+{
+  IO.ConfigureMotors();
+}
+
 void Robot::RobotPeriodic()
 {
+  IO.UpdateSmartDash();
   IO.drivetrain.Periodic();
   autoprograms.SmartDash();
 }
 
-void Robot::AutonomousInit() {
+void Robot::AutonomousInit()
+{
   autoprograms.Init();
 }
-void Robot::AutonomousPeriodic() {
+
+void Robot::AutonomousPeriodic()
+{
   autoprograms.Run();
 }
 
