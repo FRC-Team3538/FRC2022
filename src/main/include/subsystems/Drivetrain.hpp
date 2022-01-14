@@ -23,16 +23,18 @@
 #include <units/angular_velocity.h>
 #include <units/length.h>
 #include <units/velocity.h>
+#include <units/voltage.h>
 #include <wpi/numbers>
 #include <math.h>
 
 #include "ctre/Phoenix.h"
+#include "Subsystem.hpp"
 
 
 /**
  * Represents a differential drive style drivetrain.
  */
-class Drivetrain
+class Drivetrain : public Subsystem
 {
 public:
     Drivetrain(bool isSimulation)
@@ -89,11 +91,13 @@ public:
         impel2.ConfigSupplyCurrentLimit(config);
     }
 
+    void ConfigureSystem();
     void SetSpeeds(const frc::DifferentialDriveWheelSpeeds &speeds);
     void Drive(units::meters_per_second_t xSpeed,
                units::radians_per_second_t rot);
     void Arcade(double forward, double rotate);
     void UpdateOdometry();
+    void UpdateTelemetry();
     void ResetOdometry(const frc::Pose2d &pose);
 
     frc::Pose2d GetPose() const { return m_odometry.GetPose(); }
