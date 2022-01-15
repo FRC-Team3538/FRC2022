@@ -3,6 +3,11 @@
 #include <units/angular_velocity.h>
 #include <units/angle.h>
 #include <units/length.h>
+#include <units/velocity.h>
+
+#include <units/constants.h>
+
+#include <wpi/numbers>
 
 #include <frc/Solenoid.h>
 
@@ -11,6 +16,7 @@
 #include "Subsystem.hpp"
 
 #include <iostream>
+
 
 class Shooter : public Subsystem
 {
@@ -41,7 +47,8 @@ public:
     void SetTurret(units::volt_t targetVolts);
     void SetShooter(units::volt_t targetVolts);
 
-    void SetFeeder(double setValue);
+    void SetFeeder(units::volt_t targetVolts);
+    void SetHood(units::volt_t targetVolts);
     void SetIndexer(double setValue);
 
     void SetIntakeState(Position pos);
@@ -56,17 +63,32 @@ public:
 
 private:
 
-    WPI_TalonFX intake{10};
-    WPI_TalonFX indexerA{11};
-    WPI_TalonFX indexerB{12};
+    // WPI_TalonFX intake{10};
+    // WPI_TalonFX indexerA{11};
+    // WPI_TalonFX indexerB{12};
     WPI_TalonFX feeder{13};
     WPI_TalonFX shooterA{14};
     WPI_TalonFX shooterB{15};
     WPI_TalonFX hood{16};
-    WPI_TalonFX turret{17};
+    // WPI_TalonFX turret{17};
 
-    frc::Solenoid deployPiston{frc::PneumaticsModuleType::REVPH, 1};
+    // frc::Solenoid deployPiston{frc::PneumaticsModuleType::REVPH, 1};
 
     static constexpr double kScaleFactorTurret = 1.0;
     static constexpr double kScaleFactorFly = 1.0;
+
+    nt::NetworkTableEntry shooterVoltageEntry = frc::SmartDashboard::GetEntry("/shooter/Shooter_Voltage");
+    nt::NetworkTableEntry shooterRPMEntry = frc::SmartDashboard::GetEntry("/shooter/Shooter_RPM");
+    nt::NetworkTableEntry shooterSurfaceSpeedEntry = frc::SmartDashboard::GetEntry("/shooter/Shooter_Surface_Speed_FPS");
+
+    nt::NetworkTableEntry feederVoltageEntry = frc::SmartDashboard::GetEntry("/shooter/Feeder_Voltage");
+    nt::NetworkTableEntry feederRPMEntry = frc::SmartDashboard::GetEntry("/shooter/Feeder_RPM");
+
+    nt::NetworkTableEntry hoodVoltageEntry = frc::SmartDashboard::GetEntry("/shooter/Hood_Voltage");
+    nt::NetworkTableEntry hoodRPMEntry = frc::SmartDashboard::GetEntry("/shooter/Hood_RPM");
+    nt::NetworkTableEntry hoodSurfaceSpeedEntry = frc::SmartDashboard::GetEntry("/shooter/Hood_Surface_Speed_FPS");
+
+    nt::NetworkTableEntry shotEffortEntry = frc::SmartDashboard::GetEntry("/shooter/Shot_Effort_FPS");
+    nt::NetworkTableEntry backspinEffortEntry = frc::SmartDashboard::GetEntry("/shooter/Backspin_Effort_FPS");
+    nt::NetworkTableEntry impartedBackspinEntry = frc::SmartDashboard::GetEntry("/shooter/Imparted_Backspin_RPM");
 };

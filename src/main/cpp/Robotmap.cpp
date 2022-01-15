@@ -12,8 +12,12 @@ void Robotmap::UpdateSmartDash()
 
     ++telemetryCt;
 
-    if (telemetryCt == subsystems.size())
+    if (telemetryCt == subsystems.size()) {
+        pdpVoltageEntry.SetDouble(pdp.GetVoltage());
+        pdpTotalCurrentEntry.SetDouble(pdp.GetTotalCurrent());
+        
         telemetryCt = 0;
+    }
 }
 
 /**

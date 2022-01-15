@@ -9,6 +9,11 @@
 #include "Robotmap.hpp"
 #include "auto/AutoPrograms.hpp"
 
+#include <frc/smartdashboard/SmartDashboard.h>
+
+#include <frc/PS4Controller.h>
+
+
 class Robot : public frc::TimedRobot
 {
 public:
@@ -31,4 +36,13 @@ private:
   Robotmap IO;
 
   AutoPrograms autoprograms{IO};
+
+  nt::NetworkTableEntry lockShooterVoltage = frc::SmartDashboard::GetEntry("/lockShooterVoltage");
+  nt::NetworkTableEntry targetShooterVoltage = frc::SmartDashboard::GetEntry("/targetShooterVoltage");
+
+  nt::NetworkTableEntry lockHoodVoltage = frc::SmartDashboard::GetEntry("/lockHoodVoltage");
+  nt::NetworkTableEntry targetHoodVoltage = frc::SmartDashboard::GetEntry("/targetHoodVoltage");
+
+  nt::NetworkTableEntry lockFeederVoltage = frc::SmartDashboard::GetEntry("/lockFeederVoltage");
+  nt::NetworkTableEntry targetFeederVoltage = frc::SmartDashboard::GetEntry("/targetFeederVoltage");
 };
