@@ -26,24 +26,7 @@ void Robot::AutonomousPeriodic()
   autoprograms.Run();
 }
 
-void Robot::TeleopInit() {
-
-  frc::SmartDashboard::PutBoolean("/lockShooterVoltage", true);
-  frc::SmartDashboard::PutNumber("/targetShooterVoltage", 0.0);
-  frc::SmartDashboard::PutBoolean("/lockHoodVoltage", true);
-  frc::SmartDashboard::PutNumber("/targetHoodVoltage", 0.0);
-  frc::SmartDashboard::PutBoolean("/lockFeederVoltage", true);
-  frc::SmartDashboard::PutNumber("/targetFeederVoltage", 0.0);
-
-  // lockShooterVoltage.SetBoolean(true);
-  // targetShooterVoltage.SetDouble(0.0);
-
-  // lockFeederVoltage.SetBoolean(true);
-  // targetFeederVoltage.SetDouble(0.0);
-
-  // lockHoodVoltage.SetBoolean(true);
-  // targetHoodVoltage.SetDouble(0.0);
-}
+void Robot::TeleopInit() {}
 
 double deadband(double min, double max, double val) {
   if (val < 0) {
@@ -70,13 +53,20 @@ void Robot::TeleopPeriodic() {
                   - deadband(0.05, 1, IO.mainController.GetL2Axis() / 2);
     IO.shooter.SetFeeder(units::volt_t(intake) * IO.pdp.GetVoltage());
 
+    if (IO.mainController.GetL1Button()) {
+      IO.shooter.SetIntake(-5_V);
+    } else if (IO.mainController.GetR1Button()) {
+      IO.shooter.SetIntake(5_V);
+    } else {
+      IO.shooter.SetIntake(0_V);
+    }
   }
 
   {
     double shooterVoltage;
 
-    if (frc::SmartDashboard::GetBoolean("/lockShooterVoltage", false)) {
-      shooterVoltage = frc::SmartDashboard::GetNumber("/targetShooterVoltage", 0);
+    if (lockShooterVoltage.GetBoolean(false)) {
+      shooterVoltage = targetShooterVoltage.GetDouble(0);
     } else {
       shooterVoltage = 0.0;
     }
@@ -87,8 +77,8 @@ void Robot::TeleopPeriodic() {
   {
     double hoodVoltage;
 
-    if (frc::SmartDashboard::GetBoolean("/lockHoodVoltage", false)) {
-      hoodVoltage = frc::SmartDashboard::GetNumber("/targetHoodVoltage", 0);
+    if (lockHoodVoltage.GetBoolean(false)) {
+      hoodVoltage = targetHoodVoltage.GetDouble(0);
     } else {
       hoodVoltage = 0.0;
     }
@@ -99,8 +89,8 @@ void Robot::TeleopPeriodic() {
   {
     double feederVoltage;
 
-    if (frc::SmartDashboard::GetBoolean("/lockFeederVoltage", false)) {
-      feederVoltage = frc::SmartDashboard::GetNumber("/targetFeederVoltage", 0);
+    if (lockFeederVoltage.GetBoolean(false)) {
+      feederVoltage = targetFeederVoltage.GetDouble(0);
     } else {
       feederVoltage = 0.0;
     }
@@ -109,7 +99,16 @@ void Robot::TeleopPeriodic() {
   }
 }
 
-void Robot::DisabledInit() {}
+void Robot::DisabledInit() {
+  lockShooterVoltage.SetBoolean(true);
+  targetShooterVoltage.SetDouble(0.0);
+
+  lockFeederVoltage.SetBoolean(true);
+  targetFeederVoltage.SetDouble(0.0);
+
+  lockHoodVoltage.SetBoolean(true);
+  targetHoodVoltage.SetDouble(0.0);
+}
 void Robot::DisabledPeriodic() {}
 
 void Robot::TestInit() {}

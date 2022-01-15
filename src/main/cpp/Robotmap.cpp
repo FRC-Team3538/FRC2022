@@ -13,10 +13,10 @@ void Robotmap::UpdateSmartDash()
     ++telemetryCt;
 
     if (telemetryCt == subsystems.size()) {
-        frc::SmartDashboard::PutNumber("pdp/Voltage", pdp.GetVoltage());
-        frc::SmartDashboard::PutNumber("pdp/TotalCurrent", pdp.GetTotalCurrent());
-        // pdpVoltageEntry.SetDouble(pdp.GetVoltage());
-        // pdpTotalCurrentEntry.SetDouble(pdp.GetTotalCurrent());
+        // frc::SmartDashboard::PutNumber("pdp/Voltage", pdp.GetVoltage());
+        // frc::SmartDashboard::PutNumber("pdp/TotalCurrent", pdp.GetTotalCurrent());
+        pdpVoltageEntry.SetDouble(pdp.GetVoltage());
+        pdpTotalCurrentEntry.SetDouble(pdp.GetTotalCurrent());
         
         telemetryCt = 0;
     }
