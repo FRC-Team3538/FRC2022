@@ -125,20 +125,35 @@ void Shooter::UpdateTelemetry()
     units::revolutions_per_minute_t impartedBackspin = backspinEffort / wpi::numbers::pi / units::inch_t(9.5) * units::turn_t(1);
 
 
-    shooterVoltageEntry.SetDouble(shooterA.GetMotorOutputVoltage());
-    shooterRPMEntry.SetDouble(shooterRPM.value());
-    shooterSurfaceSpeedEntry.SetDouble(shooterSurfaceSpeed.value()); 
+    frc::SmartDashboard::PutNumber("shooter/Shooter_Voltage", shooterA.GetMotorOutputVoltage());
+    frc::SmartDashboard::PutNumber("shooter/Shooter_RPM", shooterRPM.value());
+    frc::SmartDashboard::PutNumber("shooter/Shooter_Surface_Speed_FPS", shooterSurfaceSpeed.value());
 
-    feederVoltageEntry.SetDouble(feeder.GetMotorOutputVoltage());
-    feederRPMEntry.SetDouble(feeder.GetSelectedSensorVelocity() * 10 * 60 / 2048); // ticks/100ms to rpm
+    frc::SmartDashboard::PutNumber("shooter/Feeder_Voltage", feeder.GetMotorOutputVoltage());
+    frc::SmartDashboard::PutNumber("shooter/Feeder_RPM", feeder.GetSelectedSensorVelocity() * 10 * 60 / 2048);
 
-    hoodVoltageEntry.SetDouble(hood.GetMotorOutputVoltage());
-    hoodRPMEntry.SetDouble(hoodRPM.value());
-    hoodSurfaceSpeedEntry.SetDouble(hoodSurfaceSpeed.value());
+    frc::SmartDashboard::PutNumber("shooter/Hood_Voltage", hood.GetMotorOutputVoltage());
+    frc::SmartDashboard::PutNumber("shooter/Hood_RPM", hoodRPM.value());
+    frc::SmartDashboard::PutNumber("shooter/Hood_Surface_Speed_FPS", hoodSurfaceSpeed.value());
 
-    shotEffortEntry.SetDouble(shotEffort.value());
-    backspinEffortEntry.SetDouble(backspinEffort.value());
-    impartedBackspinEntry.SetDouble(impartedBackspin.value());
+    frc::SmartDashboard::PutNumber("shooter/Shot_Effort_FPS", shotEffort.value());
+    frc::SmartDashboard::PutNumber("shooter/Backspin_Effort_FPS", backspinEffort.value());
+    frc::SmartDashboard::PutNumber("shooter/Imparted_Backspin_RPM", impartedBackspin.value());
+
+    // shooterVoltageEntry.SetDouble(shooterA.GetMotorOutputVoltage());
+    // shooterRPMEntry.SetDouble(shooterRPM.value());
+    // shooterSurfaceSpeedEntry.SetDouble(shooterSurfaceSpeed.value()); 
+
+    // feederVoltageEntry.SetDouble(feeder.GetMotorOutputVoltage());
+    // feederRPMEntry.SetDouble(feeder.GetSelectedSensorVelocity() * 10 * 60 / 2048); // ticks/100ms to rpm
+
+    // hoodVoltageEntry.SetDouble(hood.GetMotorOutputVoltage());
+    // hoodRPMEntry.SetDouble(hoodRPM.value());
+    // hoodSurfaceSpeedEntry.SetDouble(hoodSurfaceSpeed.value());
+
+    // shotEffortEntry.SetDouble(shotEffort.value());
+    // backspinEffortEntry.SetDouble(backspinEffort.value());
+    // impartedBackspinEntry.SetDouble(impartedBackspin.value());
 }
 
 void Shooter::SetTurretAngle(units::degree_t targetAngle)
@@ -197,9 +212,9 @@ void Shooter::SetIntakeState(Position pos)
     }
 }
 
-void Shooter::SetIntake(double setValue)
+void Shooter::SetIntake(units::volt_t voltage)
 {
-    // intake.SetVoltage(units::volt_t{setValue * 13.0});
+    intake.SetVoltage(voltage);
 }
 
 units::degree_t Shooter::GetTurretAngle()

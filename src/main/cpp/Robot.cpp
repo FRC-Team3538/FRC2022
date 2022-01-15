@@ -29,16 +29,31 @@ void Robot::AutonomousPeriodic()
 void Robot::TeleopInit() {
   lockShooterVoltage.SetBoolean(true);
   targetShooterVoltage.SetDouble(0.0);
+
+  lockFeederVoltage.SetBoolean(true);
+  targetFeederVoltage.SetDouble(0.0);
+
+  lockHoodVoltage.SetBoolean(true);
+  targetHoodVoltage.SetDouble(0.0);
 }
 
 void Robot::TeleopPeriodic() {
+  if (IO.mainController.IsConnected()) {
+    double fwd = -IO.mainController.GetLeftY();
+    double rot = IO.mainController.GetRightX();
+
+    IO.drivetrain.Arcade(fwd, rot);
+
+    double intake = IO.mainController.GetR2Axis() - IO.mainController.GetL2Axis();
+    IO.shooter.SetIntake(units::volt_t(intake) * IO.pdp.GetVoltage());
+
+  }
+
   {
     double shooterVoltage;
 
     if (lockShooterVoltage.GetBoolean(false)) {
       shooterVoltage = targetShooterVoltage.GetDouble(0.0);
-    } else if (IO.mainController.IsConnected()) {
-      shooterVoltage = IO.mainController.GetR2Axis()* IO.pdp.GetVoltage();
     } else {
       shooterVoltage = 0.0;
     }
@@ -51,8 +66,6 @@ void Robot::TeleopPeriodic() {
 
     if (lockHoodVoltage.GetBoolean(false)) {
       hoodVoltage = targetHoodVoltage.GetDouble(0.0);
-    } else if (IO.mainController.IsConnected()) {
-      hoodVoltage = IO.mainController.GetL2Axis()* IO.pdp.GetVoltage();
     } else {
       hoodVoltage = 0.0;
     }
@@ -65,8 +78,6 @@ void Robot::TeleopPeriodic() {
 
     if (lockFeederVoltage.GetBoolean(false)) {
       feederVoltage = targetFeederVoltage.GetDouble(0.0);
-    } else if (IO.mainController.IsConnected()) {
-      feederVoltage = IO.mainController.GetLeftX() * IO.pdp.GetVoltage();
     } else {
       feederVoltage = 0.0;
     }

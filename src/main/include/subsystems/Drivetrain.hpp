@@ -18,7 +18,7 @@
 #include <frc/smartdashboard/Field2d.h>
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <frc/system/plant/LinearSystemId.h>
-#include <frc/ADIS16470_IMU.h>
+// #include <frc/ADIS16470_IMU.h>
 #include <units/angle.h>
 #include <units/angular_velocity.h>
 #include <units/length.h>
@@ -56,7 +56,7 @@ public:
         m_driveR0.SetStatusFramePeriod(ctre::phoenix::motorcontrol::StatusFrameEnhanced::Status_3_Quadrature, 18);
 
         m_gyro.Reset();
-        m_imu.Reset();
+        // m_imu.Reset();
 
         // Set the distance per pulse for the drive encoders. We can simply use the
         // distance traveled for one rotation of the wheel divided by the encoder
@@ -195,17 +195,17 @@ private:
     frc::Encoder m_leftEncoder{0, 1};
     frc::Encoder m_rightEncoder{2, 3};
 
-    frc::ADIS16470_IMU m_imu{
-        frc::ADIS16470_IMU::IMUAxis::kZ, //kZ
-        frc::SPI::Port::kOnboardCS0,
-        frc::ADIS16470_IMU::CalibrationTime::_2s};
+    // frc::ADIS16470_IMU m_imu{
+    //     frc::ADIS16470_IMU::IMUAxis::kZ, //kZ
+    //     frc::SPI::Port::kOnboardCS0,
+    //     frc::ADIS16470_IMU::CalibrationTime::_2s};
 
 
     //
     // Dynamics
     //
     frc::DifferentialDriveKinematics m_kinematics{kTrackWidth};
-    frc::DifferentialDriveOdometry m_odometry{-m_imu.GetAngle()};
+    frc::DifferentialDriveOdometry m_odometry{frc::Rotation2d()};
     frc::SimpleMotorFeedforward<units::meters> m_feedforward{kStatic, kVlinear, kAlinear};
 
     //
