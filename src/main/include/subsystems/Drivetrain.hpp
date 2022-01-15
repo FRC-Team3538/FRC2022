@@ -43,10 +43,10 @@ public:
 
         m_driveL0.ConfigFactoryDefault();
         m_driveL1.ConfigFactoryDefault();
-        m_driveL2.ConfigFactoryDefault();
+        // m_driveL2.ConfigFactoryDefault();
         m_driveR0.ConfigFactoryDefault();
         m_driveR1.ConfigFactoryDefault();
-        m_driveR2.ConfigFactoryDefault();
+        // m_driveR2.ConfigFactoryDefault();
 
         double pidIdx = 0;
         m_driveL0.ConfigSelectedFeedbackSensor(FeedbackDevice::IntegratedSensor, pidIdx);
@@ -74,21 +74,21 @@ public:
         m_driveL0.SetSelectedSensorPosition(0.0);
         m_driveR0.SetSelectedSensorPosition(0.0);
 
-        m_driveL0.SetNeutralMode(NeutralMode::Brake);
-        m_driveL1.SetNeutralMode(NeutralMode::Brake);
-        m_driveL2.SetNeutralMode(NeutralMode::Brake);
-        m_driveR0.SetNeutralMode(NeutralMode::Brake);
-        m_driveR1.SetNeutralMode(NeutralMode::Brake);
-        m_driveR2.SetNeutralMode(NeutralMode::Brake);
+        m_driveL0.SetNeutralMode(NeutralMode::Coast);
+        m_driveL1.SetNeutralMode(NeutralMode::Coast);
+        // m_driveL2.SetNeutralMode(NeutralMode::Brake);
+        m_driveR0.SetNeutralMode(NeutralMode::Coast);
+        m_driveR1.SetNeutralMode(NeutralMode::Coast);
+        // m_driveR2.SetNeutralMode(NeutralMode::Brake);
 
-        impel.SetNeutralMode(NeutralMode::Coast);
-        impel2.SetNeutralMode(NeutralMode::Coast);
+        // impel.SetNeutralMode(NeutralMode::Coast);
+        // impel2.SetNeutralMode(NeutralMode::Coast);
 
         frc::SmartDashboard::PutData("Field", &m_fieldSim);
 
         SupplyCurrentLimitConfiguration config{true, 30.0, 40.0, 0.0};
-        impel.ConfigSupplyCurrentLimit(config);
-        impel2.ConfigSupplyCurrentLimit(config);
+        // impel.ConfigSupplyCurrentLimit(config);
+        // impel2.ConfigSupplyCurrentLimit(config);
     }
 
     void ConfigureSystem();
@@ -107,8 +107,8 @@ public:
 
     void SetImpel(double speed)
     {
-        impel.Set(speed);
-        impel2.Set(speed);
+        // impel.Set(speed);
+        // impel2.Set(speed);
     }
 
     double GetVel()
@@ -144,8 +144,8 @@ public:
     static constexpr units::feet_per_second_t kMaxSpeed{20.0};
     static constexpr units::degrees_per_second_t kMaxAngularSpeed{720.0};
 
-    WPI_TalonFX impel{6};
-    WPI_TalonFX impel2{7};
+    // WPI_TalonFX impel{6};
+    // WPI_TalonFX impel2{7};
 
     frc::DifferentialDriveKinematics GetKinematics()
     {
@@ -169,27 +169,25 @@ private:
     frc::PWMVictorSPX m_rightFollower{4};
 
     // Real motor Controllers
-    WPI_TalonFX m_driveL0{0};
-    WPI_TalonFX m_driveL1{1};
-    WPI_TalonFX m_driveL2{2};
+    WPI_TalonFX m_driveL0{1};
+    WPI_TalonFX m_driveL1{2};
+    // WPI_TalonFX m_driveL2{2};
     WPI_TalonFX m_driveR0{3};
     WPI_TalonFX m_driveR1{4};
-    WPI_TalonFX m_driveR2{5};
+    // WPI_TalonFX m_driveR2{5};
 
     // Controller Groups
     frc::MotorControllerGroup m_leftGroup{
         m_leftLeader,
         m_leftFollower,
         m_driveL0,
-        m_driveL1,
-        m_driveL2};
+        m_driveL1};
 
     frc::MotorControllerGroup m_rightGroup{
         m_rightLeader,
         m_rightFollower,
         m_driveR0,
-        m_driveR1,
-        m_driveR2};
+        m_driveR1};
 
     // Simulated Encoders
     frc::Encoder m_leftEncoder{0, 1};

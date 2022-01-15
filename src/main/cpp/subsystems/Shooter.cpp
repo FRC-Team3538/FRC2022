@@ -22,9 +22,9 @@ void Shooter::ConfigureSystem()
 
     shooterB.Follow(shooterA);
 
-    shooterA.SetInverted(true);
+    shooterA.SetInverted(false);
 
-    shooterB.SetInverted(false);
+    shooterB.SetInverted(true);
 
     shooterA.Config_kF(0, 0.056494409);
     shooterA.Config_kP(0, 0.225);
@@ -112,7 +112,7 @@ void Shooter::UpdateTelemetry()
     units::feet_per_second_t shooterSurfaceSpeed = shooterRPM * units::inch_t(3.9) * wpi::numbers::pi / units::turn_t(1);
 
     // ticks/100ms to rpm
-    units::revolutions_per_minute_t hoodRPM = units::revolutions_per_minute_t(hood.GetSelectedSensorVelocity() * 10 * 60 / 2048);
+    units::revolutions_per_minute_t hoodRPM = units::revolutions_per_minute_t(0); // hood.GetSelectedSensorVelocity() * 10 * 60 / 2048);
     // 2.45" dia colsons
     units::feet_per_second_t hoodSurfaceSpeed = hoodRPM * wpi::numbers::pi * units::inch_t(2.45) / units::turn_t(1);
 
@@ -132,7 +132,7 @@ void Shooter::UpdateTelemetry()
     frc::SmartDashboard::PutNumber("shooter/Feeder_Voltage", feeder.GetMotorOutputVoltage());
     frc::SmartDashboard::PutNumber("shooter/Feeder_RPM", feeder.GetSelectedSensorVelocity() * 10 * 60 / 2048);
 
-    frc::SmartDashboard::PutNumber("shooter/Hood_Voltage", hood.GetMotorOutputVoltage());
+    frc::SmartDashboard::PutNumber("shooter/Hood_Voltage", 0); // hood.GetMotorOutputVoltage());
     frc::SmartDashboard::PutNumber("shooter/Hood_RPM", hoodRPM.value());
     frc::SmartDashboard::PutNumber("shooter/Hood_Surface_Speed_FPS", hoodSurfaceSpeed.value());
 
@@ -181,7 +181,7 @@ void Shooter::SetFeeder(units::volt_t targetVoltage)
 
 void Shooter::SetHood(units::volt_t targetVoltage)
 {
-    hood.SetVoltage(targetVoltage);
+    // hood.SetVoltage(targetVoltage);
 }
 
 void Shooter::SetIndexer(double setValue)

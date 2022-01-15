@@ -37,12 +37,10 @@ private:
 
   AutoPrograms autoprograms{IO};
 
-  nt::NetworkTableEntry lockShooterVoltage = frc::SmartDashboard::GetEntry("/lockShooterVoltage");
-  nt::NetworkTableEntry targetShooterVoltage = frc::SmartDashboard::GetEntry("/targetShooterVoltage");
-
-  nt::NetworkTableEntry lockHoodVoltage = frc::SmartDashboard::GetEntry("/lockHoodVoltage");
-  nt::NetworkTableEntry targetHoodVoltage = frc::SmartDashboard::GetEntry("/targetHoodVoltage");
-
-  nt::NetworkTableEntry lockFeederVoltage = frc::SmartDashboard::GetEntry("/lockFeederVoltage");
-  nt::NetworkTableEntry targetFeederVoltage = frc::SmartDashboard::GetEntry("/targetFeederVoltage");
+  // nt::NetworkTableEntry lockShooterVoltage = frc::SmartDashboard::GetEntry("/lockShooterVoltage");
+  // nt::NetworkTableEntry targetShooterVoltage = frc::SmartDashboard::GetEntry("/targetShooterVoltage");
+  // nt::NetworkTableEntry lockHoodVoltage = frc::SmartDashboard::GetEntry("/lockHoodVoltage");
+  // nt::NetworkTableEntry targetHoodVoltage = frc::SmartDashboard::GetEntry("/targetHoodVoltage");
+  // nt::NetworkTableEntry lockFeederVoltage = frc::SmartDashboard::GetEntry("/lockFeederVoltage");
+  // nt::NetworkTableEntry targetFeederVoltage = frc::SmartDashboard::GetEntry("/targetFeederVoltage");
 };

@@ -69,7 +69,7 @@ private:
     WPI_TalonFX feeder{13};
     WPI_TalonFX shooterA{14};
     WPI_TalonFX shooterB{15};
-    WPI_TalonFX hood{16};
+    //WPI_TalonFX hood{16};
     // WPI_TalonFX turret{17};
 
     // frc::Solenoid deployPiston{frc::PneumaticsModuleType::REVPH, 1};
