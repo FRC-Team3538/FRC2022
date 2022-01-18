@@ -65,18 +65,16 @@ void Robot::TeleopPeriodic()
     double intake = deadband(0.05, 1, IO.mainController.GetR2Axis() / 2) - deadband(0.05, 1, IO.mainController.GetL2Axis() / 2);
     IO.shooter.SetFeeder(units::volt_t(intake) * IO.pdp.GetVoltage());
 
-    if (IO.mainController.GetL1Button())
-    {
-      IO.shooter.SetIntake(-5_V);
+    double intakePercent;
+    if (IO.mainController.GetL1Button()) {
+      intakePercent = -targetIntakePercent.GetDouble(0.0);
+    } else if (IO.mainController.GetR1Button()) {
+      intakePercent = targetIntakePercent.GetDouble(0.0);
+    } else {
+      intakePercent = 0.0;
     }
-    else if (IO.mainController.GetR1Button())
-    {
-      IO.shooter.SetIntake(5_V);
-    }
-    else
-    {
-      IO.shooter.SetIntake(0_V);
-    }
+
+    IO.shooter.SetIntake(units::volt_t(intakePercent) * IO.pdp.GetVoltage());
   }
 
   {
@@ -136,7 +134,8 @@ void Robot::DisabledInit()
   // targetFeederVoltage.SetDouble(0.0);
 
   lockHoodVoltage.SetBoolean(true);
-  // targetHoodVoltage.SetDouble(0.0);
+  targetHoodVoltage.SetDouble(0.0);
+  targetIntakePercent.SetDouble(0.6);
 }
 void Robot::DisabledPeriodic() {}
 

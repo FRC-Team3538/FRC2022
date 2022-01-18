@@ -9,6 +9,9 @@ void Shooter::ConfigureSystem()
     intake.ConfigFactoryDefault();
     feeder.ConfigFactoryDefault();
     hood.ConfigFactoryDefault();
+    
+    hood.SetInverted(true);
+    intake.SetInverted(true);
 
     shooterA.ConfigFactoryDefault();
     shooterB.ConfigFactoryDefault();
@@ -36,8 +39,8 @@ void Shooter::UpdateTelemetry()
 
     // ticks/100ms to rpm
     units::revolutions_per_minute_t hoodRPM = units::revolutions_per_minute_t(hood.GetSelectedSensorVelocity() * 10 * 60 / 2048);
-    // 2.45" dia colsons
-    units::feet_per_second_t hoodSurfaceSpeed = hoodRPM * wpi::numbers::pi * units::inch_t(2.45) / units::turn_t(1);
+    // 2.00" dia compliant
+    units::feet_per_second_t hoodSurfaceSpeed = hoodRPM * wpi::numbers::pi * units::inch_t(2.00) / units::turn_t(1);
 
     // shooter RPM SHOULD be positive / 0
     // hood RPM SHOULD be negative / 0
