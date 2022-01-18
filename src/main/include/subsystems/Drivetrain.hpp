@@ -198,6 +198,7 @@ private:
     //     frc::SPI::Port::kOnboardCS0,
     //     frc::ADIS16470_IMU::CalibrationTime::_2s};
 
+    PigeonIMU m_imu{30};
 
     //
     // Dynamics

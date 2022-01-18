@@ -43,4 +43,5 @@ private:
   nt::NetworkTableEntry targetHoodVoltage = frc::SmartDashboard::GetEntry("/targetHoodVoltage");
   nt::NetworkTableEntry lockFeederVoltage = frc::SmartDashboard::GetEntry("/lockFeederVoltage");
   nt::NetworkTableEntry targetFeederVoltage = frc::SmartDashboard::GetEntry("/targetFeederVoltage");
+  
 };

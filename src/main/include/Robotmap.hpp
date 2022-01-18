@@ -2,6 +2,7 @@
 
 #include <subsystems/Drivetrain.hpp>
 #include <subsystems/Shooter.hpp>
+#include <subsystems/RJVisionPipeline.hpp>
 #include <vector>
 #include <frc/controller/RamseteController.h>
 
@@ -20,16 +21,17 @@ public:
 
     frc::PowerDistribution pdp;
 
-
     // *** PUT SUBSYSTEMS HERE ***
     Drivetrain drivetrain{false};
     Shooter shooter;
+    vision::RJVisionPipeline rjVision;
 
     // *** ALSO PUT SUBSYSTEMS HERE ***
     Robotmap()
     {
         subsystems.push_back(&drivetrain);
         subsystems.push_back(&shooter);
+        subsystems.push_back(&rjVision);
     }
 
     void UpdateSmartDash();
