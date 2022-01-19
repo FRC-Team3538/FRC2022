@@ -10,16 +10,28 @@
 
 #include <frc/PowerDistribution.h>
 
+#include "lib/wpi/DataLogManager.h"
+#include "lib/wpi/DataLog.h"
+
+
+
 class Robotmap
 {
 private:
     std::vector<Subsystem *> subsystems;
 
+    wpi::log::DataLog& dataLog = frc::DataLogManager::GetLog();
+    int pdpVoltageDatalogEntry;
+    int pdpCurrentDatalogEntry;
+
+    nt::NetworkTableEntry pdpVoltageEntry = frc::SmartDashboard::GetEntry("/pdp/Voltage");
+    nt::NetworkTableEntry pdpTotalCurrentEntry = frc::SmartDashboard::GetEntry("/pdp/TotalCurrent");
+
 public:
     frc::PS4Controller mainController{0};
     frc::PS4Controller secondaryController{1};
 
-    frc::PowerDistribution pdp;
+    frc::PowerDistribution pdp{0, frc::PowerDistribution::ModuleType::kCTRE};
 
     // *** PUT SUBSYSTEMS HERE ***
     Drivetrain drivetrain{false};
@@ -29,6 +41,8 @@ public:
     // *** ALSO PUT SUBSYSTEMS HERE ***
     Robotmap()
     {
+        pdpVoltageDatalogEntry = dataLog.Start("pdp_voltage", "double");
+        pdpCurrentDatalogEntry = dataLog.Start("pdp_current", "double[]");
         subsystems.push_back(&drivetrain);
         subsystems.push_back(&shooter);
         subsystems.push_back(&rjVision);
@@ -39,9 +53,6 @@ public:
 
     // SmartDash Cycler
     size_t telemetryCt = 0;
-
-    nt::NetworkTableEntry pdpVoltageEntry = frc::SmartDashboard::GetEntry("/pdp/Voltage");
-    nt::NetworkTableEntry pdpTotalCurrentEntry = frc::SmartDashboard::GetEntry("/pdp/TotalCurrent");
 
     // Ramsete Controller
     frc::RamseteController m_ramsete{units::unit_t<frc::RamseteController::b_unit>{2.0},

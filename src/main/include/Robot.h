@@ -11,9 +11,6 @@
 
 #include <frc/smartdashboard/SmartDashboard.h>
 
-#include <frc/PS4Controller.h>
-
-
 class Robot : public frc::TimedRobot
 {
 public:
