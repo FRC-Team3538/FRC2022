@@ -10,6 +10,9 @@ void Robot::RobotInit()
   frc::SmartDashboard::PutNumber("Target Shooter", 0.0);
   frc::SmartDashboard::PutNumber("Target Hood", 0.0);
 
+  frc::SmartDashboard::PutNumber("Target Hood RPM", 0.0);
+  frc::SmartDashboard::PutNumber("Target Shooter RPM", 0.0);
+
   IO.ConfigureMotors();
 }
 
@@ -62,67 +65,96 @@ void Robot::TeleopPeriodic()
 
     IO.drivetrain.Arcade(fwd, rot);
 
-    double intake = deadband(0.05, 1, IO.mainController.GetR2Axis() / 2) - deadband(0.05, 1, IO.mainController.GetL2Axis() / 2);
-    IO.shooter.SetFeeder(units::volt_t(intake) * IO.pdp.GetVoltage());
+    // double intake = deadband(0.05, 1, IO.mainController.GetR2Axis() / 2) - deadband(0.05, 1, IO.mainController.GetL2Axis() / 2);
+    // IO.shooter.SetFeeder(units::volt_t(intake) * IO.pdp.GetVoltage());
 
-    double intakePercent;
-    if (IO.mainController.GetL1Button()) {
-      intakePercent = -targetIntakePercent.GetDouble(0.0);
-    } else if (IO.mainController.GetR1Button()) {
-      intakePercent = targetIntakePercent.GetDouble(0.0);
-    } else {
-      intakePercent = 0.0;
-    }
-
-    IO.shooter.SetIntake(units::volt_t(intakePercent) * IO.pdp.GetVoltage());
-  }
-
-  {
-    double shooterVoltage;
-
-
-    if (lockShooterVoltage.GetBoolean(false))
+    if (IO.mainController.GetL1Button())
     {
-      shooterVoltage = frc::SmartDashboard::GetNumber("Target Shooter", 0.0);//targetShooterVoltage.GetDouble(0);
+      IO.shooter.SetIntake(-8_V);
+    }
+    else if (IO.mainController.GetR1Button())
+    {
+      IO.shooter.SetIntake(8_V);
     }
     else
     {
-      shooterVoltage = 0.0;
+      IO.shooter.SetIntake(0_V);
     }
 
-    IO.shooter.SetShooter(units::volt_t(shooterVoltage));
-  }
-
-  {
-    double hoodVoltage;
-
-    if (lockHoodVoltage.GetBoolean(false))
+    if (IO.mainController.GetPOV() == 90)
     {
-      //hoodVoltage = targetHoodVoltage.GetDouble(0);
-      hoodVoltage = frc::SmartDashboard::GetNumber("Target Hood", 0.0);//targetShooterVoltage.GetDouble(0);
+      shooterPresetVal = 2500.0;
+      hoodPresetVal = 2500.0;
+      feederPresetVal = 8.0;
+    }
+
+    if (IO.mainController.GetCircleButtonPressed())
+    {
+      IO.shooter.SetHoodRPM(units::revolutions_per_minute_t{hoodPresetVal});
+      IO.shooter.SetShooterRPM(units::revolutions_per_minute_t{shooterPresetVal});
+    }
+
+    if (IO.mainController.GetCrossButtonPressed())
+    {
+      IO.shooter.SetHoodRPM(units::revolutions_per_minute_t{0});
+      IO.shooter.SetShooterRPM(units::revolutions_per_minute_t{0});
+    }
+
+    if (IO.mainController.GetTriangleButton())
+    {
+      IO.shooter.SetFeeder(units::volt_t{8.0});
     }
     else
     {
-      hoodVoltage = 0.0;
+      IO.shooter.SetFeeder(units::volt_t{0});
     }
-
-    IO.shooter.SetHood(units::volt_t(hoodVoltage));
   }
 
-  {
-    double feederVoltage;
+  // {
+  //   double shooterVoltage;
 
-    if (lockFeederVoltage.GetBoolean(false))
-    {
-      feederVoltage = frc::SmartDashboard::GetNumber("Target Feeder", 0.0);//targetFeederVoltage.GetDouble(0);
-    }
-    else
-    {
-      feederVoltage = 0.0;
-    }
+  //   if (lockShooterVoltage.GetBoolean(false))
+  //   {
+  //     shooterVoltage = frc::SmartDashboard::GetNumber("Target Shooter", 0.0); // targetShooterVoltage.GetDouble(0);
+  //   }
+  //   else
+  //   {
+  //     shooterVoltage = 0.0;
+  //   }
 
-    IO.shooter.SetFeeder(units::volt_t(feederVoltage));
-  }
+  //   IO.shooter.SetShooter(units::volt_t(shooterVoltage));
+  // }
+
+  // {
+  //   double hoodVoltage;
+
+  //   if (lockHoodVoltage.GetBoolean(false))
+  //   {
+  //     // hoodVoltage = targetHoodVoltage.GetDouble(0);
+  //     hoodVoltage = frc::SmartDashboard::GetNumber("Target Hood", 0.0); // targetShooterVoltage.GetDouble(0);
+  //   }
+  //   else
+  //   {
+  //     hoodVoltage = 0.0;
+  //   }
+
+  //   IO.shooter.SetHood(units::volt_t(hoodVoltage));
+  // }
+
+  // {
+  //   double feederVoltage;
+
+  //   if (lockFeederVoltage.GetBoolean(false))
+  //   {
+  //     feederVoltage = frc::SmartDashboard::GetNumber("Target Feeder", 0.0); // targetFeederVoltage.GetDouble(0);
+  //   }
+  //   else
+  //   {
+  //     feederVoltage = 0.0;
+  //   }
+
+  //   IO.shooter.SetFeeder(units::volt_t(feederVoltage));
+  // }
 }
 
 void Robot::DisabledInit()
@@ -140,7 +172,12 @@ void Robot::DisabledInit()
 void Robot::DisabledPeriodic() {}
 
 void Robot::TestInit() {}
-void Robot::TestPeriodic() {}
+void Robot::TestPeriodic()
+{
+  IO.shooter.SetShooterRPM(units::revolutions_per_minute_t{frc::SmartDashboard::GetNumber("Target Shooter RPM", 0.0)});
+  IO.shooter.SetHoodRPM(units::revolutions_per_minute_t{frc::SmartDashboard::GetNumber("Target Hood RPM", 0.0)});
+  IO.shooter.SetFeeder(units::volt_t{frc::SmartDashboard::GetNumber("Target Feeder", 0.0)});
+}
 
 #ifndef RUNNING_FRC_TESTS
 int main()

@@ -57,7 +57,7 @@ void Drivetrain::UpdateOdometry()
     auto left = m_driveL0.GetSelectedSensorPosition(0) * m_leftEncoder.GetDistancePerPulse();
     auto right = m_driveR0.GetSelectedSensorPosition(0) * m_rightEncoder.GetDistancePerPulse();
 
-    m_odometry.Update(frc::Rotation2d(),
+    m_odometry.Update(GetYaw(),
                       units::meter_t(left),
                       units::meter_t(right));
 }
@@ -72,6 +72,23 @@ void Drivetrain::ResetOdometry(const frc::Pose2d &pose)
 
     m_drivetrainSimulator.SetPose(pose);
     m_odometry.ResetPosition(pose, pose.Rotation());
+}
+
+frc::Rotation2d Drivetrain::GetYaw()
+{
+    double heading = m_imu.GetFusedHeading();
+    if (heading > 180)
+    {
+        while (heading > 180)
+            heading -= 360;
+    }
+
+    if (heading < -180)
+    {
+        while (heading < -180)
+            heading += 360;
+    }
+    return frc::Rotation2d{units::degree_t{heading}};
 }
 
 void Drivetrain::SimulationPeriodic()
@@ -106,7 +123,7 @@ void Drivetrain::Periodic()
 void Drivetrain::UpdateTelemetry()
 {
     // m_fieldSim.SetRobotPose(m_odometry.GetPose());
-    double angle = 0; // m_imu.GetAngle().value();                 // acos(m_imu.GetRotation2d().Cos()) * (180.0 / wpi::numbers::pi);
+    double angle = 0;                                        // m_imu.GetAngle().value();                 // acos(m_imu.GetRotation2d().Cos()) * (180.0 / wpi::numbers::pi);
     double distL = (m_driveL0.GetSelectedSensorPosition(0)); // * m_leftEncoder.GetDistancePerPulse());
     double distR = (m_driveR0.GetSelectedSensorPosition(0)); // * m_rightEncoder.GetDistancePerPulse());
     frc::SmartDashboard::PutNumber("Dist L", distL);
@@ -118,5 +135,5 @@ void Drivetrain::UpdateTelemetry()
 
 void Drivetrain::ConfigureSystem()
 {
-
+    
 }

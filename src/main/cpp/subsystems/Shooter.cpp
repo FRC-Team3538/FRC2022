@@ -28,6 +28,14 @@ void Shooter::ConfigureSystem()
     shooterA.Config_kD(0, 6.000);
 
     shooterA.Config_IntegralZone(0, 200.0);
+
+    hood.SetInverted(false);
+    hood.Config_kF(0, 0.056494409);
+    hood.Config_kP(0, 0.225);
+    hood.Config_kI(0, 0.0001);
+    hood.Config_kD(0, 6.000);
+
+    hood.Config_IntegralZone(0, 200.0);
 }
 
 void Shooter::UpdateTelemetry()
@@ -84,10 +92,25 @@ void Shooter::UpdateTelemetry()
 
 void Shooter::SetTurretAngle(units::degree_t targetAngle)
 {
+    units::degree_t currentAng = GetTurretAngle();
+
+    if(targetAngle != turretPID.GetGoal().position)
+    {
+        turretPID.SetGoal(targetAngle);
+    }
+
+    SetTurret(units::volt_t{turretPID.Calculate(currentAng)});
 }
 
 void Shooter::SetShooterRPM(units::revolutions_per_minute_t targetRPM)
 {
+    if(targetRPM == 0.0_rpm)
+    {
+        shooterA.Set(0.0);
+        return;
+    }
+
+    shooterA.Set(ControlMode::Velocity, ((targetRPM.value() / kScaleFactorFly) / 600.0));
 }
 
 void Shooter::SetTurret(units::volt_t targetVolts)
@@ -108,6 +131,11 @@ void Shooter::SetFeeder(units::volt_t targetVoltage)
 void Shooter::SetHood(units::volt_t targetVoltage)
 {
     hood.SetVoltage(targetVoltage);
+}
+
+void Shooter::SetHoodRPM(units::revolutions_per_minute_t targetRPM)
+{
+    hood.Set(ControlMode::Velocity, ((targetRPM.value() / kScaleFactorFly) / 600.0));
 }
 
 void Shooter::SetIndexer(double setValue)

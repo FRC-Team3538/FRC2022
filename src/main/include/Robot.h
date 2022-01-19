@@ -37,6 +37,10 @@ private:
 
   AutoPrograms autoprograms{IO};
 
+  double shooterPresetVal = 0.0;
+  double hoodPresetVal = 0.0;
+  double feederPresetVal = 0.0;
+
   nt::NetworkTableEntry lockShooterVoltage = frc::SmartDashboard::GetEntry("/lockShooterVoltage");
   nt::NetworkTableEntry targetShooterVoltage = frc::SmartDashboard::GetEntry("/targetShooterVoltage");
   nt::NetworkTableEntry lockHoodVoltage = frc::SmartDashboard::GetEntry("/lockHoodVoltage");

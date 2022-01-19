@@ -4,19 +4,18 @@
 #include <units/angle.h>
 #include <units/length.h>
 #include <units/velocity.h>
-
 #include <units/constants.h>
 
 #include <wpi/numbers>
 
 #include <frc/Solenoid.h>
+#include <frc/controller/ProfiledPIDController.h>
 
 #include <ctre/Phoenix.h>
 
 #include "Subsystem.hpp"
 
 #include <iostream>
-
 
 class Shooter : public Subsystem
 {
@@ -28,7 +27,7 @@ public:
         units::degree_t turretAngle = 0_deg;
     };
 
-    enum class Position:uint8_t
+    enum class Position : uint8_t
     {
         Stowed = 0,
         Deployed
@@ -49,6 +48,7 @@ public:
 
     void SetFeeder(units::volt_t targetVolts);
     void SetHood(units::volt_t targetVolts);
+    void SetHoodRPM(units::revolutions_per_minute_t targetRPM);
     void SetIndexer(double setValue);
 
     void SetIntakeState(Position pos);
@@ -62,7 +62,6 @@ public:
     State CalculateShot(units::inch_t distance);
 
 private:
-
     WPI_TalonFX intake{10};
     // WPI_TalonFX indexerA{11};
     // WPI_TalonFX indexerB{12};
@@ -75,7 +74,13 @@ private:
     // frc::Solenoid deployPiston{frc::PneumaticsModuleType::REVPH, 1};
 
     static constexpr double kScaleFactorTurret = 1.0;
-    static constexpr double kScaleFactorFly = 1.0;
+    static constexpr double kScaleFactorFly = (1.0 / 2048);
+
+    frc::ProfiledPIDController<units::radian> turretPID{
+        0.5, 0.0, 0.1, // Rotation-error
+        frc::TrapezoidProfile<units::radian>::Constraints{
+            180_deg_per_s,
+            360_deg_per_s / 1_s}};
 
     nt::NetworkTableEntry shooterVoltageEntry = frc::SmartDashboard::GetEntry("/shooter/Shooter_Voltage");
     nt::NetworkTableEntry shooterRPMEntry = frc::SmartDashboard::GetEntry("/shooter/Shooter_RPM");
@@ -88,6 +93,4 @@ private:
     nt::NetworkTableEntry shotEffortEntry = frc::SmartDashboard::GetEntry("/shooter/Shot_Effort_FPS");
     nt::NetworkTableEntry backspinEffortEntry = frc::SmartDashboard::GetEntry("/shooter/Backspin_Effort_FPS");
     nt::NetworkTableEntry impartedBackspinEntry = frc::SmartDashboard::GetEntry("/shooter/Imparted_Backspin_RPM");
-
-
 };

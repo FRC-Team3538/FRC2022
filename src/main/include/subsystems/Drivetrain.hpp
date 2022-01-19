@@ -30,7 +30,6 @@
 #include "ctre/Phoenix.h"
 #include "Subsystem.hpp"
 
-
 /**
  * Represents a differential drive style drivetrain.
  */
@@ -57,11 +56,12 @@ public:
 
         m_gyro.Reset();
         // m_imu.Reset();
+        m_imu.ConfigFactoryDefault();
 
         // Set the distance per pulse for the drive encoders. We can simply use the
         // distance traveled for one rotation of the wheel divided by the encoder
         // resolution.
-        auto dpp = empiricalDist / 188960.5; //218325.5;//128173.5;//((2 * wpi::numbers::pi * kWheelRadius) / kEncoderResolution);
+        auto dpp = empiricalDist / 188960.5; // 218325.5;//128173.5;//((2 * wpi::numbers::pi * kWheelRadius) / kEncoderResolution);
         m_leftEncoder.SetDistancePerPulse(-dpp.value());
         m_rightEncoder.SetDistancePerPulse(dpp.value());
 
@@ -74,12 +74,12 @@ public:
         m_driveL0.SetSelectedSensorPosition(0.0);
         m_driveR0.SetSelectedSensorPosition(0.0);
 
-        m_driveL0.SetNeutralMode(NeutralMode::Coast);
-        m_driveL1.SetNeutralMode(NeutralMode::Coast);
-        // m_driveL2.SetNeutralMode(NeutralMode::Brake);
-        m_driveR0.SetNeutralMode(NeutralMode::Coast);
-        m_driveR1.SetNeutralMode(NeutralMode::Coast);
-        // m_driveR2.SetNeutralMode(NeutralMode::Brake);
+        m_driveL0.SetNeutralMode(NeutralMode::Brake);
+        m_driveL1.SetNeutralMode(NeutralMode::Brake);
+        //m_driveL2.SetNeutralMode(NeutralMode::Brake);
+        m_driveR0.SetNeutralMode(NeutralMode::Brake);
+        m_driveR1.SetNeutralMode(NeutralMode::Brake);
+        //m_driveR2.SetNeutralMode(NeutralMode::Brake);
 
         // impel.SetNeutralMode(NeutralMode::Coast);
         // impel2.SetNeutralMode(NeutralMode::Coast);
@@ -99,23 +99,12 @@ public:
     void UpdateOdometry();
     void UpdateTelemetry();
     void ResetOdometry(const frc::Pose2d &pose);
+    frc::Rotation2d GetYaw();
 
     frc::Pose2d GetPose() const { return m_odometry.GetPose(); }
 
     void SimulationPeriodic();
     void Periodic();
-
-    void SetImpel(double speed)
-    {
-        // impel.Set(speed);
-        // impel2.Set(speed);
-    }
-
-    double GetVel()
-    {
-        double vel = ((m_driveL0.GetSelectedSensorVelocity(0) * m_leftEncoder.GetDistancePerPulse() * 10.0) + (m_driveL0.GetSelectedSensorVelocity(0) * m_leftEncoder.GetDistancePerPulse() * 10.0)) / 2.0;
-        return vel;
-    }
 
 private:
     /***************************************************************************/
@@ -128,14 +117,14 @@ private:
     static constexpr int kEncoderResolution = 2048;
     static constexpr int kMotorCount = 2;
 
-    decltype(1_V) kStatic{0.826};                     //.706
-    decltype(1_V / 1_mps) kVlinear{1.94};             //1.86
-    decltype(1_V / 1_mps_sq) kAlinear{0.0827};         //0.0917
-    decltype(1_V / 1_rad_per_s) kVangular{1.96};      //1.94
-    decltype(1_V / 1_rad_per_s_sq) kAangular{0.077}; //0.0716
+    decltype(1_V) kStatic{0.826};                    //.706
+    decltype(1_V / 1_mps) kVlinear{1.94};            // 1.86
+    decltype(1_V / 1_mps_sq) kAlinear{0.0827};       // 0.0917
+    decltype(1_V / 1_rad_per_s) kVangular{1.96};     // 1.94
+    decltype(1_V / 1_rad_per_s_sq) kAangular{0.077}; // 0.0716
 
     // Velocity Control PID (Is this really required ???)
-    frc2::PIDController m_leftPIDController{1.72, 0.0, 0.0}; //2.75
+    frc2::PIDController m_leftPIDController{1.72, 0.0, 0.0}; // 2.75
     frc2::PIDController m_rightPIDController{1.72, 0.0, 0.0};
 
 public:
