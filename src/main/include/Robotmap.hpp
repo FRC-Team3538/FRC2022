@@ -19,8 +19,6 @@ class Robotmap
 {
 private:
     std::vector<Subsystem *> subsystems;
-
-    wpi::log::DataLog& dataLog = frc::DataLogManager::GetLog();
     int pdpVoltageDatalogEntry;
     int pdpCurrentDatalogEntry;
 
@@ -41,8 +39,8 @@ public:
     // *** ALSO PUT SUBSYSTEMS HERE ***
     Robotmap()
     {
-        pdpVoltageDatalogEntry = dataLog.Start("pdp_voltage", "double");
-        pdpCurrentDatalogEntry = dataLog.Start("pdp_current", "double[]");
+        pdpVoltageDatalogEntry = frc::DataLogManager::GetLog().Start("pdp_voltage", "double");
+        pdpCurrentDatalogEntry = frc::DataLogManager::GetLog().Start("pdp_current", "double[]");
         subsystems.push_back(&drivetrain);
         subsystems.push_back(&shooter);
         subsystems.push_back(&rjVision);

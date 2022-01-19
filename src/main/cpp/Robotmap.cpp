@@ -26,8 +26,8 @@ void Robotmap::UpdateSmartDash()
             currentVector.push_back(pdp.GetCurrent(i));
         }
 
-        dataLog.AppendDouble(pdpVoltageDatalogEntry, pdp.GetVoltage(), wpi::Now());
-        dataLog.AppendDoubleArray(pdpCurrentDatalogEntry, currentVector, wpi::Now());
+        frc::DataLogManager::GetLog().AppendDouble(pdpVoltageDatalogEntry, pdp.GetVoltage(), wpi::Now());
+        frc::DataLogManager::GetLog().AppendDoubleArray(pdpCurrentDatalogEntry, currentVector, wpi::Now());
         
         telemetryCt = 0;
     }
