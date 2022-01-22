@@ -4,6 +4,11 @@
 #include <wpi/fs.h>
 #include <wpi/SmallString.h>
 
+#include <pathplanner/lib/PathPlanner.h>
+
+#include <frc/trajectory/TrajectoryGenerator.h>
+#include <frc/trajectory/TrajectoryParameterizer.h>
+
 // Name for Smart Dash Chooser
 std::string AutoLine::GetName()
 {
@@ -29,6 +34,7 @@ void AutoLine::NextState()
 
 void AutoLine::Init()
 {
+
     units::feet_per_second_t maxLinearVel = 4_fps;
     // units::standard_gravity_t maxCentripetalAcc = 0.5_SG;
     units::feet_per_second_squared_t maxLinearAcc = 4_fps_sq;
@@ -38,6 +44,43 @@ void AutoLine::Init()
     //config.AddConstraint(frc::CentripetalAccelerationConstraint{12_mps_sq});
     config.SetReversed(false);
 
+    // velocity, accel don't matter
+    // but let's use the configured ones anyway
+    pathplanner::PathPlannerTrajectory pp_traj = pathplanner::PathPlanner::loadPath("2 ball", config.MaxVelocity(), config.MaxAcceleration());
+
+    std::vector<frc::TrajectoryGenerator::PoseWithCurvature> path;
+
+    for (int ind = 0; ind < pp_traj.numStates(); ind++) {
+        auto pp_state = pp_traj.getState(ind);
+
+
+        frc::Rotation2d heading_diff;
+        if (ind == 0) {
+            // sample this and next heading
+            heading_diff = pp_traj.getState(ind+1)->pose.Rotation() - pp_state->pose.Rotation();
+        } else if (ind == pp_traj.numStates() - 1) {
+            // sample this and last heading
+            heading_diff = pp_traj.getState(ind+1)->pose.Rotation() - pp_traj.getState(ind-1)->pose.Rotation();
+        } else {
+            // sample last and next heading
+            heading_diff = pp_traj.getState(ind+1)->pose.Rotation() - pp_state->pose.Rotation();
+        }
+
+        int curv_sign = 0;
+
+        if (heading_diff.Radians() > 0_rad) {
+            curv_sign = 1;
+        } else if (heading_diff.Radians() < 0_rad) {
+            curv_sign = -1;
+        }
+
+        path.push_back(frc::TrajectoryGenerator::PoseWithCurvature{pp_state->pose, pp_state->curvature * curv_sign});
+    }
+
+    m_trajectory = frc::TrajectoryParameterizer::TimeParameterizeTrajectory(path, config.Constraints(), config.StartVelocity(), config.EndVelocity(), config.MaxVelocity(), config.MaxAcceleration(), config.IsReversed());
+
+
+    /*
     std::vector<frc::Spline<5>::ControlVector> p1;
 
     {
@@ -56,6 +99,7 @@ void AutoLine::Init()
     }
 
     m_trajectory = frc::TrajectoryGenerator::GenerateTrajectory(p1, config);
+    */
 
     m_autoTimer.Reset();
     m_autoTimer.Start();
