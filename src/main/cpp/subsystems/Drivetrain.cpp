@@ -76,7 +76,7 @@ void Drivetrain::ResetOdometry(const frc::Pose2d &pose)
 
 frc::Rotation2d Drivetrain::GetYaw()
 {
-    double heading = m_imu.GetFusedHeading();
+    double heading = 0; // m_imu.GetFusedHeading();
     if (heading > 180)
     {
         while (heading > 180)

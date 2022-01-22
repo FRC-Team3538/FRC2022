@@ -56,7 +56,7 @@ public:
 
         m_gyro.Reset();
         // m_imu.Reset();
-        m_imu.ConfigFactoryDefault();
+        // m_imu.ConfigFactoryDefault();
 
         // Set the distance per pulse for the drive encoders. We can simply use the
         // distance traveled for one rotation of the wheel divided by the encoder
@@ -187,7 +187,7 @@ private:
     //     frc::SPI::Port::kOnboardCS0,
     //     frc::ADIS16470_IMU::CalibrationTime::_2s};
 
-    PigeonIMU m_imu{30};
+    // PigeonIMU m_imu{30};
 
     //
     // Dynamics

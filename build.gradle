@@ -2,6 +2,7 @@ plugins {
     id "cpp"
     id "google-test-test-suite"
     id "edu.wpi.first.GradleRIO" version "2022.2.1"
+    id "com.diffplug.spotless" version "6.2.0"
 }
 
 // Define my targets (RoboRIO) and artifacts (deployable files)
@@ -97,3 +98,14 @@ model {
         }
     }
 }
+
+// spotless {
+//     cpp {
+//         target 'src/main/**' // you have to set the target manually
+// 
+//         clangFormat('12.0.0').style('Mozilla')  // has its own section below
+//     }
+// }
+
+// build.dependsOn spotlessApply
+// deploy.dependsOn spotlessApply

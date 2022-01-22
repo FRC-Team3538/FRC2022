@@ -14,6 +14,9 @@ void Robot::RobotInit()
   frc::SmartDashboard::PutNumber("Target Shooter RPM", 0.0);
 
   IO.ConfigureMotors();
+
+  dataLogUtils.EnableNTConnectionLogging();
+  dataLogUtils.EnableNTEntryLogging();
 }
 
 void Robot::RobotPeriodic()
