@@ -61,7 +61,13 @@ public:
         // Set the distance per pulse for the drive encoders. We can simply use the
         // distance traveled for one rotation of the wheel divided by the encoder
         // resolution.
-        auto dpp = empiricalDist / 188960.5; // 218325.5;//128173.5;//((2 * wpi::numbers::pi * kWheelRadius) / kEncoderResolution);
+        // 0.4787_m / 1_rot
+        // 2048 * 10.71 ticks / rot
+        // 2.182807 * 10^-5 ticks/m
+        // 0.0000218
+        // auto dpp = empiricalDist / 188960.5; // 218325.5;//128173.5;//((2 * wpi::numbers::pi * kWheelRadius) / kEncoderResolution);
+        // TODO: really measure this, but do we need to do it for AR?
+        auto dpp = 0.0000218_m;
         m_leftEncoder.SetDistancePerPulse(-dpp.value());
         m_rightEncoder.SetDistancePerPulse(dpp.value());
 
@@ -111,21 +117,21 @@ private:
     // CrossFire Characterization Values
 
     static constexpr units::meter_t kTrackWidth = 0.579_m; //.579
-    static constexpr units::meter_t kWheelRadius = 2.125_in;
+    static constexpr units::meter_t kWheelRadius = 3.0_in;
     static constexpr units::meter_t empiricalDist = 210_in;
-    static constexpr double kGearRatio = 5.95;
+    static constexpr double kGearRatio = 10.71;
     static constexpr int kEncoderResolution = 2048;
     static constexpr int kMotorCount = 2;
 
-    decltype(1_V) kStatic{0.826};                    //.706
-    decltype(1_V / 1_mps) kVlinear{1.94};            // 1.86
-    decltype(1_V / 1_mps_sq) kAlinear{0.0827};       // 0.0917
+    decltype(1_V) kStatic{0.59481};                    //.706
+    decltype(1_V / 1_mps) kVlinear{2.4226};            // 1.86
+    decltype(1_V / 1_mps_sq) kAlinear{0.34258};       // 0.0917
     decltype(1_V / 1_rad_per_s) kVangular{1.96};     // 1.94
     decltype(1_V / 1_rad_per_s_sq) kAangular{0.077}; // 0.0716
 
     // Velocity Control PID (Is this really required ???)
-    frc2::PIDController m_leftPIDController{1.72, 0.0, 0.0}; // 2.75
-    frc2::PIDController m_rightPIDController{1.72, 0.0, 0.0};
+    frc2::PIDController m_leftPIDController{0.0, 0.0, 0.0}; // 2.75
+    frc2::PIDController m_rightPIDController{0.0, 0.0, 0.0};
 
 public:
     // Teleop Values

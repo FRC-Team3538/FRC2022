@@ -9,6 +9,10 @@
 #include <frc/trajectory/TrajectoryGenerator.h>
 #include <frc/trajectory/TrajectoryParameterizer.h>
 
+#include <frc/trajectory/constraint/DifferentialDriveKinematicsConstraint.h>
+#include <frc/trajectory/constraint/DifferentialDriveVoltageConstraint.h>
+#include <frc/trajectory/constraint/CentripetalAccelerationConstraint.h>
+
 // Name for Smart Dash Chooser
 std::string AutoLine::GetName()
 {
@@ -41,7 +45,9 @@ void AutoLine::Init()
 
     // frc::TrajectoryConfig config(Drivetrain::kMaxSpeedLinear, Drivetrain::kMaxAccelerationLinear);
     frc::TrajectoryConfig config(maxLinearVel, maxLinearAcc);
-    //config.AddConstraint(frc::CentripetalAccelerationConstraint{12_mps_sq});
+    config.AddConstraint(frc::CentripetalAccelerationConstraint{5_mps_sq});
+    config.AddConstraint(frc::DifferentialDriveVoltageConstraint{IO.drivetrain.GetFeedForward(), IO.drivetrain.GetKinematics(), 5_V});
+    config.AddConstraint(frc::DifferentialDriveKinematicsConstraint{IO.drivetrain.GetKinematics(), 4_fps});
     config.SetReversed(false);
 
     // velocity, accel don't matter
