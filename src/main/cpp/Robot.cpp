@@ -17,6 +17,7 @@ void Robot::RobotPeriodic()
   IO.UpdateSmartDash();
   IO.drivetrain.Periodic();
   autoprograms.SmartDash();
+  IO.rjVision.Periodic();
 }
 
 void Robot::AutonomousInit()

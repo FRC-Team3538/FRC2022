@@ -8,6 +8,7 @@
 #include <cmath>
 #include <frc/Timer.h>
 #include "Subsystem.hpp"
+#include "Constants.hpp"
 
 namespace vision
 {
@@ -19,10 +20,7 @@ namespace vision
     class RJVisionPipeline : public Subsystem
     {
     private:
-        const double cameraAngle = 32;
-        const double dh = 63.0; // distance between camera lens and quarter-way up the goal
-
-        double estDist = 0.0;
+        units::inch_t estDist = 0.0_in;
 
         std::shared_ptr<nt::NetworkTable> table;
         double dy, dx, tv;
@@ -35,7 +33,8 @@ namespace vision
     public:
         struct visionData
         {
-            double distance, angle;
+            units::inch_t distance;
+            units::degree_t angle;
             bool filled = false;
         };
 
@@ -49,7 +48,7 @@ namespace vision
 
         // Setter
         RJVisionPipeline::visionData Run();
-        double DistEstimation();
+        units::inch_t DistEstimation();
         void Reset();
     };
 } // namespace vision
