@@ -46,7 +46,7 @@ void AutoLine::Init()
 
     // velocity, accel don't matter
     // but let's use the configured ones anyway
-    pathplanner::PathPlannerTrajectory pp_traj = pathplanner::PathPlanner::loadPath("2 ball", config.MaxVelocity(), config.MaxAcceleration());
+    pathplanner::PathPlannerTrajectory pp_traj = pathplanner::PathPlanner::loadPath("Straight Line path", config.MaxVelocity(), config.MaxAcceleration());
 
     std::vector<frc::TrajectoryGenerator::PoseWithCurvature> path;
 

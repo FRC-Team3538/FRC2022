@@ -13,16 +13,16 @@ constexpr rj::MotorModel falcon{
 };
 
 // SET THESE BEFORE USE
-constexpr rj::DiffyDriveModel grasshopper{
-    41.95_lb,
-    4.25_in,
-    5.95,
+constexpr rj::DiffyDriveModel AR_drivebase{
+    41.95_lb, // Mass TBD
+    6.0_in,  // Wheel Diameter
+    10.75,    // Gear Ratio
     // This will be different for every run - TODO: set this in AutonomousInit()
     12.8_V,
     // This will be different for every battery, but there's no good way to get this on-bot.
     // Maybe beak it and shuffleboard?
     0.03_Ohm,
-    6,
+    4,
     // Per Motor
     55_A,
     0.9,
