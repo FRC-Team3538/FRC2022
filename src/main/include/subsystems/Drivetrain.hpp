@@ -42,10 +42,10 @@ public:
 
         m_driveL0.ConfigFactoryDefault();
         m_driveL1.ConfigFactoryDefault();
-        // m_driveL2.ConfigFactoryDefault();
+        m_driveL2.ConfigFactoryDefault();
         m_driveR0.ConfigFactoryDefault();
         m_driveR1.ConfigFactoryDefault();
-        // m_driveR2.ConfigFactoryDefault();
+        m_driveR2.ConfigFactoryDefault();
 
         double pidIdx = 0;
         m_driveL0.ConfigSelectedFeedbackSensor(FeedbackDevice::IntegratedSensor, pidIdx);
@@ -74,18 +74,18 @@ public:
         m_leftEncoder.Reset();
         m_rightEncoder.Reset();
 
-        m_rightGroup.SetInverted(true);
-        m_leftGroup.SetInverted(false);
+        m_rightGroup.SetInverted(false);
+        m_leftGroup.SetInverted(true);
 
         m_driveL0.SetSelectedSensorPosition(0.0);
         m_driveR0.SetSelectedSensorPosition(0.0);
 
         m_driveL0.SetNeutralMode(NeutralMode::Brake);
         m_driveL1.SetNeutralMode(NeutralMode::Brake);
-        //m_driveL2.SetNeutralMode(NeutralMode::Brake);
+        m_driveL2.SetNeutralMode(NeutralMode::Brake);
         m_driveR0.SetNeutralMode(NeutralMode::Brake);
         m_driveR1.SetNeutralMode(NeutralMode::Brake);
-        //m_driveR2.SetNeutralMode(NeutralMode::Brake);
+        m_driveR2.SetNeutralMode(NeutralMode::Brake);
 
         // impel.SetNeutralMode(NeutralMode::Coast);
         // impel2.SetNeutralMode(NeutralMode::Coast);
@@ -164,25 +164,27 @@ private:
     frc::PWMVictorSPX m_rightFollower{4};
 
     // Real motor Controllers
-    WPI_TalonFX m_driveL0{1};
-    WPI_TalonFX m_driveL1{2};
-    // WPI_TalonFX m_driveL2{2};
+    WPI_TalonFX m_driveL0{0};
+    WPI_TalonFX m_driveL1{1};
+    WPI_TalonFX m_driveL2{2};
     WPI_TalonFX m_driveR0{3};
     WPI_TalonFX m_driveR1{4};
-    // WPI_TalonFX m_driveR2{5};
+    WPI_TalonFX m_driveR2{5};
 
     // Controller Groups
     frc::MotorControllerGroup m_leftGroup{
         m_leftLeader,
         m_leftFollower,
         m_driveL0,
-        m_driveL1};
+        m_driveL1,
+        m_driveL2};
 
     frc::MotorControllerGroup m_rightGroup{
         m_rightLeader,
         m_rightFollower,
         m_driveR0,
-        m_driveR1};
+        m_driveR1,
+        m_driveR2};
 
     // Simulated Encoders
     frc::Encoder m_leftEncoder{0, 1};

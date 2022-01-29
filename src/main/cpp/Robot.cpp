@@ -52,7 +52,7 @@ void Robot::TeleopInit()
 
 void Robot::TeleopPeriodic()
 {
-  IO.drivetrain.Arcade(deadband(-IO.mainController.GetLeftY(), 0.05), deadband(-IO.mainController.GetRightX(), 0.05));
+  IO.drivetrain.Arcade(deadband(-IO.mainController.GetLeftY(), deadbandVal), deadband(-IO.mainController.GetRightX(), deadbandVal));
 
   {
     double shooterVoltage;
@@ -121,11 +121,11 @@ void Robot::TeleopPeriodic()
 
       if (IO.secondaryController.GetR1Button() || IO.mainController.GetR1Button())
       {
-        intakeVoltage = shotTimer.Get() > 0.25_s ? 10.0 : 0.0;
+        intakeVoltage = shotTimer.Get() > 0.25_s ? 10.0 : 0.0; 
       }
       else
       {
-        intakeVoltage = (deadband((IO.secondaryController.GetR2Axis() + 1.0) / 2.0, 0.05)) * 13.0;
+        intakeVoltage = (deadband((IO.secondaryController.GetR2Axis() + 1.0) / 2.0, deadbandVal)) * 13.0;
       }
     }
     else

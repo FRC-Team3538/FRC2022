@@ -49,6 +49,8 @@ private:
   nt::NetworkTableEntry targetFeederVoltage = frc::SmartDashboard::GetEntry("/targetFeederVoltage");
   nt::NetworkTableEntry targetIntakePercent = frc::SmartDashboard::GetEntry("/targetIntakePercent");
 
+  const double deadbandVal = 0.1;
+
   double deadband(double val, double deadband);
 
   frc::Timer shotTimer;
