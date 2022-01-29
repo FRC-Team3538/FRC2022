@@ -68,8 +68,8 @@ public:
         // auto dpp = empiricalDist / 188960.5; // 218325.5;//128173.5;//((2 * wpi::numbers::pi * kWheelRadius) / kEncoderResolution);
         // TODO: really measure this, but do we need to do it for AR?
         auto dpp = 0.0000218_m;
-        m_leftEncoder.SetDistancePerPulse(-dpp.value());
-        m_rightEncoder.SetDistancePerPulse(dpp.value());
+        m_leftEncoder.SetDistancePerPulse(dpp.value());
+        m_rightEncoder.SetDistancePerPulse(-dpp.value());
 
         m_leftEncoder.Reset();
         m_rightEncoder.Reset();
@@ -80,11 +80,11 @@ public:
         m_driveL0.SetSelectedSensorPosition(0.0);
         m_driveR0.SetSelectedSensorPosition(0.0);
 
-        m_driveL0.SetNeutralMode(NeutralMode::Brake);
-        m_driveL1.SetNeutralMode(NeutralMode::Brake);
+        m_driveL0.SetNeutralMode(NeutralMode::Coast);
+        m_driveL1.SetNeutralMode(NeutralMode::Coast);
         //m_driveL2.SetNeutralMode(NeutralMode::Brake);
-        m_driveR0.SetNeutralMode(NeutralMode::Brake);
-        m_driveR1.SetNeutralMode(NeutralMode::Brake);
+        m_driveR0.SetNeutralMode(NeutralMode::Coast);
+        m_driveR1.SetNeutralMode(NeutralMode::Coast);
         //m_driveR2.SetNeutralMode(NeutralMode::Brake);
 
         // impel.SetNeutralMode(NeutralMode::Coast);

@@ -42,12 +42,14 @@ frc::Trajectory AutoHelper::LoadTrajectory(std::string name, frc::TrajectoryConf
             curv_sign = -1;
         }
 
+        auto pose = pp_state->pose;
+
         if (config->IsReversed()) {
-            pp_state->pose = pp_state->pose.TransformBy(frc::Transform2d(frc::Translation2d(), frc::Rotation2d(180_deg)));
+            pose = pp_state->pose.TransformBy(frc::Transform2d(frc::Translation2d(), frc::Rotation2d(180_deg)));
             curv_sign *= -1;
         }
 
-        path.push_back(frc::TrajectoryGenerator::PoseWithCurvature{pp_state->pose, pp_state->curvature * curv_sign});
+        path.push_back(frc::TrajectoryGenerator::PoseWithCurvature{pose, pp_state->curvature * curv_sign});
     }
 
     return frc::TrajectoryParameterizer::TimeParameterizeTrajectory(path, config->Constraints(), config->StartVelocity(), config->EndVelocity(), config->MaxVelocity(), config->MaxAcceleration(), config->IsReversed());
