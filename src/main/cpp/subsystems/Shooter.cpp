@@ -125,7 +125,7 @@ void Shooter::SetShooter(units::volt_t targetVolts)
 
 void Shooter::SetFeeder(units::volt_t targetVoltage)
 {
-    feeder.SetVoltage(targetVoltage);
+    indexerA.SetVoltage(targetVoltage);
 }
 
 void Shooter::SetHood(units::volt_t targetVoltage)
@@ -168,6 +168,7 @@ void Shooter::SetIntakeState(Position pos)
 
 void Shooter::SetIntake(units::volt_t voltage)
 {
+    feeder.SetVoltage(-voltage);
     intake.SetVoltage(voltage);
 }
 

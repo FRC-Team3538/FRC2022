@@ -63,7 +63,7 @@ public:
 
 private:
     WPI_TalonFX intake{10};
-    // WPI_TalonFX indexerA{11};
+    WPI_TalonFX indexerA{11};
     // WPI_TalonFX indexerB{12};
     WPI_TalonFX feeder{13};
     WPI_TalonFX shooterA{14};

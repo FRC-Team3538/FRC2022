@@ -48,4 +48,6 @@ private:
   nt::NetworkTableEntry lockFeederVoltage = frc::SmartDashboard::GetEntry("/lockFeederVoltage");
   nt::NetworkTableEntry targetFeederVoltage = frc::SmartDashboard::GetEntry("/targetFeederVoltage");
   nt::NetworkTableEntry targetIntakePercent = frc::SmartDashboard::GetEntry("/targetIntakePercent");
+
+  double deadband(double val, double deadband);
 };

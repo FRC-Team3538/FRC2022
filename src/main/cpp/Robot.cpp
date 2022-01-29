@@ -7,9 +7,23 @@
 
 using namespace pathplanner;
 
+double Robot::deadband(double val, double deadband)
+{
+  if(val > 1.0)
+    return 1.0;
+  if(val < -1.0)
+    return -1.0;
+  if(std::abs(val) < deadband)
+    return 0.0;
+  return val;
+}
+
 void Robot::RobotInit()
 {
   IO.ConfigureMotors();
+  frc::SmartDashboard::PutNumber("Feeder Voltage", 0.0);
+  frc::SmartDashboard::PutNumber("Shooter Voltage", 0.0);
+  frc::SmartDashboard::PutNumber("Hood Wheel Voltage", 0.0);
 }
 
 void Robot::RobotPeriodic()
@@ -30,20 +44,26 @@ void Robot::AutonomousPeriodic()
   autoprograms.Run();
 }
 
-void Robot::TeleopInit() {
+void Robot::TeleopInit()
+{
   lockShooterVoltage.SetBoolean(true);
   targetShooterVoltage.SetDouble(0.0);
 }
 
-void Robot::TeleopPeriodic() {
+void Robot::TeleopPeriodic()
+{
+  IO.drivetrain.Arcade(deadband(-IO.mainController.GetLeftY(), 0.05), deadband(-IO.mainController.GetRightX(), 0.05));
+
   {
     double shooterVoltage;
 
-    if (lockShooterVoltage.GetBoolean(false)) {
-      shooterVoltage = targetShooterVoltage.GetDouble(0.0);
-    } else if (IO.mainController.IsConnected()) {
-      shooterVoltage = IO.mainController.GetR2Axis()* IO.pdp.GetVoltage();
-    } else {
+    if (IO.mainController.IsConnected())
+    {
+      shooterVoltage = (IO.mainController.GetR1Button() || IO.secondaryController.GetR1Button()) ? frc::SmartDashboard::GetNumber("Shooter Voltage", 0.0) : 0.0;
+      std::cout << shooterVoltage << std::endl;
+    }
+    else
+    {
       shooterVoltage = 0.0;
     }
 
@@ -53,11 +73,16 @@ void Robot::TeleopPeriodic() {
   {
     double hoodVoltage;
 
-    if (lockHoodVoltage.GetBoolean(false)) {
+    if (lockHoodVoltage.GetBoolean(false))
+    {
       hoodVoltage = targetHoodVoltage.GetDouble(0.0);
-    } else if (IO.mainController.IsConnected()) {
-      hoodVoltage = IO.mainController.GetL2Axis()* IO.pdp.GetVoltage();
-    } else {
+    }
+    else if (IO.mainController.IsConnected())
+    {
+      hoodVoltage = (IO.mainController.GetR1Button() || IO.secondaryController.GetR1Button()) ? frc::SmartDashboard::GetNumber("Hood Wheel Voltage", 0.0) : 0.0;
+    }
+    else
+    {
       hoodVoltage = 0.0;
     }
 
@@ -67,15 +92,36 @@ void Robot::TeleopPeriodic() {
   {
     double feederVoltage;
 
-    if (lockFeederVoltage.GetBoolean(false)) {
+    if (lockFeederVoltage.GetBoolean(false))
+    {
       feederVoltage = targetFeederVoltage.GetDouble(0.0);
-    } else if (IO.mainController.IsConnected()) {
-      feederVoltage = IO.mainController.GetLeftX() * IO.pdp.GetVoltage();
-    } else {
+    }
+    else if (IO.mainController.IsConnected())
+    {
+      feederVoltage = (IO.mainController.GetR1Button() || IO.secondaryController.GetR1Button()) ? frc::SmartDashboard::GetNumber("Feeder Voltage", 0.0) : 0.0;
+    }
+    else
+    {
       feederVoltage = 0.0;
     }
 
     IO.shooter.SetFeeder(units::volt_t(feederVoltage));
+  }
+
+  {
+    double intakeVoltage;
+
+    if(IO.mainController.IsConnected())
+    {
+      intakeVoltage = (deadband((IO.secondaryController.GetR2Axis() + 1.0 )/ 2.0, 0.05)) * 13.0;
+      //std::cout << intakeVoltage << std::endl;
+    }
+    else
+    {
+      intakeVoltage = 0.0;
+    }
+
+    IO.shooter.SetIntake(units::volt_t{intakeVoltage});
   }
 }
 
