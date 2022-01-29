@@ -1,4 +1,4 @@
-#include "auto/AutoLine.hpp"
+#include "auto/AutoLine_Backward.hpp"
 
 #include <frc/trajectory/constraint/DifferentialDriveKinematicsConstraint.h>
 #include <frc/trajectory/constraint/DifferentialDriveVoltageConstraint.h>
@@ -7,29 +7,29 @@
 #include <lib/AutoHelper.h>
 
 // Name for Smart Dash Chooser
-std::string AutoLine::GetName()
+std::string AutoLine_Backward::GetName()
 {
     return "2 - Backward";
 }
 
 // Initialization
 // Constructor requires a reference to the robot map
-AutoLine::AutoLine(Robotmap &IO) : IO(IO)
+AutoLine_Backward::AutoLine_Backward(Robotmap &IO) : IO(IO)
 {
     m_state = 0;
 }
 
-AutoLine::~AutoLine() {}
+AutoLine_Backward::~AutoLine_Backward() {}
 
 //State Machine
-void AutoLine::NextState()
+void AutoLine_Backward::NextState()
 {
     m_state++;
     m_autoTimer.Reset();
     m_autoTimer.Start();
 }
 
-void AutoLine::Init()
+void AutoLine_Backward::Init()
 {
 
     units::feet_per_second_t maxLinearVel = 4_fps;
@@ -52,7 +52,7 @@ void AutoLine::Init()
 }
 
 // Execute the program
-void AutoLine::Run()
+void AutoLine_Backward::Run()
 {
     switch (m_state)
     {
@@ -78,7 +78,7 @@ void AutoLine::Run()
     UpdateSmartDash();
 }
 
-void AutoLine::UpdateSmartDash()
+void AutoLine_Backward::UpdateSmartDash()
 {
     frc::SmartDashboard::PutNumber("Auto State", m_state);
 }
