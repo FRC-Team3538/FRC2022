@@ -9,11 +9,11 @@ using namespace pathplanner;
 
 double Robot::deadband(double val, double deadband)
 {
-  if(val > 1.0)
+  if (val > 1.0)
     return 1.0;
-  if(val < -1.0)
+  if (val < -1.0)
     return -1.0;
-  if(std::abs(val) < deadband)
+  if (std::abs(val) < deadband)
     return 0.0;
   return val;
 }
@@ -111,10 +111,22 @@ void Robot::TeleopPeriodic()
   {
     double intakeVoltage;
 
-    if(IO.mainController.IsConnected())
+    if (IO.mainController.IsConnected())
     {
-      intakeVoltage = (deadband((IO.secondaryController.GetR2Axis() + 1.0 )/ 2.0, 0.05)) * 13.0;
-      //std::cout << intakeVoltage << std::endl;
+      if (IO.mainController.GetR1ButtonPressed() || IO.secondaryController.GetR1ButtonPressed())
+      {
+        shotTimer.Reset();
+        shotTimer.Start();
+      }
+
+      if (IO.secondaryController.GetR1Button() || IO.mainController.GetR1Button())
+      {
+        intakeVoltage = shotTimer.Get() > 0.25_s ? 10.0 : 0.0;
+      }
+      else
+      {
+        intakeVoltage = (deadband((IO.secondaryController.GetR2Axis() + 1.0) / 2.0, 0.05)) * 13.0;
+      }
     }
     else
     {

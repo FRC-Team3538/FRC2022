@@ -50,4 +50,6 @@ private:
   nt::NetworkTableEntry targetIntakePercent = frc::SmartDashboard::GetEntry("/targetIntakePercent");
 
   double deadband(double val, double deadband);
+
+  frc::Timer shotTimer;
 };
