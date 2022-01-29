@@ -1,5 +1,4 @@
-#include "auto/AutoLine.hpp"
-
+#include "auto/AutoTurn.hpp"
 #include "lib/AutoHelper.h"
 
 #include <frc/trajectory/constraint/DifferentialDriveKinematicsConstraint.h>
@@ -7,29 +6,29 @@
 #include <frc/trajectory/constraint/CentripetalAccelerationConstraint.h>
 
 // Name for Smart Dash Chooser
-std::string AutoLine::GetName()
+std::string AutoTurn::GetName()
 {
-    return "1 - Line";
+    return "3 - Turn";
 }
 
 // Initialization
 // Constructor requires a reference to the robot map
-AutoLine::AutoLine(Robotmap &IO) : IO(IO)
+AutoTurn::AutoTurn(Robotmap &IO) : IO(IO)
 {
     m_state = 0;
 }
 
-AutoLine::~AutoLine() {}
+AutoTurn::~AutoTurn() {}
 
 //State Machine
-void AutoLine::NextState()
+void AutoTurn::NextState()
 {
     m_state++;
     m_autoTimer.Reset();
     m_autoTimer.Start();
 }
 
-void AutoLine::Init()
+void AutoTurn::Init()
 {
 
     units::feet_per_second_t maxLinearVel = 4_fps;
@@ -43,7 +42,7 @@ void AutoLine::Init()
     config.AddConstraint(frc::DifferentialDriveKinematicsConstraint{IO.drivetrain.GetKinematics(), 4_fps});
     config.SetReversed(false);
 
-    m_trajectory = rj::AutoHelper::LoadTrajectory("Straight Line path", &config);
+    m_trajectory = rj::AutoHelper::LoadTrajectory("Turning Left and Right", &config);
 
     m_autoTimer.Reset();
     m_autoTimer.Start();
@@ -52,7 +51,7 @@ void AutoLine::Init()
 }
 
 // Execute the program
-void AutoLine::Run()
+void AutoTurn::Run()
 {
     switch (m_state)
     {
@@ -78,7 +77,7 @@ void AutoLine::Run()
     UpdateSmartDash();
 }
 
-void AutoLine::UpdateSmartDash()
+void AutoTurn::UpdateSmartDash()
 {
     frc::SmartDashboard::PutNumber("Auto State", m_state);
 }

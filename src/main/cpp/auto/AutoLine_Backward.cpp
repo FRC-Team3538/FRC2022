@@ -1,35 +1,35 @@
-#include "auto/AutoLine.hpp"
-
-#include "lib/AutoHelper.h"
+#include "auto/AutoLine_Backward.hpp"
 
 #include <frc/trajectory/constraint/DifferentialDriveKinematicsConstraint.h>
 #include <frc/trajectory/constraint/DifferentialDriveVoltageConstraint.h>
 #include <frc/trajectory/constraint/CentripetalAccelerationConstraint.h>
 
+#include <lib/AutoHelper.h>
+
 // Name for Smart Dash Chooser
-std::string AutoLine::GetName()
+std::string AutoLine_Backward::GetName()
 {
-    return "1 - Line";
+    return "2 - Backward";
 }
 
 // Initialization
 // Constructor requires a reference to the robot map
-AutoLine::AutoLine(Robotmap &IO) : IO(IO)
+AutoLine_Backward::AutoLine_Backward(Robotmap &IO) : IO(IO)
 {
     m_state = 0;
 }
 
-AutoLine::~AutoLine() {}
+AutoLine_Backward::~AutoLine_Backward() {}
 
 //State Machine
-void AutoLine::NextState()
+void AutoLine_Backward::NextState()
 {
     m_state++;
     m_autoTimer.Reset();
     m_autoTimer.Start();
 }
 
-void AutoLine::Init()
+void AutoLine_Backward::Init()
 {
 
     units::feet_per_second_t maxLinearVel = 4_fps;
@@ -41,9 +41,9 @@ void AutoLine::Init()
     config.AddConstraint(frc::CentripetalAccelerationConstraint{5_mps_sq});
     config.AddConstraint(frc::DifferentialDriveVoltageConstraint{IO.drivetrain.GetFeedForward(), IO.drivetrain.GetKinematics(), 5_V});
     config.AddConstraint(frc::DifferentialDriveKinematicsConstraint{IO.drivetrain.GetKinematics(), 4_fps});
-    config.SetReversed(false);
+    config.SetReversed(true);
 
-    m_trajectory = rj::AutoHelper::LoadTrajectory("Straight Line path", &config);
+    m_trajectory = rj::AutoHelper::LoadTrajectory("Backwards", &config);
 
     m_autoTimer.Reset();
     m_autoTimer.Start();
@@ -52,7 +52,7 @@ void AutoLine::Init()
 }
 
 // Execute the program
-void AutoLine::Run()
+void AutoLine_Backward::Run()
 {
     switch (m_state)
     {
@@ -78,7 +78,7 @@ void AutoLine::Run()
     UpdateSmartDash();
 }
 
-void AutoLine::UpdateSmartDash()
+void AutoLine_Backward::UpdateSmartDash()
 {
     frc::SmartDashboard::PutNumber("Auto State", m_state);
 }
