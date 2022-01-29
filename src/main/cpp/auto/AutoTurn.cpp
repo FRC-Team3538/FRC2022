@@ -1,5 +1,4 @@
 #include "auto/AutoLine.hpp"
-
 #include "lib/AutoHelper.h"
 
 #include <frc/trajectory/constraint/DifferentialDriveKinematicsConstraint.h>
@@ -9,7 +8,7 @@
 // Name for Smart Dash Chooser
 std::string AutoLine::GetName()
 {
-    return "1 - Line";
+    return "3 - Turn";
 }
 
 // Initialization
@@ -43,7 +42,7 @@ void AutoLine::Init()
     config.AddConstraint(frc::DifferentialDriveKinematicsConstraint{IO.drivetrain.GetKinematics(), 4_fps});
     config.SetReversed(false);
 
-    m_trajectory = rj::AutoHelper::LoadTrajectory("Straight Line path", &config);
+    m_trajectory = rj::AutoHelper::LoadTrajectory("Turning Left and Right", &config);
 
     m_autoTimer.Reset();
     m_autoTimer.Start();

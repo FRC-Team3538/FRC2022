@@ -1,15 +1,15 @@
 #include "auto/AutoLine.hpp"
 
-#include "lib/AutoHelper.h"
-
 #include <frc/trajectory/constraint/DifferentialDriveKinematicsConstraint.h>
 #include <frc/trajectory/constraint/DifferentialDriveVoltageConstraint.h>
 #include <frc/trajectory/constraint/CentripetalAccelerationConstraint.h>
 
+#include <lib/AutoHelper.h>
+
 // Name for Smart Dash Chooser
 std::string AutoLine::GetName()
 {
-    return "1 - Line";
+    return "2 - Backward";
 }
 
 // Initialization
@@ -41,9 +41,9 @@ void AutoLine::Init()
     config.AddConstraint(frc::CentripetalAccelerationConstraint{5_mps_sq});
     config.AddConstraint(frc::DifferentialDriveVoltageConstraint{IO.drivetrain.GetFeedForward(), IO.drivetrain.GetKinematics(), 5_V});
     config.AddConstraint(frc::DifferentialDriveKinematicsConstraint{IO.drivetrain.GetKinematics(), 4_fps});
-    config.SetReversed(false);
+    config.SetReversed(true);
 
-    m_trajectory = rj::AutoHelper::LoadTrajectory("Straight Line path", &config);
+    m_trajectory = rj::AutoHelper::LoadTrajectory("Backwards", &config);
 
     m_autoTimer.Reset();
     m_autoTimer.Start();
