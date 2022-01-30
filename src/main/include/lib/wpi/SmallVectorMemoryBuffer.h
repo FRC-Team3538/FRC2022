@@ -23,8 +23,8 @@
 #include <utility>
 
 #include "lib/wpi/MemoryBuffer.h"
-#include <wpi/SmallVector.h>
-#include <wpi/raw_ostream.h>
+#include "wpi/SmallVector.h"
+#include "wpi/raw_ostream.h"
 
 namespace wpi {
 

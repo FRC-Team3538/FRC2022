@@ -35,17 +35,35 @@
 using namespace wpi::log;
 
 static constexpr size_t kBlockSize = 16 * 1024;
-static constexpr size_t kRecordHeaderSize = 16;
+static constexpr size_t kRecordMaxHeaderSize = 17;
 
-static void WriteRecordHeader(uint8_t** buf, int entry, uint64_t timestamp,
-                              size_t payloadSize) {
-  wpi::support::endian::write32le(*buf, entry);
-  *buf += 4;
-  wpi::support::endian::write32le(*buf, payloadSize);
-  *buf += 4;
-  wpi::support::endian::write64le(*buf,
-                                  timestamp == 0 ? wpi::Now() : timestamp);
-  *buf += 8;
+template <typename T>
+static unsigned int WriteVarInt(uint8_t* buf, T val) {
+  unsigned int len = 0;
+  do {
+    *buf++ = static_cast<unsigned int>(val) & 0xff;
+    ++len;
+    val >>= 8;
+  } while (val != 0);
+  return len;
+}
+
+// min size: 4, max size: 17
+static unsigned int WriteRecordHeader(uint8_t* buf, uint32_t entry,
+                                      uint64_t timestamp,
+                                      uint32_t payloadSize) {
+  uint8_t* origbuf = buf++;
+
+  unsigned int entryLen = WriteVarInt(buf, entry);
+  buf += entryLen;
+  unsigned int payloadLen = WriteVarInt(buf, payloadSize);
+  buf += payloadLen;
+  unsigned int timestampLen =
+      WriteVarInt(buf, timestamp == 0 ? wpi::Now() : timestamp);
+  buf += timestampLen;
+  *origbuf =
+      ((timestampLen - 1) << 4) | ((payloadLen - 1) << 2) | (entryLen - 1);
+  return buf - origbuf;
 }
 
 class DataLog::Buffer {
@@ -84,6 +102,8 @@ class DataLog::Buffer {
     return rv;
   }
 
+  void Unreserve(size_t size) { m_len -= size; }
+
   void Clear() { m_len = 0; }
 
   size_t GetRemaining() const { return m_maxLen - m_len; }
@@ -97,9 +117,19 @@ class DataLog::Buffer {
   size_t m_maxLen;
 };
 
-DataLog::DataLog(std::string_view dir, std::string_view filename, double period)
-    : m_newFilename{filename}, m_thread{[this, dir = std::string{dir}, period] {
-        WriterThreadMain(dir, period);
+DataLog::DataLog(std::string_view dir, std::string_view filename, double period,
+                 std::string_view extraHeader)
+    : m_period{period},
+      m_extraHeader{extraHeader},
+      m_newFilename{filename},
+      m_thread{[this, dir = std::string{dir}] { WriterThreadMain(dir); }} {}
+
+DataLog::DataLog(std::function<void(wpi::span<const uint8_t> data)> write,
+                 double period, std::string_view extraHeader)
+    : m_period{period},
+      m_extraHeader{extraHeader},
+      m_thread{[this, write = std::move(write)] {
+        WriterThreadMain(std::move(write));
       }} {}
 
 DataLog::~DataLog() {
@@ -168,8 +198,8 @@ static void WriteToFile(fs::file_t f, wpi::span<const uint8_t> data,
   } while (data.size() > 0);
 }
 
-void DataLog::WriterThreadMain(std::string_view dir, double period) {
-  std::chrono::duration<double> periodTime{period};
+void DataLog::WriterThreadMain(std::string_view dir) {
+  std::chrono::duration<double> periodTime{m_period};
 
   std::error_code ec;
   fs::path dirPath{dir};
@@ -206,6 +236,15 @@ void DataLog::WriterThreadMain(std::string_view dir, double period) {
   if (f != fs::kInvalidFile) {
     const uint8_t header[] = {'W', 'P', 'I', 'L', 'O', 'G', 0, 1};
     WriteToFile(f, header, filename);
+    uint8_t extraLen[4];
+    support::endian::write32le(extraLen, m_extraHeader.size());
+    WriteToFile(f, extraLen, filename);
+    if (m_extraHeader.size() > 0) {
+      WriteToFile(f,
+                  {reinterpret_cast<const uint8_t*>(m_extraHeader.data()),
+                   m_extraHeader.size()},
+                  filename);
+    }
   }
 
   std::vector<Buffer> toWrite;
@@ -274,8 +313,65 @@ void DataLog::WriterThreadMain(std::string_view dir, double period) {
   }
 }
 
+void DataLog::WriterThreadMain(
+    std::function<void(wpi::span<const uint8_t> data)> write) {
+  std::chrono::duration<double> periodTime{m_period};
+
+  // write header (version 1.0)
+  {
+    const uint8_t header[] = {'W', 'P', 'I', 'L', 'O', 'G', 0, 1};
+    write(header);
+    uint8_t extraLen[4];
+    support::endian::write32le(extraLen, m_extraHeader.size());
+    write(extraLen);
+    if (m_extraHeader.size() > 0) {
+      write({reinterpret_cast<const uint8_t*>(m_extraHeader.data()),
+             m_extraHeader.size()});
+    }
+  }
+
+  std::vector<Buffer> toWrite;
+
+  std::unique_lock lock{m_mutex};
+  while (m_active) {
+    bool doFlush = false;
+    auto timeoutTime = std::chrono::steady_clock::now() + periodTime;
+    if (m_cond.wait_until(lock, timeoutTime) == std::cv_status::timeout) {
+      doFlush = true;
+    }
+
+    if (doFlush || m_doFlush) {
+      // flush to file
+      m_doFlush = false;
+      if (m_outgoing.empty()) {
+        continue;
+      }
+      // swap outgoing with empty vector
+      toWrite.swap(m_outgoing);
+
+      lock.unlock();
+      // write buffers
+      for (auto&& buf : toWrite) {
+        if (!buf.GetData().empty()) {
+          write(buf.GetData());
+        }
+      }
+      lock.lock();
+
+      // release buffers back to free list
+      for (auto&& buf : toWrite) {
+        buf.Clear();
+        m_free.emplace_back(std::move(buf));
+      }
+      toWrite.resize(0);
+    }
+  }
+
+  write({});  // indicate EOF
+}
+
 // Control records use the following format:
-// 4-byte type
+// 1-byte type
 // 4-byte entry
 // rest of data (depending on type)
 
@@ -300,10 +396,8 @@ int DataLog::Start(std::string_view name, std::string_view type,
   }
   entryInfo.type = type;
   size_t strsize = name.size() + type.size() + metadata.size();
-  uint8_t* buf = Reserve(kRecordHeaderSize + 8);
-  WriteRecordHeader(&buf, 0, timestamp, 8 + 12 + strsize);
-  wpi::support::endian::write32le(buf, impl::kControlStart);
-  buf += 4;
+  uint8_t* buf = StartRecord(0, timestamp, 5 + 12 + strsize, 5);
+  *buf++ = impl::kControlStart;
   wpi::support::endian::write32le(buf, entryInfo.id);
   AppendStringImpl(name);
   AppendStringImpl(type);
@@ -326,10 +420,8 @@ void DataLog::Finish(int entry, int64_t timestamp) {
     return;
   }
   m_entryCounts.erase(entry);
-  uint8_t* buf = Reserve(kRecordHeaderSize + 8);
-  WriteRecordHeader(&buf, 0, timestamp, 8);
-  wpi::support::endian::write32le(buf, impl::kControlFinish);
-  buf += 4;
+  uint8_t* buf = StartRecord(0, timestamp, 5, 5);
+  *buf++ = impl::kControlFinish;
   wpi::support::endian::write32le(buf, entry);
 }
 
@@ -339,10 +431,8 @@ void DataLog::SetMetadata(int entry, std::string_view metadata,
     return;
   }
   std::scoped_lock lock{m_mutex};
-  uint8_t* buf = Reserve(kRecordHeaderSize + 8);
-  WriteRecordHeader(&buf, entry, timestamp, 8 + 4 + metadata.size());
-  wpi::support::endian::write32le(buf, impl::kControlSetMetadata);
-  buf += 4;
+  uint8_t* buf = StartRecord(entry, timestamp, 5 + 4 + metadata.size(), 5);
+  *buf++ = impl::kControlSetMetadata;
   wpi::support::endian::write32le(buf, entry);
   AppendStringImpl(metadata);
 }
@@ -358,6 +448,15 @@ uint8_t* DataLog::Reserve(size_t size) {
     }
   }
   return m_outgoing.back().Reserve(size);
+}
+
+uint8_t* DataLog::StartRecord(uint32_t entry, uint64_t timestamp,
+                              uint32_t payloadSize, size_t reserveSize) {
+  uint8_t* buf = Reserve(kRecordMaxHeaderSize + reserveSize);
+  auto headerLen = WriteRecordHeader(buf, entry, timestamp, payloadSize);
+  m_outgoing.back().Unreserve(kRecordMaxHeaderSize - headerLen);
+  buf += headerLen;
+  return buf;
 }
 
 void DataLog::AppendImpl(wpi::span<const uint8_t> data) {
@@ -385,8 +484,7 @@ void DataLog::AppendRaw(int entry, wpi::span<const uint8_t> data,
   if (m_paused) {
     return;
   }
-  uint8_t* buf = Reserve(kRecordHeaderSize);
-  WriteRecordHeader(&buf, entry, timestamp, data.size());
+  StartRecord(entry, timestamp, data.size(), 0);
   AppendImpl(data);
 }
 
@@ -404,8 +502,7 @@ void DataLog::AppendRaw2(int entry,
   for (auto&& chunk : data) {
     size += chunk.size();
   }
-  uint8_t* buf = Reserve(kRecordHeaderSize);
-  WriteRecordHeader(&buf, entry, timestamp, size);
+  StartRecord(entry, timestamp, size, 0);
   for (auto chunk : data) {
     AppendImpl(chunk);
   }
@@ -419,8 +516,7 @@ void DataLog::AppendBoolean(int entry, bool value, int64_t timestamp) {
   if (m_paused) {
     return;
   }
-  uint8_t* buf = Reserve(kRecordHeaderSize + 1);
-  WriteRecordHeader(&buf, entry, timestamp, 1);
+  uint8_t* buf = StartRecord(entry, timestamp, 1, 1);
   buf[0] = value ? 1 : 0;
 }
 
@@ -432,8 +528,7 @@ void DataLog::AppendInteger(int entry, int64_t value, int64_t timestamp) {
   if (m_paused) {
     return;
   }
-  uint8_t* buf = Reserve(kRecordHeaderSize + 8);
-  WriteRecordHeader(&buf, entry, timestamp, 8);
+  uint8_t* buf = StartRecord(entry, timestamp, 8, 8);
   wpi::support::endian::write64le(buf, value);
 }
 
@@ -445,8 +540,7 @@ void DataLog::AppendFloat(int entry, float value, int64_t timestamp) {
   if (m_paused) {
     return;
   }
-  uint8_t* buf = Reserve(kRecordHeaderSize + 4);
-  WriteRecordHeader(&buf, entry, timestamp, 4);
+  uint8_t* buf = StartRecord(entry, timestamp, 4, 4);
   if constexpr (wpi::support::endian::system_endianness() ==
                 wpi::support::little) {
     std::memcpy(buf, &value, 4);
@@ -463,8 +557,7 @@ void DataLog::AppendDouble(int entry, double value, int64_t timestamp) {
   if (m_paused) {
     return;
   }
-  uint8_t* buf = Reserve(kRecordHeaderSize + 8);
-  WriteRecordHeader(&buf, entry, timestamp, 8);
+  uint8_t* buf = StartRecord(entry, timestamp, 8, 8);
   if constexpr (wpi::support::endian::system_endianness() ==
                 wpi::support::little) {
     std::memcpy(buf, &value, 8);
@@ -489,8 +582,8 @@ void DataLog::AppendBooleanArray(int entry, wpi::span<const bool> arr,
   if (m_paused) {
     return;
   }
-  uint8_t* buf = Reserve(kRecordHeaderSize);
-  WriteRecordHeader(&buf, entry, timestamp, arr.size());
+  StartRecord(entry, timestamp, arr.size(), 0);
+  uint8_t* buf;
   while (arr.size() > kBlockSize) {
     buf = Reserve(kBlockSize);
     for (auto val : arr.subspan(0, kBlockSize)) {
@@ -513,8 +606,8 @@ void DataLog::AppendBooleanArray(int entry, wpi::span<const int> arr,
   if (m_paused) {
     return;
   }
-  uint8_t* buf = Reserve(kRecordHeaderSize);
-  WriteRecordHeader(&buf, entry, timestamp, arr.size());
+  StartRecord(entry, timestamp, arr.size(), 0);
+  uint8_t* buf;
   while (arr.size() > kBlockSize) {
     buf = Reserve(kBlockSize);
     for (auto val : arr.subspan(0, kBlockSize)) {
@@ -548,8 +641,8 @@ void DataLog::AppendIntegerArray(int entry, wpi::span<const int64_t> arr,
     if (m_paused) {
       return;
     }
-    uint8_t* buf = Reserve(kRecordHeaderSize);
-    WriteRecordHeader(&buf, entry, timestamp, arr.size() * 8);
+    StartRecord(entry, timestamp, arr.size() * 8, 0);
+    uint8_t* buf;
     while ((arr.size() * 8) > kBlockSize) {
       buf = Reserve(kBlockSize);
       for (auto val : arr.subspan(0, kBlockSize / 8)) {
@@ -581,8 +674,8 @@ void DataLog::AppendFloatArray(int entry, wpi::span<const float> arr,
     if (m_paused) {
       return;
     }
-    uint8_t* buf = Reserve(kRecordHeaderSize);
-    WriteRecordHeader(&buf, entry, timestamp, arr.size() * 4);
+    StartRecord(entry, timestamp, arr.size() * 4, 0);
+    uint8_t* buf;
     while ((arr.size() * 4) > kBlockSize) {
       buf = Reserve(kBlockSize);
       for (auto val : arr.subspan(0, kBlockSize / 4)) {
@@ -614,8 +707,8 @@ void DataLog::AppendDoubleArray(int entry, wpi::span<const double> arr,
     if (m_paused) {
       return;
     }
-    uint8_t* buf = Reserve(kRecordHeaderSize);
-    WriteRecordHeader(&buf, entry, timestamp, arr.size() * 8);
+    StartRecord(entry, timestamp, arr.size() * 8, 0);
+    uint8_t* buf;
     while ((arr.size() * 8) > kBlockSize) {
       buf = Reserve(kBlockSize);
       for (auto val : arr.subspan(0, kBlockSize / 8)) {
@@ -647,8 +740,7 @@ void DataLog::AppendStringArray(int entry, wpi::span<const std::string> arr,
   if (m_paused) {
     return;
   }
-  uint8_t* buf = Reserve(kRecordHeaderSize + 4);
-  WriteRecordHeader(&buf, entry, timestamp, size);
+  uint8_t* buf = StartRecord(entry, timestamp, size, 4);
   wpi::support::endian::write32le(buf, arr.size());
   for (auto&& str : arr) {
     AppendStringImpl(str);
@@ -671,8 +763,7 @@ void DataLog::AppendStringArray(int entry,
   if (m_paused) {
     return;
   }
-  uint8_t* buf = Reserve(kRecordHeaderSize + 4);
-  WriteRecordHeader(&buf, entry, timestamp, size);
+  uint8_t* buf = StartRecord(entry, timestamp, size, 4);
   wpi::support::endian::write32le(buf, arr.size());
   for (auto sv : arr) {
     AppendStringImpl(sv);

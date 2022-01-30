@@ -12,7 +12,7 @@
 #include <vector>
 
 #include "lib/wpi/MemoryBuffer.h"
-#include <wpi/span.h>
+#include "wpi/span.h"
 
 namespace wpi::log {
 
@@ -319,8 +319,24 @@ class DataLogReader {
    */
   uint16_t GetVersion() const;
 
+  /**
+   * Gets the extra header data.
+   *
+   * @return Extra header data
+   */
+  std::string_view GetExtraHeader() const;
+
+  /**
+   * Gets the buffer identifier, typically the filename.
+   *
+   * @return Identifier string
+   */
+  std::string_view GetBufferIdentifier() const {
+    return m_buf ? m_buf->GetBufferIdentifier() : "Invalid";
+  }
+
   /** Returns iterator to first record. */
-  iterator begin() const { return DataLogIterator{this, 8}; }
+  iterator begin() const;
 
   /** Returns end iterator. */
   iterator end() const { return DataLogIterator{this, SIZE_MAX}; }

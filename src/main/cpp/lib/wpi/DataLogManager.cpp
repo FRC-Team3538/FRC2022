@@ -11,7 +11,7 @@
 #include <fmt/chrono.h>
 #include <fmt/format.h>
 #include <networktables/NetworkTableInstance.h>
-#include <lib/wpi/DataLog.h>
+#include "lib/wpi/DataLog.h"
 #include <wpi/SafeThread.h>
 #include <wpi/StringExtras.h>
 #include <wpi/fs.h>
@@ -179,7 +179,7 @@ void Thread::Main() {
       if (dsAttachCount > 50) {  // 1 second
         std::time_t now = std::time(nullptr);
         auto tm = std::gmtime(&now);
-        if (tm->tm_year > 2000) {
+        if (tm->tm_year > 100) {
           // assume local clock is now synchronized to DS, so rename based on
           // local time
           m_log.SetFilename(fmt::format("FRC_{:%Y%m%d_%H%M%S}.wpilog", *tm));

@@ -24,7 +24,7 @@
 #include <string_view>
 #include <system_error>
 
-#include <wpi/span.h>
+#include "wpi/span.h"
 
 // Duplicated from fs.h to avoid a dependency
 namespace fs {

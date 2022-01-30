@@ -6,6 +6,7 @@
 
 #include <stdint.h>
 
+#include <functional>
 #include <initializer_list>
 #include <memory>
 #include <string>
@@ -13,12 +14,11 @@
 #include <thread>
 #include <vector>
 
-#include <wpi/DenseMap.h>
-
-#include <wpi/StringMap.h>
-#include <wpi/condition_variable.h>
-#include <wpi/mutex.h>
-#include <wpi/span.h>
+#include "wpi/DenseMap.h"
+#include "wpi/StringMap.h"
+#include "wpi/condition_variable.h"
+#include "wpi/mutex.h"
+#include "wpi/span.h"
 
 namespace wpi::log {
 
@@ -54,9 +54,25 @@ class DataLog final {
    *                 generated of the form "wpilog_{}.wpilog"
    * @param period time between automatic flushes to disk, in seconds;
    *               this is a time/storage tradeoff
+   * @param extraHeader extra header data
    */
   explicit DataLog(std::string_view dir = "", std::string_view filename = "",
-                   double period = 0.25);
+                   double period = 0.25, std::string_view extraHeader = "");
+
+  /**
+   * Construct a new Data Log that passes its output to the provided function
+   * rather than a file.  The write function will be called on a separate
+   * background thread and may block.  The write function is called with an
+   * empty data array when the thread is terminating.
+   *
+   * @param write write function
+   * @param period time between automatic calls to write, in seconds;
+   *               this is a time/storage tradeoff
+   * @param extraHeader extra header data
+   */
+  explicit DataLog(std::function<void(wpi::span<const uint8_t> data)> write,
+                   double period = 0.25, std::string_view extraHeader = "");
+
   ~DataLog();
   DataLog(const DataLog&) = delete;
   DataLog& operator=(const DataLog&) = delete;
@@ -163,9 +179,13 @@ class DataLog final {
                          int64_t timestamp);
 
  private:
-  void WriterThreadMain(std::string_view dir, double period);
+  void WriterThreadMain(std::string_view dir);
+  void WriterThreadMain(
+      std::function<void(wpi::span<const uint8_t> data)> write);
 
   // must be called with m_mutex held
+  uint8_t* StartRecord(uint32_t entry, uint64_t timestamp, uint32_t payloadSize,
+                       size_t reserveSize);
   uint8_t* Reserve(size_t size);
   void AppendImpl(wpi::span<const uint8_t> data);
   void AppendStringImpl(std::string_view str);
@@ -175,6 +195,8 @@ class DataLog final {
   bool m_active{true};
   bool m_doFlush{false};
   bool m_paused{false};
+  double m_period;
+  std::string m_extraHeader;
   std::string m_newFilename;
   class Buffer;
   std::vector<Buffer> m_free;
@@ -200,12 +222,6 @@ class DataLogEntry {
       : m_log{&log}, m_entry{log.Start(name, type, metadata, timestamp)} {}
 
  public:
-  virtual ~DataLogEntry() {
-    if (m_log) {
-      m_log->Finish(m_entry);
-    }
-  }
-
   DataLogEntry(const DataLogEntry&) = delete;
   DataLogEntry& operator=(const DataLogEntry&) = delete;
 
@@ -232,6 +248,15 @@ class DataLogEntry {
    */
   void SetMetadata(std::string_view metadata, int64_t timestamp = 0) {
     m_log->SetMetadata(m_entry, metadata, timestamp);
+  }
+
+  /**
+   * Finishes the entry.
+   *
+   * @param timestamp Time stamp (may be 0 to indicate now)
+   */
+  void Finish(int64_t timestamp = 0) {
+    m_log->Finish(m_entry, timestamp);
   }
 
  protected:
