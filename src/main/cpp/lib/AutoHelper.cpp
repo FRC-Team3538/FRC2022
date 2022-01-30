@@ -15,7 +15,7 @@ namespace rj {
 frc::Trajectory AutoHelper::LoadTrajectory(std::string name, frc::TrajectoryConfig *config) {
     // velocity, accel don't matter
     // but let's use the configured ones anyway
-    pathplanner::PathPlannerTrajectory pp_traj = pathplanner::PathPlanner::loadPath(name, config->MaxVelocity(), config->MaxAcceleration());
+    pathplanner::PathPlannerTrajectory pp_traj = pathplanner::PathPlanner::loadPath(name, config->MaxVelocity(), config->MaxAcceleration(), config->IsReversed());
 
     std::vector<frc::TrajectoryGenerator::PoseWithCurvature> path;
 
@@ -44,10 +44,10 @@ frc::Trajectory AutoHelper::LoadTrajectory(std::string name, frc::TrajectoryConf
 
         auto pose = pp_state->pose;
 
-        if (config->IsReversed()) {
-            pose = pp_state->pose.TransformBy(frc::Transform2d(frc::Translation2d(), frc::Rotation2d(180_deg)));
-            curv_sign *= -1;
-        }
+        // if (config->IsReversed()) {
+        //     pose = pp_state->pose.TransformBy(frc::Transform2d(frc::Translation2d(), frc::Rotation2d(180_deg)));
+        //     curv_sign *= -1;
+        // }
 
         path.push_back(frc::TrajectoryGenerator::PoseWithCurvature{pose, pp_state->curvature * curv_sign});
     }

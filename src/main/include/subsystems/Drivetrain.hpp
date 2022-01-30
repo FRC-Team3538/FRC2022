@@ -74,8 +74,8 @@ public:
         m_leftEncoder.Reset();
         m_rightEncoder.Reset();
 
-        m_rightGroup.SetInverted(false);
-        m_leftGroup.SetInverted(true);
+        m_rightGroup.SetInverted(true);
+        m_leftGroup.SetInverted(false);
 
         m_driveL0.SetSelectedSensorPosition(0.0);
         m_driveR0.SetSelectedSensorPosition(0.0);
