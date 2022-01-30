@@ -68,8 +68,8 @@ public:
         // auto dpp = empiricalDist / 188960.5; // 218325.5;//128173.5;//((2 * wpi::numbers::pi * kWheelRadius) / kEncoderResolution);
         // TODO: really measure this, but do we need to do it for AR?
         auto dpp = 0.0000218_m;
-        m_leftEncoder.SetDistancePerPulse(-dpp.value());
-        m_rightEncoder.SetDistancePerPulse(dpp.value());
+        m_leftEncoder.SetDistancePerPulse(dpp.value());
+        m_rightEncoder.SetDistancePerPulse(-dpp.value());
 
         m_leftEncoder.Reset();
         m_rightEncoder.Reset();

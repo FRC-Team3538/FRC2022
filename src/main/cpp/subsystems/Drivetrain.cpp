@@ -6,6 +6,8 @@
 
 #include <frc/RobotController.h>
 
+#include <iostream>
+
 void Drivetrain::SetSpeeds(const frc::DifferentialDriveWheelSpeeds &speeds)
 {
     auto leftFeedforward = m_feedforward.Calculate(speeds.left);
@@ -43,7 +45,7 @@ void Drivetrain::SetSpeeds(const frc::DifferentialDriveWheelSpeeds &speeds)
 void Drivetrain::Drive(units::meters_per_second_t xSpeed,
                        units::radians_per_second_t rot)
 {
-    SetSpeeds(m_kinematics.ToWheelSpeeds({-xSpeed, 0_mps, -rot}));
+    SetSpeeds(m_kinematics.ToWheelSpeeds({xSpeed, 0_mps, rot}));
 }
 
 void Drivetrain::Arcade(double forward, double rotate)
@@ -71,12 +73,19 @@ void Drivetrain::ResetOdometry(const frc::Pose2d &pose)
     m_driveR0.SetSelectedSensorPosition(0);
 
     m_drivetrainSimulator.SetPose(pose);
+    m_imu.SetFusedHeading(pose.Rotation().Degrees().value(), 50);
     m_odometry.ResetPosition(pose, pose.Rotation());
 }
 
 frc::Rotation2d Drivetrain::GetYaw()
 {
-    double heading = m_imu.GetFusedHeading();
+    ctre::phoenix::sensors::PigeonIMU::FusionStatus status;
+    m_imu.GetFusedHeading(status);
+    double heading = status.heading;
+    std::cout << status.bIsFusing << std::endl;
+    std::cout << status.bIsValid << std::endl;
+    std::cout << status.description << std::endl;
+    std::cout << status.lastError << std::endl;
     if (heading > 180)
     {
         while (heading > 180)
@@ -122,10 +131,10 @@ void Drivetrain::Periodic()
 
 void Drivetrain::UpdateTelemetry()
 {
-    // m_fieldSim.SetRobotPose(m_odometry.GetPose());
-    double angle = m_imu.GetFusedHeading();                 // acos(m_imu.GetRotation2d().Cos()) * (180.0 / wpi::numbers::pi);
-    double distL = (m_driveL0.GetSelectedSensorPosition(0)); // * m_leftEncoder.GetDistancePerPulse());
-    double distR = (m_driveR0.GetSelectedSensorPosition(0)); // * m_rightEncoder.GetDistancePerPulse());
+    m_fieldSim.SetRobotPose(m_odometry.GetPose());
+    double angle = GetYaw().Radians().value();
+    double distL = (m_driveL0.GetSelectedSensorPosition(0) * m_leftEncoder.GetDistancePerPulse());
+    double distR = (m_driveR0.GetSelectedSensorPosition(0) * m_rightEncoder.GetDistancePerPulse());
     frc::SmartDashboard::PutNumber("Dist L", distL);
     frc::SmartDashboard::PutNumber("Dist R", distR);
     frc::SmartDashboard::PutNumber("Angle", angle);

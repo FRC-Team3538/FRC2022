@@ -60,7 +60,7 @@ void Robot::TeleopPeriodic()
     if (IO.mainController.IsConnected())
     {
       shooterVoltage = (IO.mainController.GetR1Button() || IO.secondaryController.GetR1Button()) ? frc::SmartDashboard::GetNumber("Shooter Voltage", 0.0) : 0.0;
-      std::cout << shooterVoltage << std::endl;
+      // std::cout << shooterVoltage << std::endl;
     }
     else
     {
@@ -139,7 +139,15 @@ void Robot::TeleopPeriodic()
 }
 
 void Robot::DisabledInit() {}
-void Robot::DisabledPeriodic() {}
+void Robot::DisabledPeriodic() {
+  frc::SmartDashboard::PutNumber("Driver FWD/REV (FWD +)", -IO.mainController.GetLeftY());
+  frc::SmartDashboard::PutNumber("Driver LEFT/RIGHT (LEFT +)", -IO.mainController.GetRightX());
+  frc::SmartDashboard::PutNumber("DT Gyro (CCW +)", IO.drivetrain.GetYaw().Radians().value());
+
+  // steps afterward:
+  // + voltage => fwd motion
+  // fwd motion => + encoder count
+}
 
 void Robot::TestInit() {}
 void Robot::TestPeriodic() {}

@@ -59,6 +59,14 @@ void AutoLine_Backward::Run()
     case 0:
     {
         auto reference = m_trajectory.Sample(m_autoTimer.Get());
+        frc::SmartDashboard::PutNumber("Drive State/X", reference.pose.Translation().X().value());
+        frc::SmartDashboard::PutNumber("Drive State/Y", reference.pose.Translation().Y().value());
+        frc::SmartDashboard::PutNumber("Drive State/Theta", reference.pose.Rotation().Radians().value());
+        frc::SmartDashboard::PutNumber("Drive State/T", reference.t.value());
+        frc::SmartDashboard::PutNumber("Drive State/V", reference.velocity.value());
+        frc::SmartDashboard::PutNumber("Drive State/A", reference.acceleration.value());
+        frc::SmartDashboard::PutNumber("Drive State/k", reference.curvature.value());
+
         auto speeds = IO.m_ramsete.Calculate(IO.drivetrain.GetPose(), reference);
 
         IO.drivetrain.Drive(speeds.vx, speeds.omega);
