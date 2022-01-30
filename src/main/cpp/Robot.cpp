@@ -109,7 +109,7 @@ void Robot::TeleopPeriodic()
   }
 
   {
-    double intakeVoltage;
+    double intakeVoltage = 0.0;
 
     if (IO.mainController.IsConnected())
     {
@@ -125,7 +125,8 @@ void Robot::TeleopPeriodic()
       }
       else
       {
-        intakeVoltage = (deadband((IO.secondaryController.GetR2Axis() + 1.0) / 2.0, deadbandVal)) * 13.0;
+        intakeVoltage += IO.secondaryController.IsConnected() ? (((deadband((IO.secondaryController.GetR2Axis() + 1.0) / 2.0, deadbandVal)) - (deadband((IO.secondaryController.GetL2Axis() + 1.0) / 2.0, deadbandVal))) * 13.0) : 0.0;
+        intakeVoltage += IO.mainController.IsConnected() ? (((deadband((IO.mainController.GetR2Axis() + 1.0) / 2.0, deadbandVal)) - (deadband((IO.mainController.GetL2Axis() + 1.0) / 2.0, deadbandVal))) * 13.0) : 0.0;
       }
     }
     else
