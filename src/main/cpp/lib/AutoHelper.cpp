@@ -9,6 +9,8 @@
 #include <frc/trajectory/TrajectoryGenerator.h>
 #include <frc/trajectory/TrajectoryParameterizer.h>
 
+#include <iostream>
+
 
 namespace rj {
 
@@ -44,10 +46,7 @@ frc::Trajectory AutoHelper::LoadTrajectory(std::string name, frc::TrajectoryConf
 
         auto pose = pp_state->pose;
 
-        // if (config->IsReversed()) {
-        //     pose = pp_state->pose.TransformBy(frc::Transform2d(frc::Translation2d(), frc::Rotation2d(180_deg)));
-        //     curv_sign *= -1;
-        // }
+        std::cout << pose.Translation().X().value() << ", " << pose.Translation().Y().value() << " @ " << pose.Rotation().Radians().value() << std::endl;
 
         path.push_back(frc::TrajectoryGenerator::PoseWithCurvature{pose, pp_state->curvature * curv_sign});
     }

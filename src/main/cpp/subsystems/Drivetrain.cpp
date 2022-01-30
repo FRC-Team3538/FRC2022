@@ -62,6 +62,10 @@ void Drivetrain::UpdateOdometry()
     m_odometry.Update(GetYaw(),
                       units::meter_t(left),
                       units::meter_t(right));
+
+    frc::SmartDashboard::PutNumber("Odometry/X", m_odometry.GetPose().Translation().X().value());
+    frc::SmartDashboard::PutNumber("Odometry/Y", m_odometry.GetPose().Translation().Y().value());
+    frc::SmartDashboard::PutNumber("Odometry/Theta", m_odometry.GetPose().Rotation().Radians().value());
 }
 
 void Drivetrain::ResetOdometry(const frc::Pose2d &pose)
@@ -73,7 +77,7 @@ void Drivetrain::ResetOdometry(const frc::Pose2d &pose)
     m_driveR0.SetSelectedSensorPosition(0);
 
     m_drivetrainSimulator.SetPose(pose);
-    m_imu.SetFusedHeading(pose.Rotation().Degrees().value(), 50);
+    // m_imu.SetFusedHeading(pose.Rotation().Degrees().value(), 50);
     m_odometry.ResetPosition(pose, pose.Rotation());
 }
 
@@ -82,10 +86,10 @@ frc::Rotation2d Drivetrain::GetYaw()
     ctre::phoenix::sensors::PigeonIMU::FusionStatus status;
     m_imu.GetFusedHeading(status);
     double heading = status.heading;
-    std::cout << status.bIsFusing << std::endl;
-    std::cout << status.bIsValid << std::endl;
-    std::cout << status.description << std::endl;
-    std::cout << status.lastError << std::endl;
+    // std::cout << status.bIsFusing << std::endl;
+    // std::cout << status.bIsValid << std::endl;
+    // std::cout << status.description << std::endl;
+    // std::cout << status.lastError << std::endl;
     if (heading > 180)
     {
         while (heading > 180)
