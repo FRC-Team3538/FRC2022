@@ -37,11 +37,13 @@ void Robot::RobotPeriodic()
 void Robot::AutonomousInit()
 {
   autoprograms.Init();
+
 }
 
 void Robot::AutonomousPeriodic()
 {
   autoprograms.Run();
+  IO.drivetrain.SetBrakeMode();
 }
 
 void Robot::TeleopInit()
@@ -136,18 +138,28 @@ void Robot::TeleopPeriodic()
 
     IO.shooter.SetIntake(units::volt_t{intakeVoltage});
   }
+
+  IO.drivetrain.SetBrakeMode();
+
 }
 
-void Robot::DisabledInit() {}
+void Robot::DisabledInit() {
+  brakeTimer.Reset();
+  brakeTimer.Start();
+}
 void Robot::DisabledPeriodic() {
   frc::SmartDashboard::PutNumber("Driver FWD/REV (FWD +)", -IO.mainController.GetLeftY());
   frc::SmartDashboard::PutNumber("Driver LEFT/RIGHT (LEFT +)", -IO.mainController.GetRightX());
   frc::SmartDashboard::PutNumber("DT Gyro (CCW +)", IO.drivetrain.GetYaw().Radians().value());
-
+  if (brakeTimer.Get() > 3.0_s)
+  {
+    IO.drivetrain.SetCoastMode();
+    }
+  }
   // steps afterward:
   // + voltage => fwd motion
   // fwd motion => + encoder count
-}
+
 
 void Robot::TestInit() {}
 void Robot::TestPeriodic() {}

@@ -111,6 +111,8 @@ public:
 
     void SimulationPeriodic();
     void Periodic();
+    void SetBrakeMode();
+    void SetCoastMode();
 
 private:
     /***************************************************************************/
