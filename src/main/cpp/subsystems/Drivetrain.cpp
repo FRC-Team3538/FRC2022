@@ -50,8 +50,8 @@ void Drivetrain::Drive(units::meters_per_second_t xSpeed,
 
 void Drivetrain::Arcade(double forward, double rotate)
 {
-    m_leftGroup.Set(forward - rotate);
-    m_rightGroup.Set(forward + rotate);
+    m_leftGroup.SetVoltage((forward - rotate) * 13_V);
+    m_rightGroup.SetVoltage((forward + rotate) * 13_V);
 }
 
 void Drivetrain::UpdateOdometry()
@@ -82,10 +82,10 @@ frc::Rotation2d Drivetrain::GetYaw()
     ctre::phoenix::sensors::PigeonIMU::FusionStatus status;
     m_imu.GetFusedHeading(status);
     double heading = status.heading;
-    std::cout << status.bIsFusing << std::endl;
-    std::cout << status.bIsValid << std::endl;
-    std::cout << status.description << std::endl;
-    std::cout << status.lastError << std::endl;
+    // std::cout << status.bIsFusing << std::endl;
+    // std::cout << status.bIsValid << std::endl;
+    // std::cout << status.description << std::endl;
+    // std::cout << status.lastError << std::endl;
     if (heading > 180)
     {
         while (heading > 180)
@@ -98,6 +98,26 @@ frc::Rotation2d Drivetrain::GetYaw()
             heading += 360;
     }
     return frc::Rotation2d{units::degree_t{heading}};
+}
+
+bool Drivetrain::TurnRel(double forward, units::degree_t target, units::degree_t tolerance)
+{
+    //std::cout << target.value() << std::endl;
+    yawController.SetSetpoint((target + GetYaw().Degrees()).value());
+    yawController.SetTolerance(tolerance.value());
+    double rotate = yawController.Calculate(GetYaw().Degrees().value());
+
+    //std::cout << rotate << std::endl;
+    if (units::math::abs(target) < tolerance)
+    {
+        Arcade(0.0, 0.0);
+        return true;
+    }
+    else
+    {
+        Arcade(forward, rotate);
+        return false;
+    }
 }
 
 void Drivetrain::SimulationPeriodic()
@@ -155,11 +175,18 @@ void Drivetrain::UpdateTelemetry()
     frc::SmartDashboard::PutNumber("Dist L", distL);
     frc::SmartDashboard::PutNumber("Dist R", distR);
     frc::SmartDashboard::PutNumber("Angle", angle);
+
+    yawController.SetPID(frc::SmartDashboard::GetNumber("P", 0.0), frc::SmartDashboard::GetNumber("I", 0.0), frc::SmartDashboard::GetNumber("D", 0.0));
+    frc::SmartDashboard::PutNumber("P FROM THE P", yawController.GetP());
     // frc::SmartDashboard::PutNumber("DISTANCEL", m_driveL0.GetSelectedSensorPosition(0));
     // frc::SmartDashboard::PutNumber("DISTANCER", m_driveR0.GetSelectedSensorPosition(0));
 }
 
 void Drivetrain::ConfigureSystem()
 {
-    
+    frc::SmartDashboard::PutNumber("P", 0.0);
+    frc::SmartDashboard::PutNumber("I", 0.0);
+    frc::SmartDashboard::PutNumber("D", 0.0);
+    yawController.EnableContinuousInput(-180, 180);
+    //yawController.SetIntegratorRange(0.05, 0.5);
 }

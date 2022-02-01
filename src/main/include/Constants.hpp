@@ -24,8 +24,8 @@ namespace Constants
 
     // *** VISION CONSTANTS ***
 
-    const units::degree_t cameraAngle = 0.0_deg;   // Angle of elevation of camera
-    const units::inch_t deltaH = 0.0_in;   // Distance between camera lens and vision target midpoint
+    const units::degree_t cameraAngle = 16.0_deg;   // Angle of elevation of camera
+    const units::inch_t deltaH = 59.0_in;   // Distance between camera lens and vision target midpoint
 
     // *** SHOOTER CONSTANTS ***
 }

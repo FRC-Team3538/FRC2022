@@ -35,9 +35,9 @@ namespace vision
 
         RJVisionPipeline::visionData telemetry;
 
-        if (lightOn.Get() > 0.1_s) 
+        if (true)//lightOn.Get() > 0.1_s) 
         {
-            if (tv == 1.0)
+            if (tv != 0.0)
             {
                 telemetry.angle = units::degree_t{dx};
                 telemetry.distance = DistEstimation();

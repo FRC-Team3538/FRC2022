@@ -139,6 +139,18 @@ void Shooter::SetHoodRPM(units::revolutions_per_minute_t targetRPM)
     hood.Set(ControlMode::Velocity, ((targetRPM.value() / kScaleFactorFly) / 600.0));
 }
 
+bool Shooter::TempUpToSpeed()
+{
+    if((std::abs(hood.GetSelectedSensorVelocity() - hood.GetClosedLoopTarget()) < 100) && (std::abs(shooterA.GetSelectedSensorVelocity() - shooterA.GetClosedLoopTarget()) < 100))
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 void Shooter::SetIndexer(double setValue)
 {
     // indexerA.SetVoltage(units::volt_t{setValue * 13.0});
@@ -186,6 +198,10 @@ units::revolutions_per_minute_t Shooter::GetShooterRPM()
 
 Shooter::State Shooter::CalculateShot(units::inch_t distance)
 {
-    State shotStats = {0_rpm, 0_deg};
+    double ratio = 7.5/7;
+
+    double mainWheel = 8073 + (-0.00325 * std::pow(distance.value(), 3)) + (1.2191 * std::pow(distance.value(), 2)) + (-139.806 * std::pow(distance.value(), 1));
+
+    State shotStats = {units::revolutions_per_minute_t{mainWheel}, units::revolutions_per_minute_t{mainWheel * ratio}, 0_deg};
     return shotStats;
 }
