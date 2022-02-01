@@ -37,19 +37,19 @@ void Robot::RobotPeriodic()
 void Robot::AutonomousInit()
 {
   autoprograms.Init();
-
+  IO.drivetrain.SetBrakeMode();
 }
 
 void Robot::AutonomousPeriodic()
 {
   autoprograms.Run();
-  IO.drivetrain.SetBrakeMode();
 }
 
 void Robot::TeleopInit()
 {
   lockShooterVoltage.SetBoolean(true);
   targetShooterVoltage.SetDouble(0.0);
+  IO.drivetrain.SetBrakeMode();
 }
 
 void Robot::TeleopPeriodic()
@@ -139,7 +139,7 @@ void Robot::TeleopPeriodic()
     IO.shooter.SetIntake(units::volt_t{intakeVoltage});
   }
 
-  IO.drivetrain.SetBrakeMode();
+
 
 }
 

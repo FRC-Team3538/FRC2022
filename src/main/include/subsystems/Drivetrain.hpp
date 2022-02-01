@@ -80,13 +80,7 @@ public:
         m_driveL0.SetSelectedSensorPosition(0.0);
         m_driveR0.SetSelectedSensorPosition(0.0);
 
-        m_driveL0.SetNeutralMode(NeutralMode::Brake);
-        m_driveL1.SetNeutralMode(NeutralMode::Brake);
-        m_driveL2.SetNeutralMode(NeutralMode::Brake);
-        m_driveR0.SetNeutralMode(NeutralMode::Brake);
-        m_driveR1.SetNeutralMode(NeutralMode::Brake);
-        m_driveR2.SetNeutralMode(NeutralMode::Brake);
-
+      
         // impel.SetNeutralMode(NeutralMode::Coast);
         // impel2.SetNeutralMode(NeutralMode::Coast);
 
