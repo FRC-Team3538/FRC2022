@@ -24,6 +24,8 @@ public:
     {
         units::revolutions_per_minute_t shooterVelocity = 0_rpm;
 
+        units::revolutions_per_minute_t hoodVelocity = 0_rpm;
+
         units::degree_t turretAngle = 0_deg;
     };
 
@@ -60,6 +62,8 @@ public:
     units::revolutions_per_minute_t GetShooterRPM();
 
     State CalculateShot(units::inch_t distance);
+
+    bool TempUpToSpeed();
 
 private:
     WPI_TalonFX intake{10};

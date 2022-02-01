@@ -80,11 +80,11 @@ public:
         m_driveL0.SetSelectedSensorPosition(0.0);
         m_driveR0.SetSelectedSensorPosition(0.0);
 
-        m_driveL0.SetNeutralMode(NeutralMode::Coast);
-        m_driveL1.SetNeutralMode(NeutralMode::Coast);
+        m_driveL0.SetNeutralMode(NeutralMode::Brake);
+        m_driveL1.SetNeutralMode(NeutralMode::Brake);
         // m_driveL2.SetNeutralMode(NeutralMode::Coast);
-        m_driveR0.SetNeutralMode(NeutralMode::Coast);
-        m_driveR1.SetNeutralMode(NeutralMode::Coast);
+        m_driveR0.SetNeutralMode(NeutralMode::Brake);
+        m_driveR1.SetNeutralMode(NeutralMode::Brake);
         // m_driveR2.SetNeutralMode(NeutralMode::Coast);
 
         // impel.SetNeutralMode(NeutralMode::Coast);
@@ -107,10 +107,14 @@ public:
     void ResetOdometry(const frc::Pose2d &pose);
     frc::Rotation2d GetYaw();
 
+    bool TurnRel(double forward, units::degree_t target, units::degree_t tolerance);
+
     frc::Pose2d GetPose() const { return m_odometry.GetPose(); }
 
     void SimulationPeriodic();
     void Periodic();
+    void SetBrakeMode();
+    void SetCoastMode();
 
 private:
     /***************************************************************************/
@@ -220,4 +224,6 @@ private:
     frc::sim::EncoderSim m_leftEncoderSim{m_leftEncoder};
     frc::sim::EncoderSim m_rightEncoderSim{m_rightEncoder};
     frc::Field2d m_fieldSim;
+
+    frc::PIDController yawController{0.25, 0.0, 0.05};
 };
