@@ -141,13 +141,28 @@ void Shooter::SetHoodRPM(units::revolutions_per_minute_t targetRPM)
 
 bool Shooter::TempUpToSpeed()
 {
-    if((std::abs(hood.GetSelectedSensorVelocity() - hood.GetClosedLoopTarget()) < 100) && (std::abs(shooterA.GetSelectedSensorVelocity() - shooterA.GetClosedLoopTarget()) < 100))
+    bool hoodAtTarget = std::abs(hood.GetSelectedSensorVelocity() * 600 * kScaleFactorFly) - (hood.GetClosedLoopTarget() * 600 * kScaleFactorFly) < 100.0;
+    bool shooterAtTarget = std::abs(shooterA.GetSelectedSensorVelocity() * 600 * kScaleFactorFly) - (shooterA.GetClosedLoopTarget() * 600 * kScaleFactorFly) < 100.0;
+
+    std::cout << (shooterA.GetSelectedSensorVelocity() * 600 * kScaleFactorFly) << std::endl;
+
+    if(hoodAtTarget && shooterAtTarget && !shotTimerOS)
+    {
+        shotTimer.Reset();
+        shotTimer.Start();
+        shotTimerOS = true;
+        return false;
+    }
+    else if(!(hoodAtTarget && shooterAtTarget))
+    {
+        shotTimerOS = false;
+        shotTimer.Reset();
+        return false;
+    }
+
+    if(shotTimer.Get() > 0.25_s)
     {
         return true;
-    }
-    else
-    {
-        return false;
     }
 }
 
@@ -200,7 +215,9 @@ Shooter::State Shooter::CalculateShot(units::inch_t distance)
 {
     double ratio = 7.5/7;
 
-    double mainWheel = 8073 + (-0.00325 * std::pow(distance.value(), 3)) + (1.2191 * std::pow(distance.value(), 2)) + (-139.806 * std::pow(distance.value(), 1));
+    double mainWheel = 7973 + (-0.00325 * std::pow(distance.value(), 3)) + (1.2191 * std::pow(distance.value(), 2)) + (-139.806 * std::pow(distance.value(), 1));
+
+    std::cout << mainWheel << std::endl;
 
     State shotStats = {units::revolutions_per_minute_t{mainWheel}, units::revolutions_per_minute_t{mainWheel * ratio}, 0_deg};
     return shotStats;

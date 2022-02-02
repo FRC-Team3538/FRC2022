@@ -52,7 +52,7 @@ private:
   const double deadbandVal = 0.1;
 
   double deadband(double val, double deadband);
-  
+  bool visionOS = false;
 
   frc::Timer shotTimer;
   frc::Timer brakeTimer;

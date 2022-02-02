@@ -23,8 +23,8 @@ void Robot::RobotInit()
   IO.watchdog.Disable();
   IO.ConfigureMotors();
   frc::SmartDashboard::PutNumber("Feeder Voltage", 0.0);
-  frc::SmartDashboard::PutNumber("Shooter Voltage", 0.0);
-  frc::SmartDashboard::PutNumber("Hood Wheel Voltage", 0.0);
+  frc::SmartDashboard::PutNumber("Shooter RPM", 0.0);
+  frc::SmartDashboard::PutNumber("Hood Wheel RPM", 0.0);
 }
 
 void Robot::RobotPeriodic()
@@ -58,140 +58,145 @@ void Robot::TeleopPeriodic()
   if (IO.mainController.GetTriangleButton())
   {
     vision::RJVisionPipeline::visionData data = IO.rjVision.Run();
-    std::cout << data.distance.value() << std::endl;
+    // std::cout << data.distance.value() << std::endl;
     if (data.filled)
     {
-      if (IO.drivetrain.TurnRel(0.0, data.angle, 1_deg))
+      if (IO.drivetrain.TurnRel(0.0, data.angle, 1_deg, 0.25_s) && !visionOS)
       {
         Shooter::State shotStats = IO.shooter.CalculateShot(data.distance);
         IO.shooter.SetShooterRPM(shotStats.shooterVelocity);
         IO.shooter.SetHoodRPM(shotStats.hoodVelocity);
-        if (IO.shooter.TempUpToSpeed())
-        {
-          IO.shooter.SetFeeder(10_V);
-          IO.shooter.SetIntake(10_V);
-        }
+        visionOS = true;
       }
+      if (visionOS && IO.shooter.TempUpToSpeed())
+      {
+        IO.drivetrain.Arcade(0.0, 0.0);
+        IO.shooter.SetFeeder(6.5_V);
+        IO.shooter.SetIntake(6.5_V);
+      }
+      else if (visionOS && !IO.shooter.TempUpToSpeed())
+        IO.shooter.SetFeeder(0_V);
     }
   }
   else
   {
-    IO.drivetrain.Arcade(deadband(IO.mainController.GetLeftY(), deadbandVal), deadband(IO.mainController.GetRightX(), deadbandVal));
-    IO.shooter.SetFeeder(0_V);
-    double intakeVoltage = IO.mainController.IsConnected() ? (((deadband((IO.mainController.GetR2Axis() + 1.0) / 2.0, deadbandVal)) - (deadband((IO.mainController.GetL2Axis() + 1.0) / 2.0, deadbandVal))) * 13.0) : 0.0;
-    IO.shooter.SetIntake(units::volt_t{intakeVoltage});
-    IO.shooter.SetHoodRPM(units::revolutions_per_minute_t{0});
-    IO.shooter.SetShooterRPM(units::revolutions_per_minute_t{0});
-  }
+    visionOS = false;
+    IO.drivetrain.Arcade(-deadband(IO.mainController.GetLeftY(), deadbandVal), -deadband(IO.mainController.GetRightX(), deadbandVal));
+    //IO.shooter.SetFeeder(0_V);
+    //double intakeVoltage = IO.mainController.IsConnected() ? (((deadband((IO.mainController.GetR2Axis() + 1.0) / 2.0, deadbandVal)) - (deadband((IO.mainController.GetL2Axis() + 1.0) / 2.0, deadbandVal))) * 13.0) : 0.0;
+    //IO.shooter.SetIntake(units::volt_t{intakeVoltage});
+    // IO.shooter.SetHoodRPM(units::revolutions_per_minute_t{0});
+    // IO.shooter.SetShooterRPM(units::revolutions_per_minute_t{0});
 
-  {
-    double shooterVoltage;
-
-    if (IO.mainController.IsConnected())
     {
-      shooterVoltage = (IO.mainController.GetR1Button() || IO.secondaryController.GetR1Button()) ? frc::SmartDashboard::GetNumber("Shooter Voltage", 0.0) : 0.0;
-      // std::cout << shooterVoltage << std::endl;
-    }
-    else
-    {
-      shooterVoltage = 0.0;
-    }
+      double shooterVoltage;
 
-    //IO.shooter.SetShooterRPM(units::revolutions_per_minute_t(shooterVoltage));
-  }
-
-  {
-    double hoodVoltage;
-
-    if (lockHoodVoltage.GetBoolean(false))
-    {
-      hoodVoltage = targetHoodVoltage.GetDouble(0.0);
-    }
-    else if (IO.mainController.IsConnected())
-    {
-      hoodVoltage = (IO.mainController.GetR1Button() || IO.secondaryController.GetR1Button()) ? frc::SmartDashboard::GetNumber("Hood Wheel Voltage", 0.0) : 0.0;
-    }
-    else
-    {
-      hoodVoltage = 0.0;
-    }
-
-    //IO.shooter.SetHoodRPM(units::revolutions_per_minute_t(hoodVoltage));
-  }
-
-  {
-    double feederVoltage;
-
-    if (lockFeederVoltage.GetBoolean(false))
-    {
-      feederVoltage = targetFeederVoltage.GetDouble(0.0);
-    }
-    else if (IO.mainController.IsConnected())
-    {
-      feederVoltage = (IO.mainController.GetR1Button() || IO.secondaryController.GetR1Button()) ? frc::SmartDashboard::GetNumber("Feeder Voltage", 0.0) : 0.0;
-    }
-    else
-    {
-      feederVoltage = 0.0;
-    }
-
-    //IO.shooter.SetFeeder(units::volt_t(feederVoltage));
-  }
-
-  {
-    double intakeVoltage = 0.0;
-
-    if (IO.mainController.IsConnected() || IO.secondaryController.IsConnected())
-    {
-      if (IO.mainController.GetR1ButtonPressed() || IO.secondaryController.GetR1ButtonPressed())
+      if (IO.mainController.IsConnected())
       {
-        shotTimer.Reset();
-        shotTimer.Start();
-      }
-
-      if (IO.secondaryController.GetR1Button() || IO.mainController.GetR1Button())
-      {
-        intakeVoltage = shotTimer.Get() > 0.25_s ? 10.0 : 0.0;
+        shooterVoltage = (IO.mainController.GetR1Button() || IO.secondaryController.GetR1Button()) ? frc::SmartDashboard::GetNumber("Shooter RPM", 0.0) : 0.0;
+        // std::cout << shooterVoltage << std::endl;
       }
       else
       {
-        if (IO.secondaryController.IsConnected()) {
-          intakeVoltage += ((deadband((IO.secondaryController.GetR2Axis() + 1.0) / 2.0, deadbandVal)) - (deadband((IO.secondaryController.GetL2Axis() + 1.0) / 2.0, deadbandVal))) * 13.0;
+        shooterVoltage = 0.0;
+      }
+
+      IO.shooter.SetShooterRPM(units::revolutions_per_minute_t(shooterVoltage));
+    }
+
+    {
+      double hoodVoltage;
+
+      if (lockHoodVoltage.GetBoolean(false))
+      {
+        hoodVoltage = targetHoodVoltage.GetDouble(0.0);
+      }
+      else if (IO.mainController.IsConnected())
+      {
+        hoodVoltage = (IO.mainController.GetR1Button() || IO.secondaryController.GetR1Button()) ? frc::SmartDashboard::GetNumber("Hood Wheel RPM", 0.0) : 0.0;
+      }
+      else
+      {
+        hoodVoltage = 0.0;
+      }
+
+      IO.shooter.SetHoodRPM(units::revolutions_per_minute_t(hoodVoltage));
+    }
+
+    {
+      double feederVoltage;
+
+      if (lockFeederVoltage.GetBoolean(false))
+      {
+        feederVoltage = targetFeederVoltage.GetDouble(0.0);
+      }
+      else if (IO.mainController.IsConnected())
+      {
+        feederVoltage = (IO.mainController.GetR1Button() || IO.secondaryController.GetR1Button()) ? frc::SmartDashboard::GetNumber("Feeder Voltage", 0.0) : 0.0;
+      }
+      else
+      {
+        feederVoltage = 0.0;
+      }
+
+      IO.shooter.SetFeeder(units::volt_t(feederVoltage));
+    }
+
+    {
+      double intakeVoltage = 0.0;
+
+      if (IO.mainController.IsConnected() || IO.secondaryController.IsConnected())
+      {
+        if (IO.mainController.GetR1ButtonPressed() || IO.secondaryController.GetR1ButtonPressed())
+        {
+          shotTimer.Reset();
+          shotTimer.Start();
         }
-        else if (IO.mainController.IsConnected()) {
-          intakeVoltage += ((deadband((IO.mainController.GetR2Axis() + 1.0) / 2.0, deadbandVal)) - (deadband((IO.mainController.GetL2Axis() + 1.0) / 2.0, deadbandVal))) * 13.0;
+
+        if (IO.secondaryController.GetR1Button() || IO.mainController.GetR1Button())
+        {
+          intakeVoltage = shotTimer.Get() > 0.25_s ? 10.0 : 0.0;
+        }
+        else
+        {
+          if (IO.secondaryController.IsConnected())
+          {
+            intakeVoltage += ((deadband((IO.secondaryController.GetR2Axis() + 1.0) / 2.0, deadbandVal)) - (deadband((IO.secondaryController.GetL2Axis() + 1.0) / 2.0, deadbandVal))) * 13.0;
+          }
+          else if (IO.mainController.IsConnected())
+          {
+            intakeVoltage += ((deadband((IO.mainController.GetR2Axis() + 1.0) / 2.0, deadbandVal)) - (deadband((IO.mainController.GetL2Axis() + 1.0) / 2.0, deadbandVal))) * 13.0;
+          }
         }
       }
+      else
+      {
+        intakeVoltage = 0.0;
+      }
+    
+    IO.shooter.SetIntake(units::volt_t{intakeVoltage});
     }
-    else
-    {
-      intakeVoltage = 0.0;
-    }
-
-    //IO.shooter.SetIntake(units::volt_t{intakeVoltage});
   }
-
-
-
 }
 
-void Robot::DisabledInit() {
+void Robot::DisabledInit()
+{
   brakeTimer.Reset();
   brakeTimer.Start();
 }
-void Robot::DisabledPeriodic() {
+void Robot::DisabledPeriodic()
+{
   frc::SmartDashboard::PutNumber("Driver FWD/REV (FWD +)", -IO.mainController.GetLeftY());
   frc::SmartDashboard::PutNumber("Driver LEFT/RIGHT (LEFT +)", -IO.mainController.GetRightX());
   frc::SmartDashboard::PutNumber("DT Gyro (CCW +)", IO.drivetrain.GetYaw().Radians().value());
   if (brakeTimer.Get() > 3.0_s)
   {
     IO.drivetrain.SetCoastMode();
-    }
   }
-  // steps afterward:
-  // + voltage => fwd motion
-  // fwd motion => + encoder count
-
+}
+// steps afterward:
+// + voltage => fwd motion
+// fwd motion => + encoder count
 
 void Robot::TestInit() {}
 void Robot::TestPeriodic() {}

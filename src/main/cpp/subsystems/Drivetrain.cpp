@@ -104,22 +104,39 @@ frc::Rotation2d Drivetrain::GetYaw()
     return frc::Rotation2d{units::degree_t{heading}};
 }
 
-bool Drivetrain::TurnRel(double forward, units::degree_t target, units::degree_t tolerance)
+bool Drivetrain::TurnRel(double forward, units::degree_t target, units::degree_t tolerance, units::second_t delay)
 {
-    //std::cout << target.value() << std::endl;
+    // std::cout << target.value() << std::endl;
     yawController.SetSetpoint((target + GetYaw().Degrees()).value());
     yawController.SetTolerance(tolerance.value());
     double rotate = yawController.Calculate(GetYaw().Degrees().value());
 
-    //std::cout << rotate << std::endl;
+    // std::cout << rotate << std::endl;
     if (units::math::abs(target) < tolerance)
     {
-        Arcade(0.0, 0.0);
-        return true;
+        if (!turnRelOS)
+        {
+            turnRelTimer.Reset();
+            turnRelTimer.Start();
+            turnRelOS = true;
+            return false;
+        }
+        else if (turnRelTimer.Get() > delay)
+        {
+            Arcade(forward, 0.0);
+            return true;
+        }
+        else
+        {
+            Arcade(forward, -rotate);
+            return false;
+        }
     }
     else
     {
-        Arcade(forward, rotate);
+        turnRelTimer.Reset();
+        turnRelOS = false;
+        Arcade(forward, -rotate);
         return false;
     }
 }
@@ -154,21 +171,21 @@ void Drivetrain::Periodic()
 }
 void Drivetrain::SetBrakeMode()
 {
-  m_driveL0.SetNeutralMode(NeutralMode::Brake);
-  m_driveL1.SetNeutralMode(NeutralMode::Brake);
-  m_driveL2.SetNeutralMode(NeutralMode::Brake);
-  m_driveR0.SetNeutralMode(NeutralMode::Brake);
-  m_driveR1.SetNeutralMode(NeutralMode::Brake);
-  m_driveR2.SetNeutralMode(NeutralMode::Brake);
+    m_driveL0.SetNeutralMode(NeutralMode::Brake);
+    m_driveL1.SetNeutralMode(NeutralMode::Brake);
+    // m_driveL2.SetNeutralMode(NeutralMode::Brake);
+    m_driveR0.SetNeutralMode(NeutralMode::Brake);
+    m_driveR1.SetNeutralMode(NeutralMode::Brake);
+    // m_driveR2.SetNeutralMode(NeutralMode::Brake);
 }
 void Drivetrain::SetCoastMode()
 {
-  m_driveL0.SetNeutralMode(NeutralMode::Coast);
-  m_driveL1.SetNeutralMode(NeutralMode::Coast);
-  m_driveL2.SetNeutralMode(NeutralMode::Coast);
-  m_driveR0.SetNeutralMode(NeutralMode::Coast);
-  m_driveR1.SetNeutralMode(NeutralMode::Coast);
-  m_driveR2.SetNeutralMode(NeutralMode::Coast);
+    m_driveL0.SetNeutralMode(NeutralMode::Coast);
+    m_driveL1.SetNeutralMode(NeutralMode::Coast);
+    // m_driveL2.SetNeutralMode(NeutralMode::Coast);
+    m_driveR0.SetNeutralMode(NeutralMode::Coast);
+    m_driveR1.SetNeutralMode(NeutralMode::Coast);
+    // m_driveR2.SetNeutralMode(NeutralMode::Coast);
 }
 void Drivetrain::UpdateTelemetry()
 {
@@ -180,17 +197,12 @@ void Drivetrain::UpdateTelemetry()
     frc::SmartDashboard::PutNumber("Dist R", distR);
     frc::SmartDashboard::PutNumber("Angle", angle);
 
-    yawController.SetPID(frc::SmartDashboard::GetNumber("P", 0.0), frc::SmartDashboard::GetNumber("I", 0.0), frc::SmartDashboard::GetNumber("D", 0.0));
-    frc::SmartDashboard::PutNumber("P FROM THE P", yawController.GetP());
     // frc::SmartDashboard::PutNumber("DISTANCEL", m_driveL0.GetSelectedSensorPosition(0));
     // frc::SmartDashboard::PutNumber("DISTANCER", m_driveR0.GetSelectedSensorPosition(0));
 }
 
 void Drivetrain::ConfigureSystem()
 {
-    frc::SmartDashboard::PutNumber("P", 0.0);
-    frc::SmartDashboard::PutNumber("I", 0.0);
-    frc::SmartDashboard::PutNumber("D", 0.0);
     yawController.EnableContinuousInput(-180, 180);
-    //yawController.SetIntegratorRange(0.05, 0.5);
+    // yawController.SetIntegratorRange(0.05, 0.5);
 }

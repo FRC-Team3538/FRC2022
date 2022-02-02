@@ -97,4 +97,7 @@ private:
     nt::NetworkTableEntry shotEffortEntry = frc::SmartDashboard::GetEntry("/shooter/Shot_Effort_FPS");
     nt::NetworkTableEntry backspinEffortEntry = frc::SmartDashboard::GetEntry("/shooter/Backspin_Effort_FPS");
     nt::NetworkTableEntry impartedBackspinEntry = frc::SmartDashboard::GetEntry("/shooter/Imparted_Backspin_RPM");
+
+    bool shotTimerOS = false;
+    frc::Timer shotTimer;
 };
