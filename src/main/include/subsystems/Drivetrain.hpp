@@ -101,6 +101,8 @@ public:
     void ResetOdometry(const frc::Pose2d &pose);
     frc::Rotation2d GetYaw();
 
+    bool TurnRel(double forward, units::degree_t target, units::degree_t tolerance);
+
     frc::Pose2d GetPose() const { return m_odometry.GetPose(); }
 
     void SimulationPeriodic();
@@ -220,4 +222,6 @@ private:
     frc::sim::EncoderSim m_leftEncoderSim{m_leftEncoder};
     frc::sim::EncoderSim m_rightEncoderSim{m_rightEncoder};
     frc::Field2d m_fieldSim;
+
+    frc::PIDController yawController{0.25, 0.0, 0.05};
 };

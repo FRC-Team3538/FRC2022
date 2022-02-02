@@ -20,6 +20,7 @@ double Robot::deadband(double val, double deadband)
 
 void Robot::RobotInit()
 {
+  IO.watchdog.Disable();
   IO.ConfigureMotors();
   frc::SmartDashboard::PutNumber("Feeder Voltage", 0.0);
   frc::SmartDashboard::PutNumber("Shooter Voltage", 0.0);
@@ -54,7 +55,34 @@ void Robot::TeleopInit()
 
 void Robot::TeleopPeriodic()
 {
-  IO.drivetrain.Arcade(deadband(-IO.mainController.GetLeftY(), deadbandVal), deadband(-IO.mainController.GetRightX(), deadbandVal));
+  if (IO.mainController.GetTriangleButton())
+  {
+    vision::RJVisionPipeline::visionData data = IO.rjVision.Run();
+    std::cout << data.distance.value() << std::endl;
+    if (data.filled)
+    {
+      if (IO.drivetrain.TurnRel(0.0, data.angle, 1_deg))
+      {
+        Shooter::State shotStats = IO.shooter.CalculateShot(data.distance);
+        IO.shooter.SetShooterRPM(shotStats.shooterVelocity);
+        IO.shooter.SetHoodRPM(shotStats.hoodVelocity);
+        if (IO.shooter.TempUpToSpeed())
+        {
+          IO.shooter.SetFeeder(10_V);
+          IO.shooter.SetIntake(10_V);
+        }
+      }
+    }
+  }
+  else
+  {
+    IO.drivetrain.Arcade(deadband(IO.mainController.GetLeftY(), deadbandVal), deadband(IO.mainController.GetRightX(), deadbandVal));
+    IO.shooter.SetFeeder(0_V);
+    double intakeVoltage = IO.mainController.IsConnected() ? (((deadband((IO.mainController.GetR2Axis() + 1.0) / 2.0, deadbandVal)) - (deadband((IO.mainController.GetL2Axis() + 1.0) / 2.0, deadbandVal))) * 13.0) : 0.0;
+    IO.shooter.SetIntake(units::volt_t{intakeVoltage});
+    IO.shooter.SetHoodRPM(units::revolutions_per_minute_t{0});
+    IO.shooter.SetShooterRPM(units::revolutions_per_minute_t{0});
+  }
 
   {
     double shooterVoltage;
@@ -69,7 +97,7 @@ void Robot::TeleopPeriodic()
       shooterVoltage = 0.0;
     }
 
-    IO.shooter.SetShooter(units::volt_t(shooterVoltage));
+    //IO.shooter.SetShooterRPM(units::revolutions_per_minute_t(shooterVoltage));
   }
 
   {
@@ -88,7 +116,7 @@ void Robot::TeleopPeriodic()
       hoodVoltage = 0.0;
     }
 
-    IO.shooter.SetHood(units::volt_t(hoodVoltage));
+    //IO.shooter.SetHoodRPM(units::revolutions_per_minute_t(hoodVoltage));
   }
 
   {
@@ -107,7 +135,7 @@ void Robot::TeleopPeriodic()
       feederVoltage = 0.0;
     }
 
-    IO.shooter.SetFeeder(units::volt_t(feederVoltage));
+    //IO.shooter.SetFeeder(units::volt_t(feederVoltage));
   }
 
   {
@@ -123,7 +151,7 @@ void Robot::TeleopPeriodic()
 
       if (IO.secondaryController.GetR1Button() || IO.mainController.GetR1Button())
       {
-        intakeVoltage = shotTimer.Get() > 0.25_s ? 10.0 : 0.0; 
+        intakeVoltage = shotTimer.Get() > 0.25_s ? 10.0 : 0.0;
       }
       else
       {
@@ -136,7 +164,7 @@ void Robot::TeleopPeriodic()
       intakeVoltage = 0.0;
     }
 
-    IO.shooter.SetIntake(units::volt_t{intakeVoltage});
+    //IO.shooter.SetIntake(units::volt_t{intakeVoltage});
   }
 
 
