@@ -1,4 +1,4 @@
-#include "auto/AutoLine_Backward.hpp"
+#include "auto/AutoBackForward.hpp"
 
 #include <frc/trajectory/constraint/DifferentialDriveKinematicsConstraint.h>
 #include <frc/trajectory/constraint/DifferentialDriveVoltageConstraint.h>
@@ -7,29 +7,29 @@
 #include <lib/AutoHelper.h>
 
 // Name for Smart Dash Chooser
-std::string AutoLine_Backward::GetName()
+std::string AutoBackForward::GetName()
 {
-    return "2 - Backward";
+    return "4 - BackForward";
 }
 
 // Initialization
 // Constructor requires a reference to the robot map
-AutoLine_Backward::AutoLine_Backward(Robotmap &IO) : IO(IO)
+AutoBackForward::AutoBackForward(Robotmap &IO) : IO(IO)
 {
     m_state = 0;
 }
 
-AutoLine_Backward::~AutoLine_Backward() {}
+AutoBackForward::~AutoBackForward() {}
 
 //State Machine
-void AutoLine_Backward::NextState()
+void AutoBackForward::NextState()
 {
     m_state++;
     m_autoTimer.Reset();
     m_autoTimer.Start();
 }
 
-void AutoLine_Backward::Init()
+void AutoBackForward::Init()
 {
 
     units::feet_per_second_t maxLinearVel = 2_fps;
@@ -41,9 +41,9 @@ void AutoLine_Backward::Init()
     config.AddConstraint(frc::CentripetalAccelerationConstraint{5_mps_sq});
     config.AddConstraint(frc::DifferentialDriveVoltageConstraint{IO.drivetrain.GetFeedForward(), IO.drivetrain.GetKinematics(), 5_V});
     config.AddConstraint(frc::DifferentialDriveKinematicsConstraint{IO.drivetrain.GetKinematics(), 4_fps});
-    config.SetReversed(true);
+    config.SetReversed(false);
 
-    m_trajectory = rj::AutoHelper::LoadTrajectory("Backwards", &config);
+    m_trajectory = rj::AutoHelper::LoadTrajectory("Testing Forward Back", &config);
 
     m_autoTimer.Reset();
     m_autoTimer.Start();
@@ -52,7 +52,7 @@ void AutoLine_Backward::Init()
 }
 
 // Execute the program
-void AutoLine_Backward::Run()
+void AutoBackForward::Run()
 {
     switch (m_state)
     {
@@ -86,7 +86,7 @@ void AutoLine_Backward::Run()
     UpdateSmartDash();
 }
 
-void AutoLine_Backward::UpdateSmartDash()
+void AutoBackForward::UpdateSmartDash()
 {
     frc::SmartDashboard::PutNumber("Auto State", m_state);
 }
