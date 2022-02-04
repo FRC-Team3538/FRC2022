@@ -32,15 +32,11 @@ public:
     vision::RJVisionPipeline rjVision;
 
     // *** ALSO PUT SUBSYSTEMS HERE ***
-    Robotmap()
-    {
-        subsystems.push_back(&drivetrain);
-        subsystems.push_back(&shooter);
-        subsystems.push_back(&rjVision);
-    }
+    Robotmap();
 
     void UpdateSmartDash();
     void ConfigureMotors();
+    void watchDog();
 
     // SmartDash Cycler
     size_t telemetryCt = 0;
@@ -52,8 +48,4 @@ public:
     frc::RamseteController m_ramsete{units::unit_t<frc::RamseteController::b_unit>{2.0},
                                    units::unit_t<frc::RamseteController::zeta_unit>{0.7}};
 
-    void watchDog()
-    {
-        std::cout << "SAD WATCHDOG" << std::endl;
-    }
 };

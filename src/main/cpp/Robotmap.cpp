@@ -1,5 +1,13 @@
 #include "Robotmap.hpp"
 
+// Constructor
+Robotmap::Robotmap()
+{
+    subsystems.push_back(&drivetrain);
+    subsystems.push_back(&shooter);
+    subsystems.push_back(&rjVision);
+}
+
 /**
  * Ran periodically in Robot.cpp
  * Cycles through the systems (one system per loop)
@@ -31,4 +39,10 @@ void Robotmap::ConfigureMotors()
 {
     for (auto system : subsystems)
         system->ConfigureSystem();
+}
+
+
+void Robotmap::watchDog()
+{
+    std::cout << "SAD WATCHDOG" << std::endl;
 }

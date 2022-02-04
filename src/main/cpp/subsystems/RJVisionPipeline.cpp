@@ -68,7 +68,7 @@ namespace vision
 
     units::inch_t RJVisionPipeline::DistEstimation()
     {
-        units::inch_t dist = Constants::deltaH / (tan((dy + Constants::cameraAngle.value()) * (3.1415 / 180.0)));
+        units::inch_t dist = deltaH / (tan((dy + cameraAngle.value()) * (3.1415 / 180.0)));
         estDist = dist;
         return estDist;
     }

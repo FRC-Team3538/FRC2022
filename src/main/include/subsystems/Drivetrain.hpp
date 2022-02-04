@@ -36,61 +36,8 @@
 class Drivetrain : public Subsystem
 {
 public:
-    Drivetrain(bool isSimulation)
-    {
-        m_isSimulation = isSimulation;
-
-        m_driveL0.ConfigFactoryDefault();
-        m_driveL1.ConfigFactoryDefault();
-        m_driveL2.ConfigFactoryDefault();
-        m_driveR0.ConfigFactoryDefault();
-        m_driveR1.ConfigFactoryDefault();
-        m_driveR2.ConfigFactoryDefault();
-
-        double pidIdx = 0;
-        m_driveL0.ConfigSelectedFeedbackSensor(FeedbackDevice::IntegratedSensor, pidIdx);
-        m_driveL0.SetStatusFramePeriod(ctre::phoenix::motorcontrol::StatusFrameEnhanced::Status_3_Quadrature, 18);
-
-        m_driveR0.ConfigSelectedFeedbackSensor(FeedbackDevice::IntegratedSensor, pidIdx);
-        m_driveR0.SetStatusFramePeriod(ctre::phoenix::motorcontrol::StatusFrameEnhanced::Status_3_Quadrature, 18);
-
-        m_gyro.Reset();
-        // m_imu.Reset();
-        m_imu.ConfigFactoryDefault();
-
-        // Set the distance per pulse for the drive encoders. We can simply use the
-        // distance traveled for one rotation of the wheel divided by the encoder
-        // resolution.
-        // 0.4787_m / 1_rot
-        // 2048 * 10.71 ticks / rot
-        // 2.182807 * 10^-5 ticks/m
-        // 0.0000218
-        // auto dpp = empiricalDist / 188960.5; // 218325.5;//128173.5;//((2 * wpi::numbers::pi * kWheelRadius) / kEncoderResolution);
-        // TODO: really measure this, but do we need to do it for AR?
-        auto dpp = 0.0000218_m;
-        m_leftEncoder.SetDistancePerPulse(dpp.value());
-        m_rightEncoder.SetDistancePerPulse(-dpp.value());
-
-        m_leftEncoder.Reset();
-        m_rightEncoder.Reset();
-
-        m_rightGroup.SetInverted(false);
-        m_leftGroup.SetInverted(true);
-
-        m_driveL0.SetSelectedSensorPosition(0.0);
-        m_driveR0.SetSelectedSensorPosition(0.0);
-
-      
-        // impel.SetNeutralMode(NeutralMode::Coast);
-        // impel2.SetNeutralMode(NeutralMode::Coast);
-
-        frc::SmartDashboard::PutData("Field", &m_fieldSim);
-
-        SupplyCurrentLimitConfiguration config{true, 30.0, 40.0, 0.0};
-        // impel.ConfigSupplyCurrentLimit(config);
-        // impel2.ConfigSupplyCurrentLimit(config);
-    }
-
+    Drivetrain(bool isSimulation);
+    
     void ConfigureSystem();
     void SetSpeeds(const frc::DifferentialDriveWheelSpeeds &speeds);
     void Drive(units::meters_per_second_t xSpeed,
@@ -112,23 +59,23 @@ public:
 
 private:
     /***************************************************************************/
-    // CrossFire Characterization Values
+    // Characterization Values
 
-    static constexpr units::meter_t kTrackWidth = 0.579_m; //.579
-    static constexpr units::meter_t kWheelRadius = 3.0_in;
-    static constexpr units::meter_t empiricalDist = 210_in;
-    static constexpr double kGearRatio = 10.71;
+    static constexpr units::meter_t kTrackWidth = 0.579_m;
+    static constexpr units::meter_t kWheelRadius = 2.0_in;
+
+    static constexpr double kGearRatio = 8.48;
     static constexpr int kEncoderResolution = 2048;
-    static constexpr int kMotorCount = 2;
+    static constexpr int kMotorCount = 3; // Per gearbox
 
-    decltype(1_V) kStatic{0.59481};                    //.706
-    decltype(1_V / 1_mps) kVlinear{2.4226};            // 1.86
-    decltype(1_V / 1_mps_sq) kAlinear{0.34258};       // 0.0917
-    decltype(1_V / 1_rad_per_s) kVangular{1.96};     // 1.94
-    decltype(1_V / 1_rad_per_s_sq) kAangular{0.077}; // 0.0716
+    decltype(1_V) kStatic{0.59481};              
+    decltype(1_V / 1_mps) kVlinear{2.4226};         
+    decltype(1_V / 1_mps_sq) kAlinear{0.34258};      
+    decltype(1_V / 1_rad_per_s) kVangular{1.96};    
+    decltype(1_V / 1_rad_per_s_sq) kAangular{0.077};
 
     // Velocity Control PID (Is this really required ???)
-    frc2::PIDController m_leftPIDController{0.0, 0.0, 0.0}; // 2.75
+    frc2::PIDController m_leftPIDController{0.0, 0.0, 0.0};
     frc2::PIDController m_rightPIDController{0.0, 0.0, 0.0};
 
 public:

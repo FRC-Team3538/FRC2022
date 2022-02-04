@@ -8,6 +8,61 @@
 
 #include <iostream>
 
+Drivetrain::Drivetrain(bool isSimulation)
+{
+    m_isSimulation = isSimulation;
+
+    m_driveL0.ConfigFactoryDefault();
+    m_driveL1.ConfigFactoryDefault();
+    m_driveL2.ConfigFactoryDefault();
+    m_driveR0.ConfigFactoryDefault();
+    m_driveR1.ConfigFactoryDefault();
+    m_driveR2.ConfigFactoryDefault();
+
+    double pidIdx = 0;
+    m_driveL0.ConfigSelectedFeedbackSensor(FeedbackDevice::IntegratedSensor, pidIdx);
+    m_driveL0.SetStatusFramePeriod(ctre::phoenix::motorcontrol::StatusFrameEnhanced::Status_3_Quadrature, 18);
+
+    m_driveR0.ConfigSelectedFeedbackSensor(FeedbackDevice::IntegratedSensor, pidIdx);
+    m_driveR0.SetStatusFramePeriod(ctre::phoenix::motorcontrol::StatusFrameEnhanced::Status_3_Quadrature, 18);
+
+    m_gyro.Reset();
+    // m_imu.Reset();
+    m_imu.ConfigFactoryDefault();
+
+    // Set the distance per pulse for the drive encoders. We can simply use the
+    // distance traveled for one rotation of the wheel divided by the encoder
+    // resolution.
+    // 0.4787_m / 1_rot
+    // 2048 * 10.71 ticks / rot
+    // 2.182807 * 10^-5 ticks/m
+    // 0.0000218
+    // auto dpp = empiricalDist / 188960.5; // 218325.5;//128173.5;//((2 * wpi::numbers::pi * kWheelRadius) / kEncoderResolution);
+    // TODO: really measure this, but do we need to do it for AR?
+    auto dpp = 0.0000218_m;
+    m_leftEncoder.SetDistancePerPulse(dpp.value());
+    m_rightEncoder.SetDistancePerPulse(-dpp.value());
+
+    m_leftEncoder.Reset();
+    m_rightEncoder.Reset();
+
+    m_rightGroup.SetInverted(false);
+    m_leftGroup.SetInverted(true);
+
+    m_driveL0.SetSelectedSensorPosition(0.0);
+    m_driveR0.SetSelectedSensorPosition(0.0);
+
+    
+    // impel.SetNeutralMode(NeutralMode::Coast);
+    // impel2.SetNeutralMode(NeutralMode::Coast);
+
+    frc::SmartDashboard::PutData("Field", &m_fieldSim);
+
+    SupplyCurrentLimitConfiguration config{true, 30.0, 40.0, 0.0};
+    // impel.ConfigSupplyCurrentLimit(config);
+    // impel2.ConfigSupplyCurrentLimit(config);
+}
+
 void Drivetrain::SetSpeeds(const frc::DifferentialDriveWheelSpeeds &speeds)
 {
     auto leftFeedforward = m_feedforward.Calculate(speeds.left);
