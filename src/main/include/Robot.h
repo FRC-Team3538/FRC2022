@@ -55,8 +55,11 @@ private:
   const double deadbandVal = 0.1;
 
   double deadband(double val, double min, double max);
-  
 
   frc::Timer shotTimer;
   frc::Timer brakeTimer;
+
+  Shooter::State shotStats;
+
+  bool climberMode = false;
 };

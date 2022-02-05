@@ -3,6 +3,7 @@
 #include <subsystems/Drivetrain.hpp>
 #include <subsystems/Shooter.hpp>
 #include <subsystems/RJVisionPipeline.hpp>
+#include <subsystems/Climber.hpp>
 #include <vector>
 #include <functional>
 
@@ -27,8 +28,9 @@ public:
 
     // *** PUT SUBSYSTEMS HERE ***
     Drivetrain drivetrain;
-    // Shooter shooter;
-    // vision::RJVisionPipeline rjVision;
+    Shooter shooter;
+    vision::RJVisionPipeline rjVision;
+    Climber climber;
 
     Robotmap();
 

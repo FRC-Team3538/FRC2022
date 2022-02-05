@@ -47,6 +47,7 @@ public:
 
     void SetTurret(units::volt_t targetVolts);
     void SetShooter(units::volt_t targetVolts);
+    void SetShooterState(State shotStats);
 
     void SetFeeder(units::volt_t targetVolts);
     void SetHood(units::volt_t targetVolts);

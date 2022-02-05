@@ -5,8 +5,9 @@
 Robotmap::Robotmap()
 {
     subsystems.push_back(&drivetrain);
-    // subsystems.push_back(&shooter);
-    // subsystems.push_back(&rjVision);
+    subsystems.push_back(&shooter);
+    subsystems.push_back(&rjVision);
+    subsystems.push_back(&climber);
 }
 
 /**

@@ -7,15 +7,22 @@
 
 using namespace pathplanner;
 
-double Robot::deadband(double val, double min, double max)
+double Robot::deadband(double val, double min = 0.1, double max = 1.0)
 {
-  if (val > max) {
+  if (val > max)
+  {
     return max;
-  } else if (val < -max) {
+  }
+  else if (val < -max)
+  {
     return -max;
-  } else if (std::abs(val) < min) {
+  }
+  else if (std::abs(val) < min)
+  {
     return 0.0;
-  } else {
+  }
+  else
+  {
     double sgn = val / std::abs(val);
     return sgn * (std::abs(val) - min) / (max - min) * max;
   }
@@ -62,149 +69,151 @@ void Robot::TeleopInit()
 
 void Robot::TeleopPeriodic()
 {
-  if (IO.mainController.IsConnected())
+  double intakeSpd = 0.0;
+  double feederSpd = 0.0;
+
+  // *** INTAKE DEPLOY ***
+
+  if (IO.mainController.GetR1Button() || IO.secondaryController.GetR1Button())
   {
-    if (IO.mainController.GetTriangleButton())
+    IO.shooter.SetIntakeState(Shooter::Position::Deployed);
+  }
+
+  if (IO.mainController.GetL1Button() || IO.secondaryController.GetL1Button())
+  {
+    IO.shooter.SetIntakeState(Shooter::Position::Stowed);
+  }
+
+  // *** PRESETS ***
+
+  switch (IO.secondaryController.GetPOV())
+  {
+  case 0:
+  {
+    // FENDER
+    auto kShooterRPM = 0.0_rpm;
+    auto kHoodRPM = 0.0_rpm;
+
+    shotStats = {kShooterRPM, kHoodRPM, 0.0_deg};
+    break;
+  }
+
+  case 90:
+  {
+    // MIDFIELD
+    auto kShooterRPM = 0.0_rpm;
+    auto kHoodRPM = 0.0_rpm;
+
+    shotStats = {kShooterRPM, kHoodRPM, 0.0_deg};
+    break;
+  }
+
+  case 180:
+  {
+    // LAUNCHPAD
+    auto kShooterRPM = 0.0_rpm;
+    auto kHoodRPM = 0.0_rpm;
+
+    shotStats = {kShooterRPM, kHoodRPM, 0.0_deg};
+    break;
+  }
+
+  case 270:
+  {
+    // TARMAC
+    auto kShooterRPM = 0.0_rpm;
+    auto kHoodRPM = 0.0_rpm;
+
+    shotStats = {kShooterRPM, kHoodRPM, 0.0_deg};
+    break;
+  }
+
+  default:
+  {
+  }
+  }
+
+  // *** MANUAL SHOOTING ***
+
+  if (IO.secondaryController.GetCircleButtonPressed())
+    IO.shooter.SetShooterState(shotStats);
+  else if (IO.secondaryController.GetCrossButtonPressed())
+    IO.shooter.SetShooterState({0.0_rpm, 0.0_rpm, 0.0_deg});
+
+  if (!climberMode)
+  {
+    // HOOD CODE
+  }
+
+  // *** VISION AND DRIVING ***
+
+  if (IO.mainController.GetR2Button())
+  {
+    vision::RJVisionPipeline::visionData data = IO.rjVision.Run();
+    if (data.filled)
     {
-      // vision::RJVisionPipeline::visionData data = IO.rjVision.Run();
-      // std::cout << data.distance.value() << std::endl;
-      // if (data.filled)
-      // {
-      //   if (IO.drivetrain.TurnRel(0.0, data.angle, 1_deg))
-      //   {
-      //     Shooter::State shotStats = IO.shooter.CalculateShot(data.distance);
-      //     IO.shooter.SetShooterRPM(shotStats.shooterVelocity);
-      //     IO.shooter.SetHoodRPM(shotStats.hoodVelocity);
-      //     if (IO.shooter.TempUpToSpeed())
-      //     {
-      //       IO.shooter.SetFeeder(10_V);
-      //       IO.shooter.SetIntake(10_V);
-      //     }
-      //   }
-      // }
-    }
-    else
-    {
-      auto fwd = deadband(IO.mainController.GetLeftY(), deadbandVal, 1.0);
-      auto rot = deadband(IO.mainController.GetRightX(), deadbandVal, 1.0);
-      IO.drivetrain.Arcade(fwd, rot);
-
-      double rightTrigger = deadband((IO.mainController.GetR2Axis() + 1.0) / 2.0, deadbandVal, 1.0);
-      double leftTrigger = deadband((IO.mainController.GetL2Axis() + 1.0) / 2.0, deadbandVal, 1.0);
-      
-      double intakeVoltage = (right - left) * 13.0;
-
-      IO.shooter.SetIntake(units::volt_t{intakeVoltage});
-
-      // ???
-      IO.shooter.SetFeeder(0_V);
-      IO.shooter.SetHoodRPM(units::revolutions_per_minute_t{0});
-      IO.shooter.SetShooterRPM(units::revolutions_per_minute_t{0});
+      if (IO.drivetrain.TurnRel(0.0, data.angle, 0.75_deg))
+      {
+        Shooter::State shotStat = IO.shooter.CalculateShot(data.distance);
+        IO.shooter.SetShooterState(shotStat);
+        if (IO.shooter.TempUpToSpeed())
+        {
+          feederSpd = 10.0;
+          intakeSpd = 10.0;
+        }
+      }
     }
   }
   else
   {
-    IO.shooter.SetIntake(units::volt_t{0});
-
-    // ???
-    IO.shooter.SetFeeder(0_V);
-    IO.shooter.SetHoodRPM(units::revolutions_per_minute_t{0});
-    IO.shooter.SetShooterRPM(units::revolutions_per_minute_t{0});
+    double fwd = deadband(IO.mainController.GetLeftY());
+    double rot = deadband(IO.mainController.GetRightX());
+    IO.drivetrain.Arcade(fwd, rot);
   }
-/*
+
+  // *** SETTING VALUES FOR FEEDER AND INTAKE ***
+
+  if (IO.mainController.GetSquareButton())
+    feederSpd = -10.0;
+  else if (IO.secondaryController.GetTriangleButton())
+    feederSpd = 10.0;
+  else
+    feederSpd = 0.0;
+
+  if (intakeSpd == 0.0 || IO.mainController.GetTriangleButton())
   {
-    double shooterVoltage;
-
-    if (IO.mainController.IsConnected())
-    {
-      shooterVoltage = (IO.mainController.GetR1Button() || IO.secondaryController.GetR1Button()) ? frc::SmartDashboard::GetNumber("Shooter Voltage", 0.0) : 0.0;
-      // std::cout << shooterVoltage << std::endl;
-    }
-    else
-    {
-      shooterVoltage = 0.0;
-    }
-
-    //IO.shooter.SetShooterRPM(units::revolutions_per_minute_t(shooterVoltage));
+    intakeSpd += IO.secondaryController.IsConnected() ? (((deadband((IO.secondaryController.GetR2Axis() + 1.0) / 2.0)) - (deadband((IO.secondaryController.GetL2Axis() + 1.0) / 2.0))) * 13.0) : 0.0;
+    intakeSpd += IO.mainController.IsConnected() ? (((deadband((IO.mainController.GetL2Axis() + 1.0) / 2.0)) - IO.mainController.GetTriangleButton()) * 13.0) : 0.0;
   }
 
+  IO.shooter.SetFeeder(units::volt_t{feederSpd});
+  IO.shooter.SetIntake(units::volt_t{intakeSpd});
+
+  // *** CLIMBER CODE ***
+
+  if (IO.secondaryController.GetPSButtonPressed())
+    climberMode = !climberMode;
+
+  if (climberMode)
   {
-    double hoodVoltage;
+    IO.climber.SetClimber(deadband(IO.secondaryController.GetLeftY()));
 
-    if (lockHoodVoltage.GetBoolean(false))
-    {
-      hoodVoltage = targetHoodVoltage.GetDouble(0.0);
-    }
-    else if (IO.mainController.IsConnected())
-    {
-      hoodVoltage = (IO.mainController.GetR1Button() || IO.secondaryController.GetR1Button()) ? frc::SmartDashboard::GetNumber("Hood Wheel Voltage", 0.0) : 0.0;
-    }
-    else
-    {
-      hoodVoltage = 0.0;
-    }
-
-    //IO.shooter.SetHoodRPM(units::revolutions_per_minute_t(hoodVoltage));
+    // CLIMB ANGLE SETTING
   }
-
+  else
   {
-    double feederVoltage;
-
-    if (lockFeederVoltage.GetBoolean(false))
-    {
-      feederVoltage = targetFeederVoltage.GetDouble(0.0);
-    }
-    else if (IO.mainController.IsConnected())
-    {
-      feederVoltage = (IO.mainController.GetR1Button() || IO.secondaryController.GetR1Button()) ? frc::SmartDashboard::GetNumber("Feeder Voltage", 0.0) : 0.0;
-    }
-    else
-    {
-      feederVoltage = 0.0;
-    }
-
-    //IO.shooter.SetFeeder(units::volt_t(feederVoltage));
+    IO.climber.SetClimber(0.0);
+    IO.climber.SetClimberState(Climber::ClimbState::Down);
   }
-
-  {
-    double intakeVoltage = 0.0;
-
-    if (IO.mainController.IsConnected())
-    {
-      if (IO.mainController.GetR1ButtonPressed() || IO.secondaryController.GetR1ButtonPressed())
-      {
-        shotTimer.Reset();
-        shotTimer.Start();
-      }
-
-      if (IO.secondaryController.GetR1Button() || IO.mainController.GetR1Button())
-      {
-        intakeVoltage = shotTimer.Get() > 0.25_s ? 10.0 : 0.0;
-      }
-      else
-      {
-        intakeVoltage += IO.secondaryController.IsConnected() ? (((deadband((IO.secondaryController.GetR2Axis() + 1.0) / 2.0, deadbandVal)) - (deadband((IO.secondaryController.GetL2Axis() + 1.0) / 2.0, deadbandVal))) * 13.0) : 0.0;
-        intakeVoltage += IO.mainController.IsConnected() ? (((deadband((IO.mainController.GetR2Axis() + 1.0) / 2.0, deadbandVal)) - (deadband((IO.mainController.GetL2Axis() + 1.0) / 2.0, deadbandVal))) * 13.0) : 0.0;
-      }
-    }
-    else
-    {
-      intakeVoltage = 0.0;
-    }
-
-    //IO.shooter.SetIntake(units::volt_t{intakeVoltage});
-  }
-  */
-
 }
 
-void Robot::DisabledInit() 
+void Robot::DisabledInit()
 {
   brakeTimer.Reset();
   brakeTimer.Start();
 }
 
-void Robot::DisabledPeriodic() 
+void Robot::DisabledPeriodic()
 {
   // Automatic Coast Mode
   if (brakeTimer.Get() > 3.0_s)
@@ -213,14 +222,12 @@ void Robot::DisabledPeriodic()
   }
 }
 
-
 void Robot::SimulationInit() {}
 
-void Robot::SimulationPeriodic() 
+void Robot::SimulationPeriodic()
 {
   IO.drivetrain.SimulationPeriodic();
 }
-
 
 void Robot::TestInit() {}
 void Robot::TestPeriodic() {}
