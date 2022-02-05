@@ -255,9 +255,7 @@ class DataLogEntry {
    *
    * @param timestamp Time stamp (may be 0 to indicate now)
    */
-  void Finish(int64_t timestamp = 0) {
-    m_log->Finish(m_entry, timestamp);
-  }
+  void Finish(int64_t timestamp = 0) { m_log->Finish(m_entry, timestamp); }
 
  protected:
   DataLog* m_log = nullptr;

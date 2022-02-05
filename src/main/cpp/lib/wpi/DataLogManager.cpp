@@ -11,7 +11,7 @@
 #include <fmt/chrono.h>
 #include <fmt/format.h>
 #include <networktables/NetworkTableInstance.h>
-#include "lib/wpi/DataLog.h"
+#include <lib/wpi/DataLog.h>
 #include <wpi/SafeThread.h>
 #include <wpi/StringExtras.h>
 #include <wpi/fs.h>
