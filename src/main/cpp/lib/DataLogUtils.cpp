@@ -177,4 +177,26 @@ DataLogUtils::isNTConnectionLogging()
   return NTConnectionLogging;
 }
 
+void 
+DataLogUtils::EnableJoystickLogging() 
+{ 
+  if (!JoystickLogging) { 
+    JoystickLogging = true;
+  } 
+}
+
+void 
+DataLogUtils::DisableJoystickLogging() 
+{ 
+  if (JoystickLogging) { 
+    JoystickLogging = false;
+  } 
+}
+
+bool 
+DataLogUtils::isJoystickLogging() 
+{ 
+  return JoystickLogging; 
+}
+
 }

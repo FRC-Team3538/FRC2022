@@ -12,6 +12,7 @@ class DataLogUtils
 private:
   bool NTEntryLogging;
   bool NTConnectionLogging;
+  bool JoystickLogging;
 
   NT_EntryListener entryListener;
   NT_ConnectionListener connectionListener;
@@ -29,5 +30,9 @@ public:
   void EnableNTConnectionLogging();
   void DisableNTConnectionLogging();
   bool isNTConnectionLogging();
+
+  void EnableJoystickLogging();
+  void DisableJoystickLogging();
+  bool isJoystickLogging();
 };
 }
