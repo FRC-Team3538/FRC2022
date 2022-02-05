@@ -84,7 +84,7 @@ void AutoLine::Run()
     }
     default:
     {
-        std::cout << "Done!" << std::endl;
+        // std::cout << "Done!" << std::endl;
         IO.drivetrain.Arcade(0.0, 0.0);
     }
     }
