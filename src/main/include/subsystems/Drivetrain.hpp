@@ -61,28 +61,39 @@ private:
     /***************************************************************************/
     // Characterization Values
 
-    static constexpr units::meter_t kTrackWidth = 0.579_m;
-    static constexpr units::meter_t kWheelRadius = 2.0_in;
+    static constexpr units::meter_t kTrackWidth = 0.74123_m;
+    static constexpr units::meter_t kWheelRadius = 1.95_in;
 
-    static constexpr double kGearRatio = 8.48;
+    static constexpr double kGearRatio = (60.0 / 11.0) * (56.0 / 36.0);
     static constexpr int kEncoderResolution = 2048;
     static constexpr int kMotorCount = 3; // Per gearbox
 
-    decltype(1_V) kStatic{0.59481};              
-    decltype(1_V / 1_mps) kVlinear{2.4226};         
-    decltype(1_V / 1_mps_sq) kAlinear{0.34258};      
-    decltype(1_V / 1_rad_per_s) kVangular{1.96};    
-    decltype(1_V / 1_rad_per_s_sq) kAangular{0.077};
+    // Made these slightly more obscure to support use in calculating kMaxSpeedLinear/Angular at compile time.
+    static constexpr auto kMaxVoltage = 12_V;
+    static constexpr auto kStatic = 0.64781_V;
+    static constexpr auto kVlinear = 2.87860_V / 1_mps;
+    static constexpr auto kAlinear = 0.18800_V / 1_mps_sq;
+    static constexpr auto kVangular = 2.87740_V / 1_rad_per_s;
+    static constexpr auto kAangular = 0.043271_V / 1_rad_per_s_sq;
+
+
+    // decltype(1_V) kMaxVoltage{12};
+    // decltype(1_V) kStatic{0.64781};                     // 0.64781 (lin), 0.82117 (ang)
+    // decltype(1_V / 1_mps) kVlinear{2.87860};            // 2.87860, 
+    // decltype(1_V / 1_mps_sq) kAlinear{0.18800};         // 0.18800, 
+    // decltype(1_V / 1_rad_per_s) kVangular{2.87740};     // 2.87740, 
+    // decltype(1_V / 1_rad_per_s_sq) kAangular{0.043271}; // 0.043271, 
 
     // Velocity Control PID (Is this really required ???)
-    frc2::PIDController m_leftPIDController{0.0, 0.0, 0.0};
-    frc2::PIDController m_rightPIDController{0.0, 0.0, 0.0};
+    frc2::PIDController m_leftPIDController{1.1827, 0.0, 0.0};
+    frc2::PIDController m_rightPIDController{1.1827, 0.0, 0.0};
 
 public:
     // Teleop Values
     /// TODO(Dereck): Measure these too
-    static constexpr units::feet_per_second_t kMaxSpeed{20.0};
-    static constexpr units::degrees_per_second_t kMaxAngularSpeed{720.0};
+    // CHECK: calculated based on sysid characterization
+    static constexpr units::meters_per_second_t kMaxSpeedLinear = (kMaxVoltage - kStatic) / kVlinear;
+    static constexpr units::radians_per_second_t kMaxSpeedAngular = (kMaxVoltage - kStatic) / kVangular;
 
     // WPI_TalonFX impel{6};
     // WPI_TalonFX impel2{7};
