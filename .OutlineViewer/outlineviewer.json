@@ -4,9 +4,11 @@
     "serverTeam": "10.83.32.2"
   },
   "SmartDashboard": {
-    "open": true,
     "shooter": {
       "open": true
     }
+  },
+  "limelight": {
+    "open": true
   }
 }

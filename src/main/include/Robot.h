@@ -28,6 +28,9 @@ public:
   void DisabledInit() override;
   void DisabledPeriodic() override;
 
+  void SimulationInit() override;
+  void SimulationPeriodic() override;
+
   void TestInit() override;
   void TestPeriodic() override;
 
@@ -49,4 +52,15 @@ private:
   nt::NetworkTableEntry lockFeederVoltage = frc::SmartDashboard::GetEntry("/lockFeederVoltage");
   nt::NetworkTableEntry targetFeederVoltage = frc::SmartDashboard::GetEntry("/targetFeederVoltage");
   nt::NetworkTableEntry targetIntakePercent = frc::SmartDashboard::GetEntry("/targetIntakePercent");
+
+  const double deadbandVal = 0.1;
+
+  double deadband(double val, double min, double max);
+
+  frc::Timer shotTimer;
+  frc::Timer brakeTimer;
+
+  Shooter::State shotStats;
+
+  bool climberMode = false;
 };

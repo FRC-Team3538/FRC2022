@@ -4,20 +4,20 @@
 
 #pragma once
 
-#include <frc/AnalogGyro.h>
-#include <frc/Encoder.h>
-#include <frc/motorcontrol/PWMVictorSPX.h>
 #include <frc/motorcontrol/MotorControllerGroup.h>
 #include <frc/controller/PIDController.h>
 #include <frc/controller/SimpleMotorFeedforward.h>
 #include <frc/kinematics/DifferentialDriveKinematics.h>
 #include <frc/kinematics/DifferentialDriveOdometry.h>
-#include <frc/simulation/AnalogGyroSim.h>
 #include <frc/simulation/DifferentialDrivetrainSim.h>
-#include <frc/simulation/EncoderSim.h>
 #include <frc/smartdashboard/Field2d.h>
 #include <frc/smartdashboard/SmartDashboard.h>
+#include <wpi/sendable/SendableRegistry.h>
+#include <wpi/sendable/SendableBuilder.h>
+#include <wpi/sendable/SendableHelper.h>
 #include <frc/system/plant/LinearSystemId.h>
+#include <frc/trajectory/Trajectory.h>
+#include <frc/controller/RamseteController.h>
 // #include <frc/ADIS16470_IMU.h>
 #include <units/angle.h>
 #include <units/angular_velocity.h>
@@ -30,164 +30,109 @@
 #include "ctre/Phoenix.h"
 #include "Subsystem.hpp"
 
+// leave this for wandows
+#ifndef M_PI
+    #define M_PI    3.14159265358979323846
+#endif
+
 /**
  * Represents a differential drive style drivetrain.
  */
-class Drivetrain : public Subsystem
+class Drivetrain : public Subsystem,
+                   public wpi::Sendable,
+                   public wpi::SendableHelper<Drivetrain>
 {
 public:
-    Drivetrain(bool isSimulation)
-    {
-        m_isSimulation = isSimulation;
+    Drivetrain();
 
-        m_driveL0.ConfigFactoryDefault();
-        m_driveL1.ConfigFactoryDefault();
-        // m_driveL2.ConfigFactoryDefault();
-        m_driveR0.ConfigFactoryDefault();
-        m_driveR1.ConfigFactoryDefault();
-        // m_driveR2.ConfigFactoryDefault();
-
-        double pidIdx = 0;
-        m_driveL0.ConfigSelectedFeedbackSensor(FeedbackDevice::IntegratedSensor, pidIdx);
-        m_driveL0.SetStatusFramePeriod(ctre::phoenix::motorcontrol::StatusFrameEnhanced::Status_3_Quadrature, 18);
-
-        m_driveR0.ConfigSelectedFeedbackSensor(FeedbackDevice::IntegratedSensor, pidIdx);
-        m_driveR0.SetStatusFramePeriod(ctre::phoenix::motorcontrol::StatusFrameEnhanced::Status_3_Quadrature, 18);
-
-        m_gyro.Reset();
-        // m_imu.Reset();
-        // m_imu.ConfigFactoryDefault();
-
-        // Set the distance per pulse for the drive encoders. We can simply use the
-        // distance traveled for one rotation of the wheel divided by the encoder
-        // resolution.
-        auto dpp = empiricalDist / 188960.5; // 218325.5;//128173.5;//((2 * wpi::numbers::pi * kWheelRadius) / kEncoderResolution);
-        m_leftEncoder.SetDistancePerPulse(-dpp.value());
-        m_rightEncoder.SetDistancePerPulse(dpp.value());
-
-        m_leftEncoder.Reset();
-        m_rightEncoder.Reset();
-
-        m_rightGroup.SetInverted(true);
-        m_leftGroup.SetInverted(false);
-
-        m_driveL0.SetSelectedSensorPosition(0.0);
-        m_driveR0.SetSelectedSensorPosition(0.0);
-
-        m_driveL0.SetNeutralMode(NeutralMode::Brake);
-        m_driveL1.SetNeutralMode(NeutralMode::Brake);
-        //m_driveL2.SetNeutralMode(NeutralMode::Brake);
-        m_driveR0.SetNeutralMode(NeutralMode::Brake);
-        m_driveR1.SetNeutralMode(NeutralMode::Brake);
-        //m_driveR2.SetNeutralMode(NeutralMode::Brake);
-
-        // impel.SetNeutralMode(NeutralMode::Coast);
-        // impel2.SetNeutralMode(NeutralMode::Coast);
-
-        frc::SmartDashboard::PutData("Field", &m_fieldSim);
-
-        SupplyCurrentLimitConfiguration config{true, 30.0, 40.0, 0.0};
-        // impel.ConfigSupplyCurrentLimit(config);
-        // impel2.ConfigSupplyCurrentLimit(config);
-    }
+    void InitSendable(wpi::SendableBuilder &builder) override;
 
     void ConfigureSystem();
+
+    void Arcade(double forward, double rotate);
     void SetSpeeds(const frc::DifferentialDriveWheelSpeeds &speeds);
     void Drive(units::meters_per_second_t xSpeed,
                units::radians_per_second_t rot);
-    void Arcade(double forward, double rotate);
+    bool TurnRel(double forward, units::degree_t target, units::degree_t tolerance);
+    void Drive(const frc::Trajectory::State& target);
+
     void UpdateOdometry();
-    void UpdateTelemetry();
     void ResetOdometry(const frc::Pose2d &pose);
     frc::Rotation2d GetYaw();
-
-    frc::Pose2d GetPose() const { return m_odometry.GetPose(); }
+    frc::Pose2d GetPose() const;
+    frc::DifferentialDriveKinematics GetKinematics() { return m_kinematics; }
+    frc::SimpleMotorFeedforward<units::meter> GetFeedForward() { return m_feedforward; }
 
     void SimulationPeriodic();
     void Periodic();
+    void UpdateTelemetry();
+    void SetBrakeMode();
+    void SetCoastMode();
+
+    frc::Field2d& GetField();
 
 private:
     /***************************************************************************/
-    // CrossFire Characterization Values
+    // Characterization Values
 
-    static constexpr units::meter_t kTrackWidth = 0.579_m; //.579
-    static constexpr units::meter_t kWheelRadius = 2.125_in;
-    static constexpr units::meter_t empiricalDist = 210_in;
-    static constexpr double kGearRatio = 5.95;
+    static constexpr units::meter_t kTrackWidth = 0.74123_m;
+    static constexpr units::meter_t kWheelRadius = 1.95_in;
+
+    static constexpr double kGearRatio = (60.0 / 11.0) * (56.0 / 36.0);
     static constexpr int kEncoderResolution = 2048;
-    static constexpr int kMotorCount = 2;
+    static constexpr int kMotorCount = 3; // Per gearbox
 
-    decltype(1_V) kStatic{0.826};                    //.706
-    decltype(1_V / 1_mps) kVlinear{1.94};            // 1.86
-    decltype(1_V / 1_mps_sq) kAlinear{0.0827};       // 0.0917
-    decltype(1_V / 1_rad_per_s) kVangular{1.96};     // 1.94
-    decltype(1_V / 1_rad_per_s_sq) kAangular{0.077}; // 0.0716
+    // Made these slightly more obscure to support use in calculating kMaxSpeedLinear/Angular at compile time.
+    static constexpr auto kMaxVoltage = 12.0_V;
+    static constexpr auto kStatic = 0.64781_V;
+    static constexpr auto kVlinear = 2.87860_V / 1_mps;
+    static constexpr auto kAlinear = 0.18800_V / 1_mps_sq;
+    static constexpr auto kVangular = 2.87740_V / 1_rad_per_s;
+    static constexpr auto kAangular = 0.043271_V / 1_rad_per_s_sq;
 
     // Velocity Control PID (Is this really required ???)
-    frc2::PIDController m_leftPIDController{1.72, 0.0, 0.0}; // 2.75
-    frc2::PIDController m_rightPIDController{1.72, 0.0, 0.0};
+    frc2::PIDController m_leftPIDController{0.0, 0.0, 0.0}; // {1.1827, 0.0, 0.0};
+    frc2::PIDController m_rightPIDController{0.0, 0.0, 0.0}; // {1.1827, 0.0, 0.0};
+
+    // Average Battery Resistance (Simulation)
+    static constexpr auto kBatteryResistance = 0.03;
+
+    // Distance Per Pulse (Scale Factor)
+    static constexpr auto kDPP = (2 * kWheelRadius * M_PI) / kGearRatio / kEncoderResolution; 
 
 public:
     // Teleop Values
-    /// TODO(Dereck): Measure these too
-    static constexpr units::feet_per_second_t kMaxSpeed{20.0};
-    static constexpr units::degrees_per_second_t kMaxAngularSpeed{720.0};
+    // CHECK: calculated based on sysid characterization
+    static constexpr units::meters_per_second_t kMaxSpeedLinear = (kMaxVoltage - kStatic) / kVlinear;
+    static constexpr units::radians_per_second_t kMaxSpeedAngular = (kMaxVoltage - kStatic) / kVangular;
 
-    // WPI_TalonFX impel{6};
-    // WPI_TalonFX impel2{7};
-
-    frc::DifferentialDriveKinematics GetKinematics()
-    {
-        return m_kinematics;
-    }
-
-    frc::SimpleMotorFeedforward<units::meter> GetFeedForward()
-    {
-        return m_feedforward;
-    }
 
     /***************************************************************************/
 
 private:
-    bool m_isSimulation = false;
-
-    // Simulation motor controllers
-    frc::PWMVictorSPX m_leftLeader{1};
-    frc::PWMVictorSPX m_leftFollower{2};
-    frc::PWMVictorSPX m_rightLeader{3};
-    frc::PWMVictorSPX m_rightFollower{4};
-
     // Real motor Controllers
-    WPI_TalonFX m_driveL0{1};
-    WPI_TalonFX m_driveL1{2};
-    // WPI_TalonFX m_driveL2{2};
+    WPI_TalonFX m_driveL0{0};
+    WPI_TalonFX m_driveL1{1};
+    WPI_TalonFX m_driveL2{2};
     WPI_TalonFX m_driveR0{3};
     WPI_TalonFX m_driveR1{4};
-    // WPI_TalonFX m_driveR2{5};
+    WPI_TalonFX m_driveR2{5};
 
     // Controller Groups
     frc::MotorControllerGroup m_leftGroup{
-        m_leftLeader,
-        m_leftFollower,
         m_driveL0,
-        m_driveL1};
+        m_driveL1,
+        m_driveL2
+    };
 
     frc::MotorControllerGroup m_rightGroup{
-        m_rightLeader,
-        m_rightFollower,
         m_driveR0,
-        m_driveR1};
+        m_driveR1,
+        m_driveR2
+    };
 
-    // Simulated Encoders
-    frc::Encoder m_leftEncoder{0, 1};
-    frc::Encoder m_rightEncoder{2, 3};
 
-    // frc::ADIS16470_IMU m_imu{
-    //     frc::ADIS16470_IMU::IMUAxis::kZ, //kZ
-    //     frc::SPI::Port::kOnboardCS0,
-    //     frc::ADIS16470_IMU::CalibrationTime::_2s};
-
-    // PigeonIMU m_imu{30};
+    WPI_PigeonIMU m_imu{30};
 
     //
     // Dynamics
@@ -195,6 +140,8 @@ private:
     frc::DifferentialDriveKinematics m_kinematics{kTrackWidth};
     frc::DifferentialDriveOdometry m_odometry{frc::Rotation2d()};
     frc::SimpleMotorFeedforward<units::meters> m_feedforward{kStatic, kVlinear, kAlinear};
+    frc::RamseteController m_ramsete{units::unit_t<frc::RamseteController::b_unit>{2.0},
+                                     units::unit_t<frc::RamseteController::zeta_unit>{0.7}};
 
     //
     // Simulation
@@ -211,9 +158,7 @@ private:
         kGearRatio,
         kWheelRadius};
 
-    frc::AnalogGyro m_gyro{0};
-    frc::sim::AnalogGyroSim m_gyroSim{m_gyro};
-    frc::sim::EncoderSim m_leftEncoderSim{m_leftEncoder};
-    frc::sim::EncoderSim m_rightEncoderSim{m_rightEncoder};
     frc::Field2d m_fieldSim;
+
+    frc::PIDController m_yawPID{0.25, 0.0, 0.05};
 };

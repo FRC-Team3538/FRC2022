@@ -9,7 +9,7 @@ void Shooter::ConfigureSystem()
     intake.ConfigFactoryDefault();
     feeder.ConfigFactoryDefault();
     hood.ConfigFactoryDefault();
-    
+
     hood.SetInverted(true);
     intake.SetInverted(true);
 
@@ -58,7 +58,6 @@ void Shooter::UpdateTelemetry()
     // 9.5" nominal ball
     units::revolutions_per_minute_t impartedBackspin = backspinEffort / wpi::numbers::pi / units::inch_t(9.5) * units::turn_t(1);
 
-
     // frc::SmartDashboard::PutNumber("shooter/Shooter_Voltage", shooterA.GetMotorOutputVoltage());
     // frc::SmartDashboard::PutNumber("shooter/Shooter_RPM", shooterRPM.value());
     // frc::SmartDashboard::PutNumber("shooter/Shooter_Surface_Speed_FPS", shooterSurfaceSpeed.value());
@@ -76,7 +75,7 @@ void Shooter::UpdateTelemetry()
 
     shooterVoltageEntry.SetDouble(shooterA.GetMotorOutputVoltage());
     shooterRPMEntry.SetDouble(shooterRPM.value());
-    shooterSurfaceSpeedEntry.SetDouble(shooterSurfaceSpeed.value()); 
+    shooterSurfaceSpeedEntry.SetDouble(shooterSurfaceSpeed.value());
 
     feederVoltageEntry.SetDouble(feeder.GetMotorOutputVoltage());
     feederRPMEntry.SetDouble(feeder.GetSelectedSensorVelocity() * 10 * 60 / 2048); // ticks/100ms to rpm
@@ -94,7 +93,7 @@ void Shooter::SetTurretAngle(units::degree_t targetAngle)
 {
     units::degree_t currentAng = GetTurretAngle();
 
-    if(targetAngle != turretPID.GetGoal().position)
+    if (targetAngle != turretPID.GetGoal().position)
     {
         turretPID.SetGoal(targetAngle);
     }
@@ -104,13 +103,19 @@ void Shooter::SetTurretAngle(units::degree_t targetAngle)
 
 void Shooter::SetShooterRPM(units::revolutions_per_minute_t targetRPM)
 {
-    if(targetRPM == 0.0_rpm)
+    if (targetRPM == 0.0_rpm)
     {
         shooterA.Set(0.0);
         return;
     }
 
     shooterA.Set(ControlMode::Velocity, ((targetRPM.value() / kScaleFactorFly) / 600.0));
+}
+
+void Shooter::SetShooterState(State shotStats)
+{
+    SetShooterRPM(shotStats.shooterVelocity);
+    SetHoodRPM(shotStats.hoodVelocity);
 }
 
 void Shooter::SetTurret(units::volt_t targetVolts)
@@ -125,7 +130,8 @@ void Shooter::SetShooter(units::volt_t targetVolts)
 
 void Shooter::SetFeeder(units::volt_t targetVoltage)
 {
-    feeder.SetVoltage(targetVoltage);
+    indexerA.SetVoltage(targetVoltage);
+    feeder.SetVoltage(-targetVoltage);
 }
 
 void Shooter::SetHood(units::volt_t targetVoltage)
@@ -136,6 +142,18 @@ void Shooter::SetHood(units::volt_t targetVoltage)
 void Shooter::SetHoodRPM(units::revolutions_per_minute_t targetRPM)
 {
     hood.Set(ControlMode::Velocity, ((targetRPM.value() / kScaleFactorFly) / 600.0));
+}
+
+bool Shooter::TempUpToSpeed()
+{
+    if ((std::abs(hood.GetSelectedSensorVelocity() - hood.GetClosedLoopTarget()) < 100) && (std::abs(shooterA.GetSelectedSensorVelocity() - shooterA.GetClosedLoopTarget()) < 100))
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 void Shooter::SetIndexer(double setValue)
@@ -185,6 +203,10 @@ units::revolutions_per_minute_t Shooter::GetShooterRPM()
 
 Shooter::State Shooter::CalculateShot(units::inch_t distance)
 {
-    State shotStats = {0_rpm, 0_deg};
+    double ratio = 7.5 / 7;
+
+    double mainWheel = 8073 + (-0.00325 * std::pow(distance.value(), 3)) + (1.2191 * std::pow(distance.value(), 2)) + (-139.806 * std::pow(distance.value(), 1));
+
+    State shotStats = {units::revolutions_per_minute_t{mainWheel}, units::revolutions_per_minute_t{mainWheel * ratio}, 0_deg};
     return shotStats;
 }

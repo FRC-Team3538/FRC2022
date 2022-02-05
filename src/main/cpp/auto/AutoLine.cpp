@@ -1,8 +1,12 @@
 #include "auto/AutoLine.hpp"
 
-#include <frc/Filesystem.h>
-#include <wpi/fs.h>
-#include <wpi/SmallString.h>
+#include "lib/AutoHelper.h"
+
+#include <frc/trajectory/constraint/DifferentialDriveKinematicsConstraint.h>
+#include <frc/trajectory/constraint/DifferentialDriveVoltageConstraint.h>
+#include <frc/trajectory/constraint/CentripetalAccelerationConstraint.h>
+
+#include <iostream>
 
 // Name for Smart Dash Chooser
 std::string AutoLine::GetName()
@@ -29,38 +33,27 @@ void AutoLine::NextState()
 
 void AutoLine::Init()
 {
+
     units::feet_per_second_t maxLinearVel = 4_fps;
     // units::standard_gravity_t maxCentripetalAcc = 0.5_SG;
     units::feet_per_second_squared_t maxLinearAcc = 4_fps_sq;
 
     // frc::TrajectoryConfig config(Drivetrain::kMaxSpeedLinear, Drivetrain::kMaxAccelerationLinear);
     frc::TrajectoryConfig config(maxLinearVel, maxLinearAcc);
-    //config.AddConstraint(frc::CentripetalAccelerationConstraint{12_mps_sq});
+    // config.AddConstraint(frc::CentripetalAccelerationConstraint{5_mps_sq});
+    // config.AddConstraint(frc::DifferentialDriveVoltageConstraint{IO.drivetrain.GetFeedForward(), IO.drivetrain.GetKinematics(), 5_V});
+    // config.AddConstraint(frc::DifferentialDriveKinematicsConstraint{IO.drivetrain.GetKinematics(), 4_fps});
     config.SetReversed(false);
 
-    std::vector<frc::Spline<5>::ControlVector> p1;
-
-    {
-        std::string filePath = frc::filesystem::GetDeployDirectory();
-        filePath = fs::path{filePath}.append("PathWeaver").append("Paths").append("Line.path").c_str();
-        
-
-        io::CSVReader<6> csv(filePath);
-        csv.read_header(io::ignore_extra_column | io::ignore_missing_column, "X", "Y", "Tangent X", "Tangent Y", "ddx", "ddy");
-        double x, y, dx, dy, ddx = 0, ddy = 0;
-        while (csv.read_row(x, y, dx, dy, ddx, ddy))
-        {
-            std::cout << x << ", " << dx << ", " << ddx << ", " << y << ", " << dy << ", " << ddy << ", " << std::endl;
-            p1.push_back({{x, dx, ddx}, {y, dy, ddy}});
-        }
-    }
-
-    m_trajectory = frc::TrajectoryGenerator::GenerateTrajectory(p1, config);
+    m_trajectory = rj::AutoHelper::LoadTrajectory("Straight Line path", &config);
 
     m_autoTimer.Reset();
     m_autoTimer.Start();
 
-    IO.drivetrain.ResetOdometry(m_trajectory.InitialPose());
+    auto pose = m_trajectory.InitialPose();
+    IO.drivetrain.ResetOdometry(pose);
+    // IO.drivetrain.GetField().GetObject("traj")->SetTrajectory(m_trajectory);
+    // std::cout << m_trajectory.States().size() << ", " << m_trajectory.TotalTime().value() << std::endl;
 }
 
 // Execute the program
@@ -70,10 +63,18 @@ void AutoLine::Run()
     {
     case 0:
     {
+        // std::cout << m_autoTimer.Get().value() << std::endl;
         auto reference = m_trajectory.Sample(m_autoTimer.Get());
-        auto speeds = IO.m_ramsete.Calculate(IO.drivetrain.GetPose(), reference);
 
-        IO.drivetrain.Drive(speeds.vx, speeds.omega);
+        frc::SmartDashboard::PutNumber("traj/t", reference.t.value());
+        frc::SmartDashboard::PutNumber("traj/x", reference.pose.Translation().X().value());
+        frc::SmartDashboard::PutNumber("traj/y", reference.pose.Translation().Y().value());
+        frc::SmartDashboard::PutNumber("traj/theta", reference.pose.Rotation().Radians().value());
+        frc::SmartDashboard::PutNumber("traj/k", reference.curvature.value());
+        frc::SmartDashboard::PutNumber("traj/v", reference.velocity.value());
+        frc::SmartDashboard::PutNumber("traj/a", reference.acceleration.value());
+
+        IO.drivetrain.Drive(reference);
 
         if ((m_autoTimer.Get() > m_trajectory.TotalTime()))
         {
@@ -83,13 +84,13 @@ void AutoLine::Run()
     }
     default:
     {
+        // std::cout << "Done!" << std::endl;
         IO.drivetrain.Arcade(0.0, 0.0);
     }
     }
-
-    UpdateSmartDash();
 }
 
+// Called Automagically by AutoPrograms (RobotPeriodic)
 void AutoLine::UpdateSmartDash()
 {
     frc::SmartDashboard::PutNumber("Auto State", m_state);

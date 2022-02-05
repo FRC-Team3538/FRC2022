@@ -160,3 +160,7 @@ bin/
 
 # Simulation GUI and other tools window save file
 *-window.json
+
+# pathplanner generated csv/json files - not necessary for our use.
+src/main/deploy/pathplanner/generatedCSV
+src/main/deploy/pathplanner/generatedJSON

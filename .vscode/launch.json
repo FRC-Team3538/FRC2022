@@ -10,6 +10,7 @@
       "name": "WPILib Desktop Debug",
       "request": "launch",
       "desktop": true,
+      "sourceFileMap": { "/__w/allwpilib/allwpilib/": "/home/dereck/projects/allwpilib/" }
     },
     {
       "type": "wpilib",
@@ -19,3 +20,9 @@
     }
   ]
 }
+
+/* 
+Unable to open 'DifferentialDrivetrainSim.cpp': 
+Unable to read file '/__w/allwpilib/allwpilib/wpilibc/src/main/native/cpp/simulation/DifferentialDrivetrainSim.cpp'  
+(Error: Unable to resolve nonexistent file '/__w/allwpilib/allwpilib/wpilibc/src/main/native/cpp/simulation/DifferentialDrivetrainSim.cpp').
+*/

@@ -20,7 +20,6 @@ private:
     AutoInterface *m_autoProgram;
 
     // SmartDash Chooser
-    frc::SendableChooser<std::string> m_chooser;
 
 public:
     // Constructor requires a reference to the RobotMap
@@ -33,4 +32,6 @@ public:
     // Run the selected program
     void Run();
     void SmartDash();
+    frc::SendableChooser<std::string> m_chooser;
+
 };

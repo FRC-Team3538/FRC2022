@@ -2,6 +2,16 @@
 
 #include <wpi/timestamp.h>
 
+// Constructor
+// *** ALSO PUT SUBSYSTEMS HERE ***
+Robotmap::Robotmap()
+{
+    subsystems.push_back(&drivetrain);
+    subsystems.push_back(&shooter);
+    subsystems.push_back(&rjVision);
+    subsystems.push_back(&climber);
+}
+
 /**
  * Ran periodically in Robot.cpp
  * Cycles through the systems (one system per loop)
@@ -10,13 +20,12 @@
  */
 void Robotmap::UpdateSmartDash()
 {
-    subsystems[telemetryCt]->UpdateTelemetry();
-
-    ++telemetryCt;
-
-    if (telemetryCt == subsystems.size()) {
-        // frc::SmartDashboard::PutNumber("pdp/Voltage", pdp.GetVoltage());
-        // frc::SmartDashboard::PutNumber("pdp/TotalCurrent", pdp.GetTotalCurrent());
+    if (telemetryCt < subsystems.size())
+    {
+        subsystems[telemetryCt]->UpdateTelemetry();
+    }
+    else if (telemetryCt == subsystems.size())
+    {
         pdpVoltageEntry.SetDouble(pdp.GetVoltage());
         pdpTotalCurrentEntry.SetDouble(pdp.GetTotalCurrent());
 
@@ -29,8 +38,11 @@ void Robotmap::UpdateSmartDash()
         frc::DataLogManager::GetLog().AppendDouble(pdpVoltageDatalogEntry, pdp.GetVoltage(), wpi::Now());
         frc::DataLogManager::GetLog().AppendDoubleArray(pdpCurrentDatalogEntry, currentVector, wpi::Now());
         
+        // Restart the loop
         telemetryCt = 0;
     }
+
+    ++telemetryCt;
 }
 
 /**
@@ -38,8 +50,13 @@ void Robotmap::UpdateSmartDash()
  * runs ConfigureSystem()
  *
  */
-void Robotmap::ConfigureMotors()
+void Robotmap::ConfigureSystem()
 {
     for (auto system : subsystems)
         system->ConfigureSystem();
+}
+
+void Robotmap::watchDog()
+{
+    std::cout << "SAD WATCHDOG" << std::endl;
 }

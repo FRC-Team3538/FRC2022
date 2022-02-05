@@ -24,6 +24,8 @@ public:
     {
         units::revolutions_per_minute_t shooterVelocity = 0_rpm;
 
+        units::revolutions_per_minute_t hoodVelocity = 0_rpm;
+
         units::degree_t turretAngle = 0_deg;
     };
 
@@ -45,6 +47,7 @@ public:
 
     void SetTurret(units::volt_t targetVolts);
     void SetShooter(units::volt_t targetVolts);
+    void SetShooterState(State shotStats);
 
     void SetFeeder(units::volt_t targetVolts);
     void SetHood(units::volt_t targetVolts);
@@ -61,9 +64,11 @@ public:
 
     State CalculateShot(units::inch_t distance);
 
+    bool TempUpToSpeed();
+
 private:
     WPI_TalonFX intake{10};
-    // WPI_TalonFX indexerA{11};
+    WPI_TalonFX indexerA{11};
     // WPI_TalonFX indexerB{12};
     WPI_TalonFX feeder{13};
     WPI_TalonFX shooterA{14};
