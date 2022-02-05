@@ -203,6 +203,7 @@ void Drivetrain::Periodic()
 {
     UpdateOdometry();
 }
+
 void Drivetrain::SetBrakeMode()
 {
   m_driveL0.SetNeutralMode(NeutralMode::Brake);
@@ -212,6 +213,7 @@ void Drivetrain::SetBrakeMode()
   m_driveR1.SetNeutralMode(NeutralMode::Brake);
   m_driveR2.SetNeutralMode(NeutralMode::Brake);
 }
+
 void Drivetrain::SetCoastMode()
 {
   m_driveL0.SetNeutralMode(NeutralMode::Coast);
@@ -221,6 +223,7 @@ void Drivetrain::SetCoastMode()
   m_driveR1.SetNeutralMode(NeutralMode::Coast);
   m_driveR2.SetNeutralMode(NeutralMode::Coast);
 }
+
 void Drivetrain::UpdateTelemetry()
 {
     m_fieldSim.SetRobotPose(m_odometry.GetPose());

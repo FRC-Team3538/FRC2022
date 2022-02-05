@@ -4,7 +4,7 @@
 #include <wpi/fs.h>
 #include <wpi/SmallString.h>
 
-#include <pathplanner/lib/PathPlanner.h>
+#include <lib/pathplanner/PathPlanner.h>
 
 #include <frc/trajectory/TrajectoryGenerator.h>
 #include <frc/trajectory/TrajectoryParameterizer.h>

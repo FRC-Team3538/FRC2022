@@ -3,7 +3,7 @@
 // the WPILib BSD license file in the root directory of this project.
 
 #include "Robot.h"
-#include <pathplanner/lib/PathPlanner.h>
+#include <lib/pathplanner/PathPlanner.h>
 
 using namespace pathplanner;
 
@@ -22,6 +22,8 @@ void Robot::RobotInit()
 {
   IO.watchdog.Disable();
   IO.ConfigureMotors();
+  IO.drivetrain.SetCoastMode();
+
   frc::SmartDashboard::PutNumber("Feeder Voltage", 0.0);
   frc::SmartDashboard::PutNumber("Shooter Voltage", 0.0);
   frc::SmartDashboard::PutNumber("Hood Wheel Voltage", 0.0);
@@ -167,26 +169,36 @@ void Robot::TeleopPeriodic()
     //IO.shooter.SetIntake(units::volt_t{intakeVoltage});
   }
 
-
-
 }
 
-void Robot::DisabledInit() {
+void Robot::DisabledInit() 
+{
   brakeTimer.Reset();
   brakeTimer.Start();
 }
-void Robot::DisabledPeriodic() {
+
+void Robot::DisabledPeriodic() 
+{
   frc::SmartDashboard::PutNumber("Driver FWD/REV (FWD +)", -IO.mainController.GetLeftY());
   frc::SmartDashboard::PutNumber("Driver LEFT/RIGHT (LEFT +)", -IO.mainController.GetRightX());
   frc::SmartDashboard::PutNumber("DT Gyro (CCW +)", IO.drivetrain.GetYaw().Radians().value());
+
   if (brakeTimer.Get() > 3.0_s)
   {
     IO.drivetrain.SetCoastMode();
     }
-  }
-  // steps afterward:
-  // + voltage => fwd motion
-  // fwd motion => + encoder count
+}
+
+
+void Robot::SimulationInit() 
+{
+
+}
+
+void Robot::SimulationPeriodic() 
+{
+  IO.drivetrain.SimulationPeriodic();
+}
 
 
 void Robot::TestInit() {}

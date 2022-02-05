@@ -29,6 +29,9 @@ public:
   void DisabledInit() override;
   void DisabledPeriodic() override;
 
+  void SimulationInit() override;
+  void SimulationPeriodic() override;
+
   void TestInit() override;
   void TestPeriodic() override;
 
