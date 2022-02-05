@@ -45,6 +45,10 @@ Drivetrain::Drivetrain()
 
     // Robot Pose Display
     frc::SmartDashboard::PutData("Field", &m_fieldSim);
+
+    // Yaw PID
+    m_yawPID.EnableContinuousInput(-180, 180);
+    //m_yawPID.SetIntegratorRange(0.05, 0.5);
 }
 
 // Teleop Control
@@ -201,14 +205,7 @@ void Drivetrain::SetCoastMode()
 
 void Drivetrain::UpdateTelemetry() { }
 
-void Drivetrain::ConfigureSystem()
-{
-    frc::SmartDashboard::PutNumber("P", 0.0);
-    frc::SmartDashboard::PutNumber("I", 0.0);
-    frc::SmartDashboard::PutNumber("D", 0.0);
-    m_yawPID.EnableContinuousInput(-180, 180);
-    //m_yawPID.SetIntegratorRange(0.05, 0.5);
-}
+void Drivetrain::ConfigureSystem() { }
 
 void Drivetrain::InitSendable(wpi::SendableBuilder &builder)
 {
