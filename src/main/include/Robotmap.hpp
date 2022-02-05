@@ -27,10 +27,9 @@ public:
 
     // *** PUT SUBSYSTEMS HERE ***
     Drivetrain drivetrain;
-    Shooter shooter;
-    vision::RJVisionPipeline rjVision;
+    // Shooter shooter;
+    // vision::RJVisionPipeline rjVision;
 
-    // *** ALSO PUT SUBSYSTEMS HERE ***
     Robotmap();
 
     void UpdateSmartDash();

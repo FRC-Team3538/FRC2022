@@ -1,11 +1,12 @@
 #include "Robotmap.hpp"
 
 // Constructor
+// *** ALSO PUT SUBSYSTEMS HERE ***
 Robotmap::Robotmap()
 {
     subsystems.push_back(&drivetrain);
-    subsystems.push_back(&shooter);
-    subsystems.push_back(&rjVision);
+    // subsystems.push_back(&shooter);
+    // subsystems.push_back(&rjVision);
 }
 
 /**

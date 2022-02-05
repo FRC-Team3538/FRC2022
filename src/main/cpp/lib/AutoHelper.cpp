@@ -9,6 +9,8 @@
 #include <frc/trajectory/TrajectoryGenerator.h>
 #include <frc/trajectory/TrajectoryParameterizer.h>
 
+#include <iostream>
+
 
 namespace rj {
 

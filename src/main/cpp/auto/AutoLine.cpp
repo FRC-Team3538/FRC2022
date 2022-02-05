@@ -6,6 +6,8 @@
 #include <frc/trajectory/constraint/DifferentialDriveVoltageConstraint.h>
 #include <frc/trajectory/constraint/CentripetalAccelerationConstraint.h>
 
+#include <iostream>
+
 // Name for Smart Dash Chooser
 std::string AutoLine::GetName()
 {
@@ -38,9 +40,9 @@ void AutoLine::Init()
 
     // frc::TrajectoryConfig config(Drivetrain::kMaxSpeedLinear, Drivetrain::kMaxAccelerationLinear);
     frc::TrajectoryConfig config(maxLinearVel, maxLinearAcc);
-    config.AddConstraint(frc::CentripetalAccelerationConstraint{5_mps_sq});
-    config.AddConstraint(frc::DifferentialDriveVoltageConstraint{IO.drivetrain.GetFeedForward(), IO.drivetrain.GetKinematics(), 5_V});
-    config.AddConstraint(frc::DifferentialDriveKinematicsConstraint{IO.drivetrain.GetKinematics(), 4_fps});
+    // config.AddConstraint(frc::CentripetalAccelerationConstraint{5_mps_sq});
+    // config.AddConstraint(frc::DifferentialDriveVoltageConstraint{IO.drivetrain.GetFeedForward(), IO.drivetrain.GetKinematics(), 5_V});
+    // config.AddConstraint(frc::DifferentialDriveKinematicsConstraint{IO.drivetrain.GetKinematics(), 4_fps});
     config.SetReversed(false);
 
     m_trajectory = rj::AutoHelper::LoadTrajectory("Straight Line path", &config);
@@ -50,6 +52,7 @@ void AutoLine::Init()
 
     auto pose = m_trajectory.InitialPose();
     IO.drivetrain.ResetOdometry(pose);
+    std::cout << m_trajectory.States().size() << ", " << m_trajectory.TotalTime().value() << std::endl;
 }
 
 // Execute the program
@@ -59,6 +62,7 @@ void AutoLine::Run()
     {
     case 0:
     {
+        // std::cout << m_autoTimer.Get().value() << std::endl;
         auto reference = m_trajectory.Sample(m_autoTimer.Get());
 
         //IO.drivetrain.Drive(reference);
@@ -71,6 +75,7 @@ void AutoLine::Run()
     }
     default:
     {
+        std::cout << "Done!" << std::endl;
         IO.drivetrain.Arcade(0.0, 0.0);
     }
     }

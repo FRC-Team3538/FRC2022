@@ -60,8 +60,11 @@ void Drivetrain::Arcade(double forward, double rotate)
 
 void Drivetrain::SetSpeeds(const frc::DifferentialDriveWheelSpeeds &speeds)
 {
+    std::cout << "kine, " << speeds.left.value() << ", " << speeds.right.value() << std::endl;
     auto leftFeedforward = m_feedforward.Calculate(speeds.left);
     auto rightFeedforward = m_feedforward.Calculate(speeds.right);
+    std::cout << "ff, " << leftFeedforward.value() << ", " << rightFeedforward.value() << std::endl;
+
 
     auto leftRate = m_driveL0.GetSelectedSensorVelocity() * kDPP * 10.0;
     auto rightRate = m_driveR0.GetSelectedSensorVelocity() * kDPP * 10.0;
@@ -76,9 +79,6 @@ void Drivetrain::SetSpeeds(const frc::DifferentialDriveWheelSpeeds &speeds)
 
     m_leftGroup.SetVoltage(units::volt_t{leftOutput} + leftFeedforward);
     m_rightGroup.SetVoltage(units::volt_t{rightOutput} + rightFeedforward);
-
-    // m_leftGroup.SetVoltage(leftFeedforward);
-    // m_rightGroup.SetVoltage(rightFeedforward);
 }
 
 void Drivetrain::Drive(units::meters_per_second_t xSpeed,

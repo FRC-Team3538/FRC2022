@@ -7,15 +7,18 @@
 
 using namespace pathplanner;
 
-double Robot::deadband(double val, double deadband)
+double Robot::deadband(double val, double min, double max)
 {
-  if (val > 1.0)
-    return 1.0;
-  if (val < -1.0)
-    return -1.0;
-  if (std::abs(val) < deadband)
+  if (val > max) {
+    return max;
+  } else if (val < -max) {
+    return -max;
+  } else if (std::abs(val) < min) {
     return 0.0;
-  return val;
+  } else {
+    double sgn = val / std::abs(val);
+    return sgn * (std::abs(val) - min) / (max - min) * max;
+  }
 }
 
 void Robot::RobotInit()
@@ -36,7 +39,7 @@ void Robot::RobotPeriodic()
   IO.UpdateSmartDash();
   IO.drivetrain.Periodic();
   autoprograms.SmartDash();
-  IO.rjVision.Periodic();
+  // IO.rjVision.Periodic();
 }
 
 void Robot::AutonomousInit()
@@ -59,40 +62,56 @@ void Robot::TeleopInit()
 
 void Robot::TeleopPeriodic()
 {
-  if (IO.mainController.GetTriangleButton())
+  if (IO.mainController.IsConnected())
   {
-    vision::RJVisionPipeline::visionData data = IO.rjVision.Run();
-    std::cout << data.distance.value() << std::endl;
-    if (data.filled)
+    if (IO.mainController.GetTriangleButton())
     {
-      if (IO.drivetrain.TurnRel(0.0, data.angle, 1_deg))
-      {
-        Shooter::State shotStats = IO.shooter.CalculateShot(data.distance);
-        IO.shooter.SetShooterRPM(shotStats.shooterVelocity);
-        IO.shooter.SetHoodRPM(shotStats.hoodVelocity);
-        if (IO.shooter.TempUpToSpeed())
-        {
-          IO.shooter.SetFeeder(10_V);
-          IO.shooter.SetIntake(10_V);
-        }
-      }
+      // vision::RJVisionPipeline::visionData data = IO.rjVision.Run();
+      // std::cout << data.distance.value() << std::endl;
+      // if (data.filled)
+      // {
+      //   if (IO.drivetrain.TurnRel(0.0, data.angle, 1_deg))
+      //   {
+      //     Shooter::State shotStats = IO.shooter.CalculateShot(data.distance);
+      //     IO.shooter.SetShooterRPM(shotStats.shooterVelocity);
+      //     IO.shooter.SetHoodRPM(shotStats.hoodVelocity);
+      //     if (IO.shooter.TempUpToSpeed())
+      //     {
+      //       IO.shooter.SetFeeder(10_V);
+      //       IO.shooter.SetIntake(10_V);
+      //     }
+      //   }
+      // }
+    }
+    else
+    {
+      auto fwd = deadband(IO.mainController.GetLeftY(), deadbandVal, 1.0);
+      auto rot = deadband(IO.mainController.GetRightX(), deadbandVal, 1.0);
+      IO.drivetrain.Arcade(fwd, rot);
+
+      double rightTrigger = deadband((IO.mainController.GetR2Axis() + 1.0) / 2.0, deadbandVal, 1.0);
+      double leftTrigger = deadband((IO.mainController.GetL2Axis() + 1.0) / 2.0, deadbandVal, 1.0);
+      
+      double intakeVoltage = (right - left) * 13.0;
+
+      IO.shooter.SetIntake(units::volt_t{intakeVoltage});
+
+      // ???
+      IO.shooter.SetFeeder(0_V);
+      IO.shooter.SetHoodRPM(units::revolutions_per_minute_t{0});
+      IO.shooter.SetShooterRPM(units::revolutions_per_minute_t{0});
     }
   }
   else
   {
-    auto fwd = deadband(IO.mainController.GetLeftY(), deadbandVal);
-    auto rot = deadband(IO.mainController.GetRightX(), deadbandVal);
-    IO.drivetrain.Arcade(fwd, rot);
-    
-    double intakeVoltage = IO.mainController.IsConnected() ? (((deadband((IO.mainController.GetR2Axis() + 1.0) / 2.0, deadbandVal)) - (deadband((IO.mainController.GetL2Axis() + 1.0) / 2.0, deadbandVal))) * 13.0) : 0.0;
-    IO.shooter.SetIntake(units::volt_t{intakeVoltage});
+    IO.shooter.SetIntake(units::volt_t{0});
 
     // ???
     IO.shooter.SetFeeder(0_V);
     IO.shooter.SetHoodRPM(units::revolutions_per_minute_t{0});
     IO.shooter.SetShooterRPM(units::revolutions_per_minute_t{0});
   }
-
+/*
   {
     double shooterVoltage;
 
@@ -175,6 +194,7 @@ void Robot::TeleopPeriodic()
 
     //IO.shooter.SetIntake(units::volt_t{intakeVoltage});
   }
+  */
 
 }
 

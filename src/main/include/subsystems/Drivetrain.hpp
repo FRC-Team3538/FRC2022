@@ -84,8 +84,8 @@ private:
     static constexpr auto kAangular = 0.043271_V / 1_rad_per_s_sq;
 
     // Velocity Control PID (Is this really required ???)
-    frc2::PIDController m_leftPIDController{1.1827, 0.0, 0.0};
-    frc2::PIDController m_rightPIDController{1.1827, 0.0, 0.0};
+    frc2::PIDController m_leftPIDController{0.0, 0.0, 0.0}; // {1.1827, 0.0, 0.0};
+    frc2::PIDController m_rightPIDController{0.0, 0.0, 0.0}; // {1.1827, 0.0, 0.0};
 
     // Average Battery Resistance (Simulation)
     static constexpr auto kBatteryResistance = 0.03;
