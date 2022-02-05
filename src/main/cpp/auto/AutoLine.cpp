@@ -48,7 +48,8 @@ void AutoLine::Init()
     m_autoTimer.Reset();
     m_autoTimer.Start();
 
-    IO.drivetrain.ResetOdometry(m_trajectory.InitialPose());
+    auto pose = m_trajectory.InitialPose();
+    IO.drivetrain.ResetOdometry(pose);
 }
 
 // Execute the program
@@ -60,7 +61,7 @@ void AutoLine::Run()
     {
         auto reference = m_trajectory.Sample(m_autoTimer.Get());
 
-        IO.drivetrain.Drive(reference);
+        //IO.drivetrain.Drive(reference);
 
         if ((m_autoTimer.Get() > m_trajectory.TotalTime()))
         {
@@ -73,10 +74,9 @@ void AutoLine::Run()
         IO.drivetrain.Arcade(0.0, 0.0);
     }
     }
-
-    UpdateSmartDash();
 }
 
+// Called Automagically by AutoPrograms (RobotPeriodic)
 void AutoLine::UpdateSmartDash()
 {
     frc::SmartDashboard::PutNumber("Auto State", m_state);

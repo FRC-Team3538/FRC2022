@@ -39,6 +39,9 @@
           "open": true
         },
         "open": true,
+        "pose": {
+          "open": true
+        },
         "right": {
           "open": true
         }

@@ -54,7 +54,7 @@ public:
     void UpdateOdometry();
     void ResetOdometry(const frc::Pose2d &pose);
     frc::Rotation2d GetYaw();
-    frc::Pose2d GetPose() const { return m_odometry.GetPose(); }
+    frc::Pose2d GetPose() const;
     frc::DifferentialDriveKinematics GetKinematics() { return m_kinematics; }
     frc::SimpleMotorFeedforward<units::meter> GetFeedForward() { return m_feedforward; }
 

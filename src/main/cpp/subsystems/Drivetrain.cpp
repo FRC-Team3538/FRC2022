@@ -87,16 +87,22 @@ void Drivetrain::Drive(units::meters_per_second_t xSpeed,
     SetSpeeds(m_kinematics.ToWheelSpeeds({xSpeed, 0_mps, rot}));
 }
 
+frc::Pose2d Drivetrain::GetPose() const 
+{ 
+    return m_odometry.GetPose(); 
+}
+
 void Drivetrain::UpdateOdometry()
 {
-    auto left = m_driveL0.GetSelectedSensorPosition(0) * kDPP;
-    auto right = m_driveR0.GetSelectedSensorPosition(0) * kDPP;
+    auto left = m_driveL0.GetSelectedSensorPosition(0);
+    auto right = m_driveR0.GetSelectedSensorPosition(0);
+    auto yaw = GetYaw();
 
-    m_odometry.Update(GetYaw(),
-                      units::meter_t(left),
-                      units::meter_t(right));
-                      
-    m_fieldSim.SetRobotPose(m_odometry.GetPose());
+    m_odometry.Update(yaw,
+                      units::meter_t(left * kDPP),
+                      units::meter_t(right * kDPP));
+                   
+    m_fieldSim.SetRobotPose(GetPose());  // TEMP DEBUG OFFSET
 }
 
 void Drivetrain::ResetOdometry(const frc::Pose2d &pose)
@@ -108,8 +114,6 @@ void Drivetrain::ResetOdometry(const frc::Pose2d &pose)
     m_odometry.ResetPosition(pose, pose.Rotation());
 
     m_drivetrainSimulator.SetPose(pose);
-
-    m_fieldSim.SetRobotPose(pose);
 }
 
 frc::Rotation2d Drivetrain::GetYaw()
@@ -153,7 +157,7 @@ void Drivetrain::Drive(const frc::Trajectory::State& target)
 
 void Drivetrain::SimulationPeriodic()
 {
-    // To update our simulation, we set motor voltage inputs, update the
+    // To update our simulation, we set motor `tage inputs, update the
     // simulation, and write the simulated positions and velocities to our
     // simulated encoder and gyro. We negate the right side so that positive
     // voltages make the right side move forward.
@@ -168,16 +172,18 @@ void Drivetrain::SimulationPeriodic()
     auto left_sim = m_driveL0.GetSimCollection();
     auto left_pos = m_drivetrainSimulator.GetLeftPosition().to<double>();
     auto left_vel = m_drivetrainSimulator.GetLeftVelocity().to<double>();
-    left_sim.SetIntegratedSensorRawPosition(left_pos / kDPP.value());
+    //left_sim.SetIntegratedSensorRawPosition(left_pos / kDPP.value());
     left_sim.SetIntegratedSensorVelocity(left_vel / kDPP.value() / 10);
+    m_driveL0.SetSelectedSensorPosition(left_pos / kDPP.value());
     //left_sim.SetBusVoltage(vbatt);
 
     // Right Motors
     auto right_sim = m_driveR0.GetSimCollection();
     auto right_pos = m_drivetrainSimulator.GetRightPosition().to<double>();
     auto right_vel = m_drivetrainSimulator.GetRightVelocity().to<double>();
-    right_sim.SetIntegratedSensorRawPosition(right_pos / kDPP.value());
+    //right_sim.SetIntegratedSensorRawPosition(right_pos / kDPP.value());
     right_sim.SetIntegratedSensorVelocity(right_vel / kDPP.value() / 10);
+    m_driveR0.SetSelectedSensorPosition(right_pos / kDPP.value());
     //right_sim.SetBusVoltage(vbatt);
     
     // IMU 
@@ -246,11 +252,11 @@ void Drivetrain::InitSendable(wpi::SendableBuilder &builder)
 
     // Pose
     builder.AddDoubleProperty(
-        "pose/x", [this] { return m_odometry.GetPose().X().value(); }, nullptr);
+        "pose/x", [this] { return GetPose().X().value(); }, nullptr);
     builder.AddDoubleProperty(
-        "pose/y", [this] { return m_odometry.GetPose().Y().value(); }, nullptr);
+        "pose/y", [this] { return GetPose().Y().value(); }, nullptr);
     builder.AddDoubleProperty(
-        "pose/yaw", [this] { return m_odometry.GetPose().Rotation().Degrees().value(); }, nullptr);
+        "pose/yaw", [this] { return GetPose().Rotation().Degrees().value(); }, nullptr);
 
     // Yaw PID
     builder.AddDoubleProperty(
