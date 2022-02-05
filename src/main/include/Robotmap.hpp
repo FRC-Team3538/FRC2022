@@ -27,7 +27,7 @@ public:
     frc::Watchdog watchdog{units::second_t{0.02}, test};
 
     // *** PUT SUBSYSTEMS HERE ***
-    Drivetrain drivetrain{false};
+    Drivetrain drivetrain;
     Shooter shooter;
     vision::RJVisionPipeline rjVision;
 

@@ -24,6 +24,8 @@ void Robot::RobotInit()
   IO.ConfigureMotors();
   IO.drivetrain.SetCoastMode();
 
+  frc::SmartDashboard::PutData("DriveBase", &IO.drivetrain);
+
   frc::SmartDashboard::PutNumber("Feeder Voltage", 0.0);
   frc::SmartDashboard::PutNumber("Shooter Voltage", 0.0);
   frc::SmartDashboard::PutNumber("Hood Wheel Voltage", 0.0);
