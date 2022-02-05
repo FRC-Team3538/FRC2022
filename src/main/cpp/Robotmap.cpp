@@ -6,6 +6,8 @@
 // *** ALSO PUT SUBSYSTEMS HERE ***
 Robotmap::Robotmap()
 {
+    pdpVoltageDatalogEntry = frc::DataLogManager::GetLog().Start("pdp_voltage", "double");
+    pdpCurrentDatalogEntry = frc::DataLogManager::GetLog().Start("pdp_current", "double[]");
     subsystems.push_back(&drivetrain);
     subsystems.push_back(&shooter);
     subsystems.push_back(&rjVision);
@@ -31,7 +33,7 @@ void Robotmap::UpdateSmartDash()
 
         std::vector<double> currentVector;
 
-        for(int i = 0; i < 16; i++) {
+        for(int i = 0; i < 20; i++) {
             currentVector.push_back(pdp.GetCurrent(i));
         }
 

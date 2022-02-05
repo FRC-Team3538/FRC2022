@@ -22,9 +22,7 @@ class Robotmap
 {
 private:
     std::vector<Subsystem *> subsystems;
-  
-    // pdpVoltageDatalogEntry = frc::DataLogManager::GetLog().Start("pdp_voltage", "double");
-    // pdpCurrentDatalogEntry = frc::DataLogManager::GetLog().Start("pdp_current", "double[]");
+
     int pdpVoltageDatalogEntry;
     int pdpCurrentDatalogEntry;
 
