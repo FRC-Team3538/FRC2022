@@ -1,0 +1,14 @@
+{
+  "NetworkTables Settings": {
+    "mode": "Client",
+    "serverTeam": "10.83.32.2"
+  },
+  "SmartDashboard": {
+    "shooter": {
+      "open": true
+    }
+  },
+  "limelight": {
+    "open": true
+  }
+}
