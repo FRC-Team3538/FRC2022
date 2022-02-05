@@ -30,6 +30,11 @@
 #include "ctre/Phoenix.h"
 #include "Subsystem.hpp"
 
+// leave this for wandows
+#ifndef M_PI
+    #define M_PI    3.14159265358979323846
+#endif
+
 /**
  * Represents a differential drive style drivetrain.
  */
@@ -63,6 +68,8 @@ public:
     void UpdateTelemetry();
     void SetBrakeMode();
     void SetCoastMode();
+
+    frc::Field2d& GetField();
 
 private:
     /***************************************************************************/

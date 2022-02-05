@@ -66,7 +66,7 @@ void Drivetrain::SetSpeeds(const frc::DifferentialDriveWheelSpeeds &speeds)
     std::cout << "ff, " << leftFeedforward.value() << ", " << rightFeedforward.value() << std::endl;
 
 
-    auto leftRate = m_driveL0.GetSelectedSensorVelocity() * kDPP * 10.0;
+    auto leftRate = - m_driveL0.GetSelectedSensorVelocity() * kDPP * 10.0;
     auto rightRate = m_driveR0.GetSelectedSensorVelocity() * kDPP * 10.0;
 
     double leftOutput = m_leftPIDController.Calculate(
@@ -94,7 +94,8 @@ frc::Pose2d Drivetrain::GetPose() const
 
 void Drivetrain::UpdateOdometry()
 {
-    auto left = m_driveL0.GetSelectedSensorPosition(0);
+    // left is inverted, so sensor position is inverted
+    auto left = -m_driveL0.GetSelectedSensorPosition(0);
     auto right = m_driveR0.GetSelectedSensorPosition(0);
     auto yaw = GetYaw();
 
@@ -151,7 +152,11 @@ bool Drivetrain::TurnRel(double forward, units::degree_t target, units::degree_t
 
 void Drivetrain::Drive(const frc::Trajectory::State& target)
 {
-    auto speeds = m_ramsete.Calculate(GetPose(), target);
+    auto pose = GetPose();
+    auto speeds = m_ramsete.Calculate(pose, target);
+    frc::SmartDashboard::PutNumber("output_speed/vx", speeds.vx.value());
+    frc::SmartDashboard::PutNumber("output_speed/vy", speeds.vy.value());
+    frc::SmartDashboard::PutNumber("output_speed/vw", speeds.omega.value());
     Drive(speeds.vx, speeds.omega);
 }
 
@@ -217,6 +222,10 @@ void Drivetrain::SetCoastMode()
   m_driveR2.SetNeutralMode(NeutralMode::Coast);
 }
 
+frc::Field2d& Drivetrain::GetField() {
+    return m_fieldSim;
+}
+
 void Drivetrain::UpdateTelemetry() { }
 
 void Drivetrain::ConfigureSystem() { }
@@ -232,9 +241,9 @@ void Drivetrain::InitSendable(wpi::SendableBuilder &builder)
     builder.AddDoubleProperty(
         "left/voltage", [this] { return m_driveL0.GetMotorOutputVoltage(); }, nullptr);
     builder.AddDoubleProperty(
-        "left/position", [this] { return m_driveL0.GetSelectedSensorPosition() * kDPP.value(); }, nullptr);
+        "left/position", [this] { return - m_driveL0.GetSelectedSensorPosition() * kDPP.value(); }, nullptr);
     builder.AddDoubleProperty(
-        "left/velocity", [this] { return m_driveL0.GetSelectedSensorVelocity() * kDPP.value() * 10; }, nullptr);
+        "left/velocity", [this] { return - m_driveL0.GetSelectedSensorVelocity() * kDPP.value() * 10; }, nullptr);
 
     // Right Motors
     builder.AddDoubleProperty(
