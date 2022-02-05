@@ -13,10 +13,24 @@
 #include <frc/TimedRobot.h>
 
 
+#include "lib/wpi/DataLogManager.h"
+#include "lib/wpi/DataLog.h"
+
+
+
 class Robotmap
 {
 private:
     std::vector<Subsystem *> subsystems;
+  
+    // pdpVoltageDatalogEntry = frc::DataLogManager::GetLog().Start("pdp_voltage", "double");
+    // pdpCurrentDatalogEntry = frc::DataLogManager::GetLog().Start("pdp_current", "double[]");
+    int pdpVoltageDatalogEntry;
+    int pdpCurrentDatalogEntry;
+
+    nt::NetworkTableEntry pdpVoltageEntry = frc::SmartDashboard::GetEntry("/pdp/Voltage");
+    nt::NetworkTableEntry pdpTotalCurrentEntry = frc::SmartDashboard::GetEntry("/pdp/TotalCurrent");
+
     std::function<void(void)> test = std::bind(&Robotmap::watchDog, this);
 
 public:
@@ -31,7 +45,7 @@ public:
     Shooter shooter;
     vision::RJVisionPipeline rjVision;
     Climber climber;
-
+  
     Robotmap();
 
     void UpdateSmartDash();
@@ -40,5 +54,4 @@ public:
 
     // SmartDash Cycler
     size_t telemetryCt = 0;
- 
 };

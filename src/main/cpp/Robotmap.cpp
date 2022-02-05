@@ -1,5 +1,7 @@
 #include "Robotmap.hpp"
 
+#include <wpi/timestamp.h>
+
 // Constructor
 // *** ALSO PUT SUBSYSTEMS HERE ***
 Robotmap::Robotmap()
@@ -24,9 +26,18 @@ void Robotmap::UpdateSmartDash()
     }
     else if (telemetryCt == subsystems.size())
     {
-        frc::SmartDashboard::PutNumber("pdp/Voltage", pdp.GetVoltage());
-        frc::SmartDashboard::PutNumber("pdp/TotalCurrent", pdp.GetTotalCurrent());
+        pdpVoltageEntry.SetDouble(pdp.GetVoltage());
+        pdpTotalCurrentEntry.SetDouble(pdp.GetTotalCurrent());
 
+        std::vector<double> currentVector;
+
+        for(int i = 0; i < 16; i++) {
+            currentVector.push_back(pdp.GetCurrent(i));
+        }
+
+        frc::DataLogManager::GetLog().AppendDouble(pdpVoltageDatalogEntry, pdp.GetVoltage(), wpi::Now());
+        frc::DataLogManager::GetLog().AppendDoubleArray(pdpCurrentDatalogEntry, currentVector, wpi::Now());
+        
         // Restart the loop
         telemetryCt = 0;
     }

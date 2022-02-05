@@ -11,8 +11,7 @@
 
 #include <frc/smartdashboard/SmartDashboard.h>
 
-#include <frc/PS4Controller.h>
-
+#include "lib/DataLogUtils.h"
 
 class Robot : public frc::TimedRobot
 {
@@ -37,6 +36,8 @@ public:
 
 private:
   Robotmap IO;
+
+  rj::DataLogUtils dataLogUtils{};
 
   AutoPrograms autoprograms{IO};
 
