@@ -21,7 +21,7 @@ double Robot::deadband(double val, double deadband)
 void Robot::RobotInit()
 {
   IO.watchdog.Disable();
-  IO.ConfigureMotors();
+  IO.ConfigureSystem();
   IO.drivetrain.SetCoastMode();
 
   frc::SmartDashboard::PutData("DriveBase", &IO.drivetrain);
@@ -80,10 +80,15 @@ void Robot::TeleopPeriodic()
   }
   else
   {
-    IO.drivetrain.Arcade(deadband(IO.mainController.GetLeftY(), deadbandVal), deadband(IO.mainController.GetRightX(), deadbandVal));
-    IO.shooter.SetFeeder(0_V);
+    auto fwd = deadband(IO.mainController.GetLeftY(), deadbandVal);
+    auto rot = deadband(IO.mainController.GetRightX(), deadbandVal);
+    IO.drivetrain.Arcade(fwd, rot);
+    
     double intakeVoltage = IO.mainController.IsConnected() ? (((deadband((IO.mainController.GetR2Axis() + 1.0) / 2.0, deadbandVal)) - (deadband((IO.mainController.GetL2Axis() + 1.0) / 2.0, deadbandVal))) * 13.0) : 0.0;
     IO.shooter.SetIntake(units::volt_t{intakeVoltage});
+
+    // ???
+    IO.shooter.SetFeeder(0_V);
     IO.shooter.SetHoodRPM(units::revolutions_per_minute_t{0});
     IO.shooter.SetShooterRPM(units::revolutions_per_minute_t{0});
   }
@@ -181,21 +186,15 @@ void Robot::DisabledInit()
 
 void Robot::DisabledPeriodic() 
 {
-  frc::SmartDashboard::PutNumber("Driver FWD/REV (FWD +)", -IO.mainController.GetLeftY());
-  frc::SmartDashboard::PutNumber("Driver LEFT/RIGHT (LEFT +)", -IO.mainController.GetRightX());
-  frc::SmartDashboard::PutNumber("DT Gyro (CCW +)", IO.drivetrain.GetYaw().Radians().value());
-
+  // Automatic Coast Mode
   if (brakeTimer.Get() > 3.0_s)
   {
     IO.drivetrain.SetCoastMode();
-    }
+  }
 }
 
 
-void Robot::SimulationInit() 
-{
-
-}
+void Robot::SimulationInit() {}
 
 void Robot::SimulationPeriodic() 
 {

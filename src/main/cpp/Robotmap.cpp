@@ -16,18 +16,20 @@ Robotmap::Robotmap()
  */
 void Robotmap::UpdateSmartDash()
 {
-    subsystems[telemetryCt]->UpdateTelemetry();
+    if (telemetryCt < subsystems.size())
+    {
+        subsystems[telemetryCt]->UpdateTelemetry();
+    }
+    else if (telemetryCt == subsystems.size())
+    {
+        frc::SmartDashboard::PutNumber("pdp/Voltage", pdp.GetVoltage());
+        frc::SmartDashboard::PutNumber("pdp/TotalCurrent", pdp.GetTotalCurrent());
 
-    ++telemetryCt;
-
-    if (telemetryCt == subsystems.size()) {
-        // frc::SmartDashboard::PutNumber("pdp/Voltage", pdp.GetVoltage());
-        // frc::SmartDashboard::PutNumber("pdp/TotalCurrent", pdp.GetTotalCurrent());
-        pdpVoltageEntry.SetDouble(pdp.GetVoltage());
-        pdpTotalCurrentEntry.SetDouble(pdp.GetTotalCurrent());
-        
+        // Restart the loop
         telemetryCt = 0;
     }
+
+    ++telemetryCt;
 }
 
 /**
@@ -35,12 +37,11 @@ void Robotmap::UpdateSmartDash()
  * runs ConfigureSystem()
  *
  */
-void Robotmap::ConfigureMotors()
+void Robotmap::ConfigureSystem()
 {
     for (auto system : subsystems)
         system->ConfigureSystem();
 }
-
 
 void Robotmap::watchDog()
 {

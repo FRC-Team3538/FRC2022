@@ -67,10 +67,8 @@ void AutoLine_Backward::Run()
         frc::SmartDashboard::PutNumber("Drive State/A", reference.acceleration.value());
         frc::SmartDashboard::PutNumber("Drive State/k", reference.curvature.value());
 
-        auto speeds = IO.m_ramsete.Calculate(IO.drivetrain.GetPose(), reference);
-
-        IO.drivetrain.Drive(speeds.vx, speeds.omega);
-
+        IO.drivetrain.Drive(reference);
+        
         if ((m_autoTimer.Get() > m_trajectory.TotalTime()))
         {
             NextState();

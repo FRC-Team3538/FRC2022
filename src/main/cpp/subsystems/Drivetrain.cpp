@@ -43,12 +43,12 @@ Drivetrain::Drivetrain()
     // m_imu.Reset();
     m_imu.ConfigFactoryDefault();
 
-    // Robot Pose Display
-    frc::SmartDashboard::PutData("Field", &m_fieldSim);
-
     // Yaw PID
     m_yawPID.EnableContinuousInput(-180, 180);
     //m_yawPID.SetIntegratorRange(0.05, 0.5);
+
+    // Robot Pose Display
+    frc::SmartDashboard::PutData("Field", &m_fieldSim);
 }
 
 // Teleop Control
@@ -89,7 +89,6 @@ void Drivetrain::Drive(units::meters_per_second_t xSpeed,
 
 void Drivetrain::UpdateOdometry()
 {
-
     auto left = m_driveL0.GetSelectedSensorPosition(0) * kDPP;
     auto right = m_driveR0.GetSelectedSensorPosition(0) * kDPP;
 
@@ -97,7 +96,7 @@ void Drivetrain::UpdateOdometry()
                       units::meter_t(left),
                       units::meter_t(right));
                       
-     m_fieldSim.SetRobotPose(m_odometry.GetPose());
+    m_fieldSim.SetRobotPose(m_odometry.GetPose());
 }
 
 void Drivetrain::ResetOdometry(const frc::Pose2d &pose)
@@ -105,9 +104,12 @@ void Drivetrain::ResetOdometry(const frc::Pose2d &pose)
     m_driveL0.SetSelectedSensorPosition(0);
     m_driveR0.SetSelectedSensorPosition(0);
 
-    m_drivetrainSimulator.SetPose(pose);
     m_imu.SetFusedHeading(pose.Rotation().Degrees().value(), 50);
     m_odometry.ResetPosition(pose, pose.Rotation());
+
+    m_drivetrainSimulator.SetPose(pose);
+
+    m_fieldSim.SetRobotPose(pose);
 }
 
 frc::Rotation2d Drivetrain::GetYaw()
@@ -141,6 +143,12 @@ bool Drivetrain::TurnRel(double forward, units::degree_t target, units::degree_t
         Arcade(forward, rotate);
         return false;
     }
+}
+
+void Drivetrain::Drive(const frc::Trajectory::State& target)
+{
+    auto speeds = m_ramsete.Calculate(GetPose(), target);
+    Drive(speeds.vx, speeds.omega);
 }
 
 void Drivetrain::SimulationPeriodic()

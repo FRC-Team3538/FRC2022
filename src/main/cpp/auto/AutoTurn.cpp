@@ -58,9 +58,8 @@ void AutoTurn::Run()
     case 0:
     {
         auto reference = m_trajectory.Sample(m_autoTimer.Get());
-        auto speeds = IO.m_ramsete.Calculate(IO.drivetrain.GetPose(), reference);
 
-        IO.drivetrain.Drive(speeds.vx, speeds.omega);
+        IO.drivetrain.Drive(reference);
 
         if ((m_autoTimer.Get() > m_trajectory.TotalTime()))
         {

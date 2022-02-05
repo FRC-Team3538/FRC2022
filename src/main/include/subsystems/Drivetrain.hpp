@@ -4,23 +4,20 @@
 
 #pragma once
 
-#include <frc/AnalogGyro.h>
-#include <frc/Encoder.h>
-#include <frc/motorcontrol/PWMVictorSPX.h>
 #include <frc/motorcontrol/MotorControllerGroup.h>
 #include <frc/controller/PIDController.h>
 #include <frc/controller/SimpleMotorFeedforward.h>
 #include <frc/kinematics/DifferentialDriveKinematics.h>
 #include <frc/kinematics/DifferentialDriveOdometry.h>
-#include <frc/simulation/AnalogGyroSim.h>
 #include <frc/simulation/DifferentialDrivetrainSim.h>
-#include <frc/simulation/EncoderSim.h>
 #include <frc/smartdashboard/Field2d.h>
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <wpi/sendable/SendableRegistry.h>
 #include <wpi/sendable/SendableBuilder.h>
 #include <wpi/sendable/SendableHelper.h>
 #include <frc/system/plant/LinearSystemId.h>
+#include <frc/trajectory/Trajectory.h>
+#include <frc/controller/RamseteController.h>
 // #include <frc/ADIS16470_IMU.h>
 #include <units/angle.h>
 #include <units/angular_velocity.h>
@@ -52,6 +49,7 @@ public:
     void Drive(units::meters_per_second_t xSpeed,
                units::radians_per_second_t rot);
     bool TurnRel(double forward, units::degree_t target, units::degree_t tolerance);
+    void Drive(const frc::Trajectory::State& target);
 
     void UpdateOdometry();
     void ResetOdometry(const frc::Pose2d &pose);
@@ -78,7 +76,7 @@ private:
     static constexpr int kMotorCount = 3; // Per gearbox
 
     // Made these slightly more obscure to support use in calculating kMaxSpeedLinear/Angular at compile time.
-    static constexpr auto kMaxVoltage = 12.5_V;
+    static constexpr auto kMaxVoltage = 12.0_V;
     static constexpr auto kStatic = 0.64781_V;
     static constexpr auto kVlinear = 2.87860_V / 1_mps;
     static constexpr auto kAlinear = 0.18800_V / 1_mps_sq;
@@ -134,6 +132,8 @@ private:
     frc::DifferentialDriveKinematics m_kinematics{kTrackWidth};
     frc::DifferentialDriveOdometry m_odometry{frc::Rotation2d()};
     frc::SimpleMotorFeedforward<units::meters> m_feedforward{kStatic, kVlinear, kAlinear};
+    frc::RamseteController m_ramsete{units::unit_t<frc::RamseteController::b_unit>{2.0},
+                                     units::unit_t<frc::RamseteController::zeta_unit>{0.7}};
 
     //
     // Simulation
