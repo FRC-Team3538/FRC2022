@@ -24,8 +24,14 @@ Drivetrain::Drivetrain()
     m_driveR0.ConfigSelectedFeedbackSensor(FeedbackDevice::IntegratedSensor);
     m_driveR0.SetStatusFramePeriod(ctre::phoenix::motorcontrol::StatusFrameEnhanced::Status_3_Quadrature, 18);
 
-    m_rightGroup.SetInverted(false);
-    m_leftGroup.SetInverted(true);
+    // SetInverted on individual motors rather than the group so that 
+    // Encoders and LED's are also inverted as expected.
+    m_driveL0.SetInverted(true);
+    m_driveL1.SetInverted(true);
+    m_driveL2.SetInverted(true);
+    m_driveR0.SetInverted(false);
+    m_driveR1.SetInverted(false);
+    m_driveR2.SetInverted(false);
 
     m_driveL0.SetSelectedSensorPosition(0.0);
     m_driveR0.SetSelectedSensorPosition(0.0);
@@ -108,8 +114,7 @@ frc::Pose2d Drivetrain::GetPose() const
 
 void Drivetrain::UpdateOdometry()
 {
-    // left is inverted, so sensor position is inverted
-    auto left = -m_driveL0.GetSelectedSensorPosition(0);
+    auto left = m_driveL0.GetSelectedSensorPosition(0);
     auto right = m_driveR0.GetSelectedSensorPosition(0);
     auto yaw = GetYaw();
 
