@@ -54,12 +54,18 @@ Drivetrain::Drivetrain()
 // Teleop Control
 void Drivetrain::Arcade(double forward, double rotate)
 {
+    cmd_fwd = forward;
+    cmd_rot = rotate;
+
     m_leftGroup.Set(forward - rotate);
     m_rightGroup.Set(forward + rotate);
 }
 
 void Drivetrain::SetSpeeds(const frc::DifferentialDriveWheelSpeeds &speeds)
 {
+    cmd_vl = speeds.left.value();
+    cmd_vr = speeds.right.value();
+
     auto leftFeedforward = m_feedforward.Calculate(speeds.left);
     auto rightFeedforward = m_feedforward.Calculate(speeds.right);
 
@@ -82,6 +88,17 @@ void Drivetrain::Drive(units::meters_per_second_t xSpeed,
                        units::radians_per_second_t rot)
 {
     SetSpeeds(m_kinematics.ToWheelSpeeds({xSpeed, 0_mps, rot}));
+}
+
+void Drivetrain::Drive(const frc::Trajectory::State& target)
+{
+    auto pose = GetPose();
+    auto speeds = m_ramsete.Calculate(pose, target);
+
+    cmd_vx = speeds.vx.value();
+    cmd_vw = speeds.omega.value();
+
+    Drive(speeds.vx, speeds.omega);
 }
 
 frc::Pose2d Drivetrain::GetPose() const 
@@ -150,16 +167,6 @@ bool Drivetrain::TurnRel(double forward, units::degree_t target, units::degree_t
         Arcade(forward, rotate);
         return false;
     }
-}
-
-void Drivetrain::Drive(const frc::Trajectory::State& target)
-{
-    auto pose = GetPose();
-    auto speeds = m_ramsete.Calculate(pose, target);
-    frc::SmartDashboard::PutNumber("output_speed/vx", speeds.vx.value());
-    frc::SmartDashboard::PutNumber("output_speed/vy", speeds.vy.value());
-    frc::SmartDashboard::PutNumber("output_speed/vw", speeds.omega.value());
-    Drive(speeds.vx, speeds.omega);
 }
 
 void Drivetrain::SimulationPeriodic()
@@ -236,6 +243,20 @@ void Drivetrain::InitSendable(wpi::SendableBuilder &builder)
 {
     builder.SetSmartDashboardType("DriveBase");
     builder.SetActuator(true);
+
+    // Commands
+    builder.AddDoubleProperty(
+        "cmd/fwd", [this] { return cmd_fwd; }, nullptr);
+    builder.AddDoubleProperty(
+        "cmd/rot", [this] { return cmd_rot; }, nullptr);
+    builder.AddDoubleProperty(
+        "cmd/vx", [this] { return cmd_vx; }, nullptr);
+    builder.AddDoubleProperty(
+        "cmd/vw", [this] { return cmd_vw; }, nullptr);
+    builder.AddDoubleProperty(
+        "cmd/vl", [this] { return cmd_vl; }, nullptr);
+    builder.AddDoubleProperty(
+        "cmd/vr", [this] { return cmd_vr; }, nullptr);
 
     // Left Motors
     builder.AddDoubleProperty(

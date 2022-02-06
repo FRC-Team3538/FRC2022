@@ -143,6 +143,17 @@ private:
     frc::RamseteController m_ramsete{units::unit_t<frc::RamseteController::b_unit>{2.0},
                                      units::unit_t<frc::RamseteController::zeta_unit>{0.7}};
 
+
+    //
+    // Telemetry
+    //
+    double cmd_fwd = 0.0;
+    double cmd_rot = 0.0;
+    double cmd_vx = 0.0;
+    double cmd_vw = 0.0;
+    double cmd_vl = 0.0;
+    double cmd_vr = 0.0;
+
     //
     // Simulation
     //

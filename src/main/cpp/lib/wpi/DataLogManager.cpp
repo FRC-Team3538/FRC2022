@@ -241,7 +241,7 @@ void Thread::Main() {
 void Thread::StartNTLog() {
   if (!m_ntLoggerEnabled) {
     m_ntLoggerEnabled = true;
-    auto inst = nt::NetworkTableInstance::GetDefault();
+    // auto inst = nt::NetworkTableInstance::GetDefault();
     // m_ntEntryLogger = inst.StartEntryDataLog(m_log, "", "NT:");
     // m_ntConnLogger = inst.StartConnectionDataLog(m_log, "NTConnection");
   }
