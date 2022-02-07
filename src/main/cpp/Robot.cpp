@@ -38,6 +38,9 @@ void Robot::RobotInit()
 
   dataLogUtils.EnableNTConnectionLogging();
   dataLogUtils.EnableNTEntryLogging();
+  // arg bool - log joystick data if true
+  dataLogUtils.InitDSLogging(true);
+  
   frc::SmartDashboard::PutNumber("Feeder Voltage", 0.0);
   frc::SmartDashboard::PutNumber("Shooter Voltage", 0.0);
   frc::SmartDashboard::PutNumber("Hood Wheel Voltage", 0.0);
@@ -45,6 +48,7 @@ void Robot::RobotInit()
 
 void Robot::RobotPeriodic()
 {
+  dataLogUtils.LogDSState();
   IO.UpdateSmartDash();
   IO.drivetrain.Periodic();
   autoprograms.SmartDash();
