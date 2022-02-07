@@ -11,16 +11,16 @@ void Shooter::ConfigureSystem()
     hood.ConfigFactoryDefault();
 
     hood.SetInverted(true);
-    intake.SetInverted(true);
+    intake.SetInverted(false);
 
     shooterA.ConfigFactoryDefault();
     shooterB.ConfigFactoryDefault();
 
     shooterB.Follow(shooterA);
 
-    shooterA.SetInverted(false);
+    shooterA.SetInverted(true);
 
-    shooterB.SetInverted(true);
+    shooterB.SetInverted(false);
 
     shooterA.Config_kF(0, 0.056494409);
     shooterA.Config_kP(0, 0.225);
@@ -36,6 +36,10 @@ void Shooter::ConfigureSystem()
     hood.Config_kD(0, 6.000);
 
     hood.Config_IntegralZone(0, 200.0);
+
+    shooterA.SetNeutralMode(ctre::phoenix::motorcontrol::NeutralMode::Coast);
+    shooterB.SetNeutralMode(ctre::phoenix::motorcontrol::NeutralMode::Coast);
+    hood.SetNeutralMode(ctre::phoenix::motorcontrol::NeutralMode::Coast);
 }
 
 void Shooter::UpdateTelemetry()
@@ -114,6 +118,14 @@ void Shooter::SetShooterRPM(units::revolutions_per_minute_t targetRPM)
 
 void Shooter::SetShooterState(State shotStats)
 {
+    State zero = {0.0_rpm, 0.0_rpm, 0.0_deg};
+
+    if(shotStats == zero)
+    {
+        shooterA.Set(0.0);
+        hood.Set(0.0);
+        return;
+    }
     SetShooterRPM(shotStats.shooterVelocity);
     SetHoodRPM(shotStats.hoodVelocity);
 }
@@ -131,7 +143,7 @@ void Shooter::SetShooter(units::volt_t targetVolts)
 void Shooter::SetFeeder(units::volt_t targetVoltage)
 {
     indexerA.SetVoltage(targetVoltage);
-    feeder.SetVoltage(-targetVoltage);
+    feeder.SetVoltage(targetVoltage * frc::SmartDashboard::GetNumber("Multiplier", 1.0));
 }
 
 void Shooter::SetHood(units::volt_t targetVoltage)

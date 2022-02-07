@@ -62,5 +62,5 @@ private:
 
   Shooter::State shotStats;
 
-  bool climberMode = false;
+  bool climberMode = true;
 };

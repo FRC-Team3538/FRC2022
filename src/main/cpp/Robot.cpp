@@ -40,10 +40,11 @@ void Robot::RobotInit()
   dataLogUtils.EnableNTEntryLogging();
   // arg bool - log joystick data if true
   dataLogUtils.InitDSLogging(true);
-  
+
   frc::SmartDashboard::PutNumber("Feeder Voltage", 0.0);
-  frc::SmartDashboard::PutNumber("Shooter Voltage", 0.0);
-  frc::SmartDashboard::PutNumber("Hood Wheel Voltage", 0.0);
+  frc::SmartDashboard::PutNumber("Multiplier", 1.0);
+  frc::SmartDashboard::PutNumber("Shooter RPM", 0.0);
+  frc::SmartDashboard::PutNumber("Hood Wheel RPM", 0.0);
 }
 
 void Robot::RobotPeriodic()
@@ -78,18 +79,6 @@ void Robot::TeleopPeriodic()
   double intakeSpd = 0.0;
   double feederSpd = 0.0;
 
-  // *** INTAKE DEPLOY ***
-
-  if (IO.mainController.GetR1Button() || IO.secondaryController.GetR1Button())
-  {
-    IO.shooter.SetIntakeState(Shooter::Position::Deployed);
-  }
-
-  if (IO.mainController.GetL1Button() || IO.secondaryController.GetL1Button())
-  {
-    IO.shooter.SetIntakeState(Shooter::Position::Stowed);
-  }
-
   // *** PRESETS ***
 
   switch (IO.secondaryController.GetPOV())
@@ -97,8 +86,8 @@ void Robot::TeleopPeriodic()
   case 0:
   {
     // FENDER
-    auto kShooterRPM = 0.0_rpm;
-    auto kHoodRPM = 0.0_rpm;
+    auto kShooterRPM = units::revolutions_per_minute_t{frc::SmartDashboard::GetNumber("Shooter RPM", 0.0)};
+    auto kHoodRPM = units::revolutions_per_minute_t{frc::SmartDashboard::GetNumber("Hood Wheel RPM", 0.0)};
 
     shotStats = {kShooterRPM, kHoodRPM, 0.0_deg};
     break;
@@ -182,18 +171,25 @@ void Robot::TeleopPeriodic()
   if (IO.mainController.GetSquareButton())
     feederSpd = -10.0;
   else if (IO.secondaryController.GetTriangleButton())
-    feederSpd = 10.0;
+    feederSpd = frc::SmartDashboard::GetNumber("Feeder Voltage", 0.0);
   else
     feederSpd = 0.0;
 
-  if (intakeSpd == 0.0 || IO.mainController.GetTriangleButton())
+  if (intakeSpd == 0.0)
   {
     intakeSpd += IO.secondaryController.IsConnected() ? (((deadband((IO.secondaryController.GetR2Axis() + 1.0) / 2.0)) - (deadband((IO.secondaryController.GetL2Axis() + 1.0) / 2.0))) * 13.0) : 0.0;
-    intakeSpd += IO.mainController.IsConnected() ? (((deadband((IO.mainController.GetL2Axis() + 1.0) / 2.0)) - IO.mainController.GetTriangleButton()) * 13.0) : 0.0;
+    intakeSpd += IO.mainController.IsConnected() ? (((deadband((IO.mainController.GetR2Axis() + 1.0) / 2.0)) - (deadband((IO.mainController.GetL2Axis() + 1.0) / 2.0))) * 13.0) : 0.0;
   }
 
   IO.shooter.SetFeeder(units::volt_t{feederSpd});
   IO.shooter.SetIntake(units::volt_t{intakeSpd});
+
+  // *** INTAKE DEPOY CODE ***
+
+  if (intakeSpd > 0.0)
+    IO.shooter.SetIntakeState(Shooter::Position::Deployed);
+  else
+    IO.shooter.SetIntakeState(Shooter::Position::Stowed);
 
   // *** CLIMBER CODE ***
 

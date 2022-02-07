@@ -27,6 +27,11 @@ public:
         units::revolutions_per_minute_t hoodVelocity = 0_rpm;
 
         units::degree_t turretAngle = 0_deg;
+
+        bool operator==(const State &param)
+        {
+            return ((this->shooterVelocity == param.shooterVelocity) && (this->hoodVelocity == param.hoodVelocity) && (this->turretAngle == param.turretAngle));
+        }
     };
 
     enum class Position : uint8_t
