@@ -114,13 +114,18 @@ frc::Pose2d Drivetrain::GetPose() const
 
 void Drivetrain::UpdateOdometry()
 {
-    auto left = m_driveL0.GetSelectedSensorPosition(0);
-    auto right = m_driveR0.GetSelectedSensorPosition(0);
-    auto yaw = GetYaw();
+    #ifdef __FRC_ROBORIO__
+        auto imuYaw = m_imu.GetRotation2d();
+        auto left = m_driveL0.GetSelectedSensorPosition(0) * kDPP;
+        auto right = m_driveR0.GetSelectedSensorPosition(0) * kDPP;
+    #else
+        auto imuYaw = m_imu.GetRotation2d();
+        //auto imuYaw = -m_drivetrainSimulator.GetHeading();
+        auto left = m_drivetrainSimulator.GetLeftPosition();
+        auto right = m_drivetrainSimulator.GetRightPosition();
+    #endif
 
-    m_odometry.Update(yaw,
-                      units::meter_t(left * kDPP),
-                      units::meter_t(right * kDPP));
+    m_odometry.Update(imuYaw, left, right);
                    
     m_fieldSim.SetRobotPose(GetPose());  // TEMP DEBUG OFFSET
 }
@@ -136,9 +141,7 @@ void Drivetrain::ResetOdometry(const frc::Pose2d &pose)
     // }
     m_odometry.ResetPosition(pose, pose.Rotation());
 
-
-
-    m_drivetrainSimulator.SetPose(pose);
+    //m_drivetrainSimulator.SetPose(pose);
 }
 
 frc::Rotation2d Drivetrain::GetYaw()
@@ -181,7 +184,7 @@ void Drivetrain::SimulationPeriodic()
     // simulated encoder and gyro. We negate the right side so that positive
     // voltages make the right side move forward.
     m_drivetrainSimulator.SetInputs(units::volt_t{m_driveL0.GetMotorOutputVoltage()},
-                                    units::volt_t{-m_driveR0.GetMotorOutputVoltage()});
+                                    units::volt_t{m_driveR0.GetMotorOutputVoltage()});
     m_drivetrainSimulator.Update(20_ms);
 
     // TODO(Dereck): I don't trust this yet...
@@ -208,7 +211,7 @@ void Drivetrain::SimulationPeriodic()
     // IMU 
     // TODO(Dereck): CHECK DIRECTION WRT REAL SENSOR
     auto imu_sim = m_imu.GetSimCollection();
-    imu_sim.SetRawHeading(-m_drivetrainSimulator.GetHeading().Degrees().to<double>());
+    imu_sim.SetRawHeading(m_drivetrainSimulator.GetHeading().Degrees().to<double>());
 }
 
 void Drivetrain::Periodic()
