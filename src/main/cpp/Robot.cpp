@@ -166,7 +166,7 @@ void Robot::TeleopPeriodic()
   else
   {
     double fwd = -deadband(IO.mainController.GetLeftY());
-    double rot = deadband(IO.mainController.GetRightX());
+    double rot = -deadband(IO.mainController.GetRightX());
     IO.drivetrain.Arcade(fwd, rot);
   }
 
