@@ -7,7 +7,7 @@
 #include <vector>
 #include <functional>
 
-#include <frc/PS4Controller.h>
+#include <lib/PS4Controller.hpp>
 
 #include <frc/PowerDistribution.h>
 #include <frc/TimedRobot.h>
@@ -31,8 +31,8 @@ private:
     std::function<void(void)> test = std::bind(&Robotmap::watchDog, this);
 
 public:
-    frc::PS4Controller mainController{0};
-    frc::PS4Controller secondaryController{1};
+    RJ::PS4Controller mainController{0};
+    RJ::PS4Controller secondaryController{1};
 
     frc::PowerDistribution pdp;
     frc::Watchdog watchdog{units::second_t{0.02}, test};
