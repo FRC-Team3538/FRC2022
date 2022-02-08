@@ -13,9 +13,9 @@
           "incKey": 83
         },
         {
-          "decKey": 68,
+          "decKey": 65,
           "decayRate": 0.009999999776482582,
-          "incKey": 65,
+          "incKey": 68,
           "keyRate": 0.009999999776482582,
           "maxAbsValue": 0.5
         }
