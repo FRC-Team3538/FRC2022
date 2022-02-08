@@ -57,7 +57,7 @@ public:
     void SetFeeder(units::volt_t targetVolts);
     void SetHood(units::volt_t targetVolts);
     void SetHoodRPM(units::revolutions_per_minute_t targetRPM);
-    void SetIndexer(double setValue);
+    void SetIndexer(units::volt_t targetVoltage);
 
     void SetIntakeState(Position pos);
     void SetIntake(units::volt_t voltage);
@@ -81,7 +81,7 @@ private:
     WPI_TalonFX hood{16};
     // WPI_TalonFX turret{17};
 
-    // frc::Solenoid deployPiston{frc::PneumaticsModuleType::REVPH, 1};
+    //frc::Solenoid deployPiston{frc::PneumaticsModuleType::REVPH, 1};
 
     static constexpr double kScaleFactorTurret = 1.0;
     static constexpr double kScaleFactorFly = (1.0 / 2048);

@@ -41,10 +41,10 @@ void Robot::RobotInit()
   // arg bool - log joystick data if true
   dataLogUtils.InitDSLogging(true);
 
-  frc::SmartDashboard::PutNumber("Feeder Voltage", 0.0);
-  frc::SmartDashboard::PutNumber("Multiplier", 1.0);
-  frc::SmartDashboard::PutNumber("Shooter RPM", 0.0);
-  frc::SmartDashboard::PutNumber("Hood Wheel RPM", 0.0);
+  frc::SmartDashboard::PutNumber("Feeder Voltage", 7.0);
+  // frc::SmartDashboard::PutNumber("Multiplier", 1.0);
+  frc::SmartDashboard::PutNumber("Shooter RPM", 3000.0);
+  frc::SmartDashboard::PutNumber("Hood Wheel RPM", 4000.0);
 }
 
 void Robot::RobotPeriodic()
@@ -161,7 +161,7 @@ void Robot::TeleopPeriodic()
   }
   else
   {
-    double fwd = -deadband(IO.mainController.GetLeftY());
+    double fwd = deadband(IO.mainController.GetLeftY());
     double rot = -deadband(IO.mainController.GetRightX());
     IO.drivetrain.Arcade(fwd, rot);
   }
@@ -181,12 +181,22 @@ void Robot::TeleopPeriodic()
     intakeSpd += IO.mainController.IsConnected() ? (((deadband((IO.mainController.GetR2Axis() + 1.0) / 2.0)) - (deadband((IO.mainController.GetL2Axis() + 1.0) / 2.0))) * 13.0) : 0.0;
   }
 
-  IO.shooter.SetFeeder(units::volt_t{feederSpd});
-  IO.shooter.SetIntake(units::volt_t{intakeSpd});
+  if (IO.secondaryController.GetTriangleButton())
+  {
+    IO.shooter.SetFeeder(units::volt_t{feederSpd});
+    IO.shooter.SetIntake(units::volt_t{feederSpd});
+    IO.shooter.SetIndexer(7.0_V);
+  }
+  else
+  {
+    IO.shooter.SetIndexer(7.0_V);
+    IO.shooter.SetIntake(units::volt_t{intakeSpd});
+    IO.shooter.SetFeeder(-2.0_V);
+  }
 
   // *** INTAKE DEPOY CODE ***
 
-  if (intakeSpd > 0.0)
+  if (intakeSpd != 0.0)
     IO.shooter.SetIntakeState(Shooter::Position::Deployed);
   else
     IO.shooter.SetIntakeState(Shooter::Position::Stowed);

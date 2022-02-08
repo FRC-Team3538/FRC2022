@@ -40,6 +40,9 @@ void Shooter::ConfigureSystem()
     shooterA.SetNeutralMode(ctre::phoenix::motorcontrol::NeutralMode::Coast);
     shooterB.SetNeutralMode(ctre::phoenix::motorcontrol::NeutralMode::Coast);
     hood.SetNeutralMode(ctre::phoenix::motorcontrol::NeutralMode::Coast);
+
+    indexerA.SetInverted(true);
+    feeder.SetInverted(false);
 }
 
 void Shooter::UpdateTelemetry()
@@ -142,8 +145,7 @@ void Shooter::SetShooter(units::volt_t targetVolts)
 
 void Shooter::SetFeeder(units::volt_t targetVoltage)
 {
-    indexerA.SetVoltage(targetVoltage);
-    feeder.SetVoltage(targetVoltage * frc::SmartDashboard::GetNumber("Multiplier", 1.0));
+    feeder.SetVoltage(targetVoltage);
 }
 
 void Shooter::SetHood(units::volt_t targetVoltage)
@@ -153,6 +155,12 @@ void Shooter::SetHood(units::volt_t targetVoltage)
 
 void Shooter::SetHoodRPM(units::revolutions_per_minute_t targetRPM)
 {
+    if(targetRPM == 0.0_rpm)
+    {
+        hood.Set(0.0);
+        return;
+    }
+
     hood.Set(ControlMode::Velocity, ((targetRPM.value() / kScaleFactorFly) / 600.0));
 }
 
@@ -168,10 +176,9 @@ bool Shooter::TempUpToSpeed()
     }
 }
 
-void Shooter::SetIndexer(double setValue)
+void Shooter::SetIndexer(units::volt_t targetVoltage)
 {
-    // indexerA.SetVoltage(units::volt_t{setValue * 13.0});
-    // indexerB.SetVoltage(units::volt_t{setValue * 13.0});
+    indexerA.SetVoltage(targetVoltage);
 }
 
 void Shooter::SetIntakeState(Position pos)
@@ -180,13 +187,13 @@ void Shooter::SetIntakeState(Position pos)
     {
     case Position::Stowed:
     {
-        // deployPiston.Set(false);
+        //deployPiston.Set(false);
         break;
     }
 
     case Position::Deployed:
     {
-        // deployPiston.Set(true);
+        //deployPiston.Set(true);
         break;
     }
     default:
