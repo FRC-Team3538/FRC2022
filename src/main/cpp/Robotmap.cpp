@@ -2,12 +2,16 @@
 
 #include <wpi/timestamp.h>
 
+#include "lib/Logging.h"
+
 // Constructor
 // *** ALSO PUT SUBSYSTEMS HERE ***
 Robotmap::Robotmap()
 {
+#ifdef LOGGER
     pdpVoltageDatalogEntry = frc::DataLogManager::GetLog().Start("pdp_voltage", "double");
     pdpCurrentDatalogEntry = frc::DataLogManager::GetLog().Start("pdp_current", "double[]");
+#endif
     subsystems.push_back(&drivetrain);
     subsystems.push_back(&shooter);
     subsystems.push_back(&rjVision);
@@ -36,10 +40,10 @@ void Robotmap::UpdateSmartDash()
         for(int i = 0; i < 20; i++) {
             currentVector.push_back(pdp.GetCurrent(i));
         }
-
+#ifdef LOGGING
         frc::DataLogManager::GetLog().AppendDouble(pdpVoltageDatalogEntry, pdp.GetVoltage(), wpi::Now());
         frc::DataLogManager::GetLog().AppendDoubleArray(pdpCurrentDatalogEntry, currentVector, wpi::Now());
-        
+#endif
         // Restart the loop
         telemetryCt = 0;
     }

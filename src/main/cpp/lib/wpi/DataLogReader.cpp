@@ -8,6 +8,8 @@
 #include "wpi/Endian.h"
 #include "wpi/MathExtras.h"
 
+#ifdef LOGGER
+
 using namespace wpi::log;
 
 static bool ReadString(wpi::span<const uint8_t>* buf, std::string_view* str) {
@@ -305,3 +307,5 @@ bool DataLogReader::GetNextRecord(size_t* pos) const {
   *pos += headerLen + size;
   return true;
 }
+
+#endif // LOGGER

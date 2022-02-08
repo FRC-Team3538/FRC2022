@@ -14,6 +14,9 @@
 #include "lib/wpi/MemoryBuffer.h"
 #include "wpi/span.h"
 
+#include "lib/Logging.h"
+#ifdef LOGGER
+
 namespace wpi::log {
 
 /**
@@ -367,3 +370,5 @@ inline DataLogIterator::reference DataLogIterator::operator*() const {
 }
 
 }  // namespace wpi::log
+
+#endif // LOGGER

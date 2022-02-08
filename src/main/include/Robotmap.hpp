@@ -12,7 +12,6 @@
 #include <frc/PowerDistribution.h>
 #include <frc/TimedRobot.h>
 
-
 #include "lib/wpi/DataLogManager.h"
 #include "lib/wpi/DataLog.h"
 

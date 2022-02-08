@@ -7,6 +7,10 @@
 #include <string>
 #include <string_view>
 
+#include "lib/Logging.h"
+
+#ifdef LOGGER
+
 namespace wpi::log {
 class DataLog;
 }  // namespace wpi::log
@@ -83,3 +87,5 @@ class DataLogManager final {
 };
 
 }  // namespace frc
+
+#endif // LOGGER

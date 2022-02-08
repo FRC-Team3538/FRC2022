@@ -7,6 +7,8 @@
 #include <hal/DriverStationTypes.h>
 #include <wpi/timestamp.h>
 
+#ifdef LOGGER
+
 static std::string
 ConnInfoToJson(bool connected, const nt::ConnectionInfo& info)
 {
@@ -330,3 +332,5 @@ void DSDataLogSender::Send(uint64_t timestamp) {
 }
 
 }
+
+#endif // LOGGER

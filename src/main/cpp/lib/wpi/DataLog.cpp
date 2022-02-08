@@ -32,6 +32,8 @@
 #include "wpi/fs.h"
 #include "wpi/timestamp.h"
 
+#ifdef LOGGER
+
 using namespace wpi::log;
 
 static constexpr size_t kBlockSize = 16 * 1024;
@@ -769,3 +771,5 @@ void DataLog::AppendStringArray(int entry,
     AppendStringImpl(sv);
   }
 }
+
+#endif // LOGGER

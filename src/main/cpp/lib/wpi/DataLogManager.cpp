@@ -20,6 +20,8 @@
 #include "frc/DriverStation.h"
 #include "frc/Filesystem.h"
 
+#ifdef LOGGER
+
 using namespace frc;
 
 namespace {
@@ -309,3 +311,5 @@ void DataLogManager::LogNetworkTables(bool enabled) {
     }
   }
 }
+
+#endif // LOGGER

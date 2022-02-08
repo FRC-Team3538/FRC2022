@@ -31,6 +31,8 @@
 #include "wpi/WindowsError.h"
 #endif
 
+#ifdef LOGGER
+
 using namespace wpi;
 
 MappedFileRegion::MappedFileRegion(fs::file_t f, uint64_t length,
@@ -121,3 +123,5 @@ size_t MappedFileRegion::GetAlignment() {
   return pageSize;
 #endif
 }
+
+#endif

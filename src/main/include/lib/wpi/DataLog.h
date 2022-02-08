@@ -20,6 +20,9 @@
 #include "wpi/mutex.h"
 #include "wpi/span.h"
 
+#include "lib/Logging.h"
+#ifdef LOGGER
+
 namespace wpi::log {
 
 namespace impl {
@@ -641,3 +644,5 @@ class StringArrayLogEntry : public DataLogEntry {
 };
 
 }  // namespace wpi::log
+
+#endif // LOGGER

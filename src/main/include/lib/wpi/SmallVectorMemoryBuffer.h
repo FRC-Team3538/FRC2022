@@ -26,6 +26,9 @@
 #include "wpi/SmallVector.h"
 #include "wpi/raw_ostream.h"
 
+#include "lib/Logging.h"
+#ifdef LOGGER
+
 namespace wpi {
 
 /// SmallVector-backed MemoryBuffer instance.
@@ -61,3 +64,5 @@ class SmallVectorMemoryBuffer : public MemoryBuffer {
 };
 
 }  // namespace wpi
+
+#endif // LOGGER

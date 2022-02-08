@@ -26,6 +26,9 @@
 
 #include "wpi/span.h"
 
+#include "lib/Logging.h"
+#ifdef LOGGER
+
 // Duplicated from fs.h to avoid a dependency
 namespace fs {
 #if defined(_WIN32)
@@ -238,3 +241,5 @@ class MemoryBufferRef {
 };
 
 }  // namespace wpi
+
+#endif // LOGGER

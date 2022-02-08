@@ -8,6 +8,9 @@
 #include <hal/DriverStation.h>
 #include <atomic>
 
+#include "lib/Logging.h"
+#ifdef LOGGER
+
 namespace rj {
 
 // Do not use directly
@@ -79,3 +82,5 @@ public:
   bool isDSLogging();
 };
 }
+
+#endif // LOGGER

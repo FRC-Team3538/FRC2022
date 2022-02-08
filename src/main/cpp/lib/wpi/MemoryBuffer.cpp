@@ -57,6 +57,8 @@
 #include "wpi/WindowsError.h"
 #endif
 
+#ifdef LOGGER
+
 using namespace wpi;
 
 //===----------------------------------------------------------------------===//
@@ -520,3 +522,5 @@ MemoryBufferRef MemoryBuffer::GetMemBufferRef() const {
 }
 
 SmallVectorMemoryBuffer::~SmallVectorMemoryBuffer() {}
+
+#endif // LOGGER
