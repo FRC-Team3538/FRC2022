@@ -213,6 +213,18 @@ void Shooter::InitSendable(wpi::SendableBuilder &builder)
     // Commands
     builder.AddDoubleProperty(
         "cmd/intake", [this] { return cmd_intake; }, nullptr);
+    builder.AddDoubleProperty(
+        "cmd/indexer", [this] { return cmd_indexer; }, nullptr);
+    builder.AddDoubleProperty(
+        "cmd/feeder", [this] { return cmd_feeder; }, nullptr);
+    builder.AddDoubleProperty(
+        "cmd/shooter", [this] { return cmd_shooter; }, nullptr);
+    builder.AddDoubleProperty(
+        "cmd/shooterTop", [this] { return cmd_shooterTop; }, nullptr);
+    builder.AddDoubleProperty(
+        "cmd/turret", [this] { return cmd_turret; }, nullptr);
+    builder.AddDoubleProperty(
+        "cmd/hood", [this] { return cmd_hood; }, nullptr);
 
     // Intake Motor
     builder.AddDoubleProperty(
