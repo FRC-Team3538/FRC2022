@@ -26,19 +26,19 @@ Drivetrain::Drivetrain()
 
     // SetInverted on individual motors rather than the group so that 
     // Encoders and LED's are also inverted as expected.
-    m_driveL0.SetInverted(false);
-    m_driveL1.SetInverted(false);
-    m_driveL2.SetInverted(false);
-    m_driveR0.SetInverted(true);
-    m_driveR1.SetInverted(true);
-    m_driveR2.SetInverted(true);
+    m_driveL0.SetInverted(true);
+    m_driveL1.SetInverted(true);
+    m_driveL2.SetInverted(true);
+    m_driveR0.SetInverted(false);
+    m_driveR1.SetInverted(false);
+    m_driveR2.SetInverted(false);
     
-    m_driveL0.SetSensorPhase(false);
-    m_driveL1.SetSensorPhase(false);
-    m_driveL2.SetSensorPhase(false);
-    m_driveR0.SetSensorPhase(true);
-    m_driveR1.SetSensorPhase(true);
-    m_driveR2.SetSensorPhase(true);
+    // m_driveL0.SetSensorPhase(false);
+    // m_driveL1.SetSensorPhase(false);
+    // m_driveL2.SetSensorPhase(false);
+    // m_driveR0.SetSensorPhase(true);
+    // m_driveR1.SetSensorPhase(true);
+    // m_driveR2.SetSensorPhase(true);
 
     m_driveL0.SetSelectedSensorPosition(0.0);
     m_driveR0.SetSelectedSensorPosition(0.0);
