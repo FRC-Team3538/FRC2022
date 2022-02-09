@@ -26,12 +26,19 @@ Drivetrain::Drivetrain()
 
     // SetInverted on individual motors rather than the group so that 
     // Encoders and LED's are also inverted as expected.
-    m_driveL0.SetInverted(true);
-    m_driveL1.SetInverted(true);
-    m_driveL2.SetInverted(true);
-    m_driveR0.SetInverted(false);
-    m_driveR1.SetInverted(false);
-    m_driveR2.SetInverted(false);
+    m_driveL0.SetInverted(false);
+    m_driveL1.SetInverted(false);
+    m_driveL2.SetInverted(false);
+    m_driveR0.SetInverted(true);
+    m_driveR1.SetInverted(true);
+    m_driveR2.SetInverted(true);
+    
+    m_driveL0.SetSensorPhase(false);
+    m_driveL1.SetSensorPhase(false);
+    m_driveL2.SetSensorPhase(false);
+    m_driveR0.SetSensorPhase(true);
+    m_driveR1.SetSensorPhase(true);
+    m_driveR2.SetSensorPhase(true);
 
     m_driveL0.SetSelectedSensorPosition(0.0);
     m_driveR0.SetSelectedSensorPosition(0.0);
@@ -272,9 +279,9 @@ void Drivetrain::InitSendable(wpi::SendableBuilder &builder)
     builder.AddDoubleProperty(
         "left/voltage", [this] { return m_driveL0.GetMotorOutputVoltage(); }, nullptr);
     builder.AddDoubleProperty(
-        "left/position", [this] { return - m_driveL0.GetSelectedSensorPosition() * kDPP.value(); }, nullptr);
+        "left/position", [this] { return m_driveL0.GetSelectedSensorPosition() * kDPP.value(); }, nullptr);
     builder.AddDoubleProperty(
-        "left/velocity", [this] { return - m_driveL0.GetSelectedSensorVelocity() * kDPP.value() * 10; }, nullptr);
+        "left/velocity", [this] { return m_driveL0.GetSelectedSensorVelocity() * kDPP.value() * 10; }, nullptr);
 
     // Right Motors
     builder.AddDoubleProperty(

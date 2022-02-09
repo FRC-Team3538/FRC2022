@@ -187,13 +187,13 @@ void Shooter::SetIntakeState(Position pos)
     {
     case Position::Stowed:
     {
-        //deployPiston.Set(false);
+        deployPiston.Set(false);
         break;
     }
 
     case Position::Deployed:
     {
-        //deployPiston.Set(true);
+        deployPiston.Set(true);
         break;
     }
     default:

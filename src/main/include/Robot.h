@@ -61,6 +61,13 @@ private:
 
   frc::Timer shotTimer;
   frc::Timer brakeTimer;
+  frc::Timer intakeTimer;
+
+  enum class ClimberShooterMode:uint8_t
+  {
+    Shooter = 0,
+    Climber
+  } m_csmode;
 
   Shooter::State shotStats;
 

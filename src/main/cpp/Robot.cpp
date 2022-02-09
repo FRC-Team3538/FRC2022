@@ -4,6 +4,7 @@
 
 #include "Robot.h"
 #include <lib/pathplanner/PathPlanner.h>
+#include <cmath>
 
 using namespace pathplanner;
 
@@ -84,7 +85,7 @@ void Robot::TeleopPeriodic()
 {
   double intakeSpd = 0.0;
   double feederSpd = 0.0;
-
+  double indexerSpd = 0.0;
   // *** PRESETS ***
 
   switch (IO.secondaryController.GetPOV())
@@ -148,7 +149,7 @@ void Robot::TeleopPeriodic()
 
   // *** VISION AND DRIVING ***
 
-  if (IO.mainController.GetR2Button())
+  if (IO.mainController.GetR1Button())
   {
     vision::RJVisionPipeline::visionData data = IO.rjVision.Run();
     if (data.filled)
@@ -161,6 +162,7 @@ void Robot::TeleopPeriodic()
         {
           feederSpd = 10.0;
           intakeSpd = 10.0;
+          indexerSpd = 10.0;
         }
       }
     }
@@ -170,7 +172,27 @@ void Robot::TeleopPeriodic()
     double fwd = -deadband(IO.mainController.GetLeftY());
     double rot = -deadband(IO.mainController.GetRightX());
     IO.drivetrain.Arcade(fwd, rot);
+    // Can neg rot if want to be lazy
   }
+
+  if (IO.secondaryController.GetShareButton())
+  {
+    ClimberShooterMode(ClimberShooterMode::Shooter);
+  }
+
+  if (IO.secondaryController.GetOptionsButton())
+  {
+    ClimberShooterMode(ClimberShooterMode::Climber);
+
+  }
+
+  if (m_csmode == ClimberShooterMode::Climber)
+  {
+    if (IO.secondaryController.GetR1Button())
+    {
+     IO.climber.SetClimberState(Climber::ClimbState::Up);
+    }
+  } 
 
   // *** SETTING VALUES FOR FEEDER AND INTAKE ***
 
@@ -185,6 +207,14 @@ void Robot::TeleopPeriodic()
   {
     intakeSpd += IO.secondaryController.IsConnected() ? (((deadband((IO.secondaryController.GetR2Axis() + 1.0) / 2.0)) - (deadband((IO.secondaryController.GetL2Axis() + 1.0) / 2.0))) * 13.0) : 0.0;
     intakeSpd += IO.mainController.IsConnected() ? (((deadband((IO.mainController.GetR2Axis() + 1.0) / 2.0)) - (deadband((IO.mainController.GetL2Axis() + 1.0) / 2.0))) * 13.0) : 0.0;
+    
+  }
+
+  if (indexerSpd == 0.0)
+  {
+    indexerSpd += IO.secondaryController.IsConnected() ? (((deadband((IO.secondaryController.GetR2Axis() + 1.0) / 2.0)) - (deadband((IO.secondaryController.GetL2Axis() + 1.0) / 2.0))) * 13.0) : 0.0;
+    indexerSpd += IO.mainController.IsConnected() ? (((deadband((IO.mainController.GetR2Axis() + 1.0) / 2.0)) - (deadband((IO.mainController.GetL2Axis() + 1.0) / 2.0))) * 13.0) : 0.0;
+    
   }
 
   if (IO.secondaryController.GetTriangleButton())
@@ -195,17 +225,26 @@ void Robot::TeleopPeriodic()
   }
   else
   {
-    IO.shooter.SetIndexer(7.0_V);
+    //IO.shooter.SetIndexer(7.0_V);
     IO.shooter.SetIntake(units::volt_t{intakeSpd});
-    IO.shooter.SetFeeder(-2.0_V);
+    //IO.shooter.SetFeeder(-2.0_V);
+    IO.shooter.SetIndexer(0_V);
+    IO.shooter.SetFeeder(0_V);
   }
 
   // *** INTAKE DEPOY CODE ***
 
   if (intakeSpd != 0.0)
+  {
     IO.shooter.SetIntakeState(Shooter::Position::Deployed);
-  else
+    intakeTimer.Start();
+    intakeTimer.Reset();
+  }
+  else if (intakeTimer.Get() > 0.5_s)
+  {
     IO.shooter.SetIntakeState(Shooter::Position::Stowed);
+  }
+  
 
   // *** CLIMBER CODE ***
 
@@ -229,6 +268,7 @@ void Robot::DisabledInit()
 {
   brakeTimer.Reset();
   brakeTimer.Start();
+
 }
 
 void Robot::DisabledPeriodic()
