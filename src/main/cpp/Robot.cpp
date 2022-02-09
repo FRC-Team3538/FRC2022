@@ -228,11 +228,11 @@ void Robot::TeleopPeriodic()
   }
   else
   {
-    //IO.shooter.SetIndexer(7.0_V);
     IO.shooter.SetIntake(units::volt_t{intakeSpd});
-    //IO.shooter.SetFeeder(-2.0_V);
-    IO.shooter.SetIndexer(0_V);
-    IO.shooter.SetFeeder(0_V);
+    IO.shooter.SetIndexer(7.0_V);
+    IO.shooter.SetFeeder(-2.0_V);
+    //IO.shooter.SetIndexer(0_V);
+    //IO.shooter.SetFeeder(0_V);
   }
 
   // *** INTAKE DEPOY CODE ***
