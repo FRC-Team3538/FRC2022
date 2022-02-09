@@ -38,6 +38,7 @@ void Robot::RobotInit()
   frc::SmartDashboard::PutData("Drivebase", &IO.drivetrain);
   frc::SmartDashboard::PutData("Gamepad_Dr", &IO.mainController);
   frc::SmartDashboard::PutData("Gamepad_Op", &IO.secondaryController);
+  frc::SmartDashboard::PutData("Shooter", &IO.shooter);
 
 #ifdef LOGGER
   dataLogUtils.EnableNTConnectionLogging();
@@ -177,12 +178,14 @@ void Robot::TeleopPeriodic()
 
   if (IO.secondaryController.GetShareButton())
   {
-    ClimberShooterMode(ClimberShooterMode::Shooter);
+    //ClimberShooterMode(ClimberShooterMode::Shooter);
+    m_csmode = ClimberShooterMode::Shooter;
   }
 
   if (IO.secondaryController.GetOptionsButton())
   {
-    ClimberShooterMode(ClimberShooterMode::Climber);
+    //ClimberShooterMode(ClimberShooterMode::Climber);
+    m_csmode = ClimberShooterMode::Climber;
 
   }
 

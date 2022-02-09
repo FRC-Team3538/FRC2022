@@ -205,6 +205,7 @@ void Shooter::SetIntakeState(Position pos)
 
 void Shooter::SetIntake(units::volt_t voltage)
 {
+    cmd_intake = voltage.value();
     intake.SetVoltage(voltage);
 }
 
@@ -228,4 +229,24 @@ Shooter::State Shooter::CalculateShot(units::inch_t distance)
 
     State shotStats = {units::revolutions_per_minute_t{mainWheel}, units::revolutions_per_minute_t{mainWheel * ratio}, 0_deg};
     return shotStats;
+}
+
+
+void Shooter::InitSendable(wpi::SendableBuilder &builder)
+{
+    builder.SetSmartDashboardType("Shooter");
+    builder.SetActuator(true);
+
+    // Commands
+    builder.AddDoubleProperty(
+        "cmd/intake", [this] { return cmd_intake; }, nullptr);
+
+    // Intake Motor
+    builder.AddDoubleProperty(
+        "intake/percent", [this] { return intake.Get(); }, nullptr);
+    builder.AddDoubleProperty(
+        "intake/voltage", [this] { return intake.GetMotorOutputVoltage(); }, nullptr);
+    builder.AddDoubleProperty(
+        "intake/rpm", [this] { return intake.GetSelectedSensorVelocity() / 2048.0 * 10.0; }, nullptr);
+
 }

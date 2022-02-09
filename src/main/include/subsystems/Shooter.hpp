@@ -10,6 +10,9 @@
 
 #include <frc/Solenoid.h>
 #include <frc/controller/ProfiledPIDController.h>
+#include <wpi/sendable/SendableRegistry.h>
+#include <wpi/sendable/SendableBuilder.h>
+#include <wpi/sendable/SendableHelper.h>
 
 #include <ctre/Phoenix.h>
 
@@ -17,7 +20,9 @@
 
 #include <iostream>
 
-class Shooter : public Subsystem
+class Shooter : public Subsystem,
+                public wpi::Sendable,
+                public wpi::SendableHelper<Shooter>
 {
 public:
     struct State
@@ -41,6 +46,8 @@ public:
     };
 
     Shooter();
+
+    void InitSendable(wpi::SendableBuilder &builder) override;
 
     void ConfigureSystem();
     void UpdateTelemetry();
@@ -91,6 +98,9 @@ private:
         frc::TrapezoidProfile<units::radian>::Constraints{
             180_deg_per_s,
             360_deg_per_s / 1_s}};
+
+    // Command Inputs for telemetry
+    int cmd_intake = 0.0;
 
     nt::NetworkTableEntry shooterVoltageEntry = frc::SmartDashboard::GetEntry("/shooter/Shooter_Voltage");
     nt::NetworkTableEntry shooterRPMEntry = frc::SmartDashboard::GetEntry("/shooter/Shooter_RPM");
