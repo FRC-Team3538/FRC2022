@@ -40,7 +40,7 @@ void Robotmap::UpdateSmartDash()
         for(int i = 0; i < 20; i++) {
             currentVector.push_back(pdp.GetCurrent(i));
         }
-#ifdef LOGGING
+#ifdef LOGGER
         frc::DataLogManager::GetLog().AppendDouble(pdpVoltageDatalogEntry, pdp.GetVoltage(), wpi::Now());
         frc::DataLogManager::GetLog().AppendDoubleArray(pdpCurrentDatalogEntry, currentVector, wpi::Now());
 #endif
