@@ -39,60 +39,69 @@ public:
         }
     };
 
-    enum class Position : uint8_t
+    enum class Position : bool
     {
         Stowed = 0,
-        Deployed
+        Deployed = 1
     };
 
+    // Constructor
     Shooter();
 
-    void InitSendable(wpi::SendableBuilder &builder) override;
-
+    // RJ::Subsystem Interface
     void ConfigureSystem();
     void UpdateTelemetry();
 
     // *** SETTERS ***
-
-    void SetTurretAngle(units::degree_t targetAngle);
-    void SetShooterRPM(units::revolutions_per_minute_t targetRPM);
-
-    void SetTurret(units::volt_t targetVolts);
-    void SetShooter(units::volt_t targetVolts);
-    void SetShooterState(State shotStats);
-
-    void SetFeeder(units::volt_t targetVolts);
-    void SetHood(units::volt_t targetVolts);
-    void SetHoodRPM(units::revolutions_per_minute_t targetRPM);
-    void SetIndexer(units::volt_t targetVoltage);
-
     void SetIntakeState(Position pos);
     void SetIntake(units::volt_t voltage);
+    void SetIndexer(units::volt_t targetVoltage);
+    void SetFeeder(units::volt_t targetVolts);
+
+    void SetShooter(units::volt_t targetVolts);
+    void SetShooterRPM(units::revolutions_per_minute_t targetRPM);
+
+    void SetShooterTop(units::volt_t targetVolts);
+    void SetShooterTopRPM(units::revolutions_per_minute_t targetRPM);
+    
+    // void SetTurret(units::volt_t targetVolts);
+    // void SetTurretAngle(units::degree_t targetAngle);
+
+    // void SetHood(units::volt_t targetVolts);
+    // void SetHoodAngle(units::degree_t targetAngle);
 
     // *** GETTERS ***
-
-    units::degree_t GetTurretAngle();
     units::revolutions_per_minute_t GetShooterRPM();
+    // units::degree_t GetTurretAngle();
 
+    // Helpers
     State CalculateShot(units::inch_t distance);
-
+    void SetShooterState(State shotStats);
     bool TempUpToSpeed();
 
+    // Smartdash Sendable Interface
+    void InitSendable(wpi::SendableBuilder &builder) override;
+
 private:
+
+    // Hardware
     WPI_TalonFX intake{10};
     WPI_TalonFX indexerA{11};
     // WPI_TalonFX indexerB{12};
     WPI_TalonFX feeder{13};
     WPI_TalonFX shooterA{14};
     WPI_TalonFX shooterB{15};
-    WPI_TalonFX hood{16};
+    WPI_TalonFX shooterTop{16};
     // WPI_TalonFX turret{17};
+    // WPI_TalonFX hood{18};
 
     frc::Solenoid deployPiston{frc::PneumaticsModuleType::REVPH, 15};
 
+    // Constants
     static constexpr double kScaleFactorTurret = 1.0;
     static constexpr double kScaleFactorFly = (1.0 / 2048);
 
+    // Controllers
     frc::ProfiledPIDController<units::radian> turretPID{
         0.5, 0.0, 0.1, // Rotation-error
         frc::TrapezoidProfile<units::radian>::Constraints{
@@ -101,16 +110,10 @@ private:
 
     // Command Inputs for telemetry
     int cmd_intake = 0.0;
-
-    nt::NetworkTableEntry shooterVoltageEntry = frc::SmartDashboard::GetEntry("/shooter/Shooter_Voltage");
-    nt::NetworkTableEntry shooterRPMEntry = frc::SmartDashboard::GetEntry("/shooter/Shooter_RPM");
-    nt::NetworkTableEntry shooterSurfaceSpeedEntry = frc::SmartDashboard::GetEntry("/shooter/Shooter_Surface_Speed_FPS");
-    nt::NetworkTableEntry feederVoltageEntry = frc::SmartDashboard::GetEntry("/shooter/Feeder_Voltage");
-    nt::NetworkTableEntry feederRPMEntry = frc::SmartDashboard::GetEntry("/shooter/Feeder_RPM");
-    nt::NetworkTableEntry hoodVoltageEntry = frc::SmartDashboard::GetEntry("/shooter/Hood_Voltage");
-    nt::NetworkTableEntry hoodRPMEntry = frc::SmartDashboard::GetEntry("/shooter/Hood_RPM");
-    nt::NetworkTableEntry hoodSurfaceSpeedEntry = frc::SmartDashboard::GetEntry("/shooter/Hood_Surface_Speed_FPS");
-    nt::NetworkTableEntry shotEffortEntry = frc::SmartDashboard::GetEntry("/shooter/Shot_Effort_FPS");
-    nt::NetworkTableEntry backspinEffortEntry = frc::SmartDashboard::GetEntry("/shooter/Backspin_Effort_FPS");
-    nt::NetworkTableEntry impartedBackspinEntry = frc::SmartDashboard::GetEntry("/shooter/Imparted_Backspin_RPM");
+    int cmd_indexer = 0.0;
+    int cmd_feeder = 0.0;
+    int cmd_shooter = 0.0;
+    int cmd_shooterTop = 0.0;
+    int cmd_turret = 0.0;
+    int cmd_hood = 0.0;
 };

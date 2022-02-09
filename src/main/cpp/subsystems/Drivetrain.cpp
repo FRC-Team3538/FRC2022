@@ -33,13 +33,10 @@ Drivetrain::Drivetrain()
     m_driveR1.SetInverted(false);
     m_driveR2.SetInverted(false);
     
-    // m_driveL0.SetSensorPhase(false);
-    // m_driveL1.SetSensorPhase(false);
-    // m_driveL2.SetSensorPhase(false);
-    // m_driveR0.SetSensorPhase(true);
-    // m_driveR1.SetSensorPhase(true);
-    // m_driveR2.SetSensorPhase(true);
+    // Break / Coast mode (Not affected by ConfigFactoryDefault)
+    SetCoastMode();
 
+    // Reset Encoder positions
     m_driveL0.SetSelectedSensorPosition(0.0);
     m_driveR0.SetSelectedSensorPosition(0.0);
 
