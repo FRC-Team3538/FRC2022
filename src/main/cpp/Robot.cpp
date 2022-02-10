@@ -35,6 +35,7 @@ void Robot::RobotInit()
   IO.ConfigureSystem();
   IO.drivetrain.SetCoastMode();
 
+  frc::SmartDashboard::PutData("Power", &IO.pdp);
   frc::SmartDashboard::PutData("Drivebase", &IO.drivetrain);
   frc::SmartDashboard::PutData("Gamepad_Dr", &IO.mainController);
   frc::SmartDashboard::PutData("Gamepad_Op", &IO.secondaryController);

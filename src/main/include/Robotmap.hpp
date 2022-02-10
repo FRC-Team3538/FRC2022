@@ -22,12 +22,6 @@ class Robotmap
 private:
     std::vector<Subsystem *> subsystems;
 
-    int pdpVoltageDatalogEntry;
-    int pdpCurrentDatalogEntry;
-
-    nt::NetworkTableEntry pdpVoltageEntry = frc::SmartDashboard::GetEntry("/pdp/Voltage");
-    nt::NetworkTableEntry pdpTotalCurrentEntry = frc::SmartDashboard::GetEntry("/pdp/TotalCurrent");
-
     std::function<void(void)> test = std::bind(&Robotmap::watchDog, this);
 
 public:
