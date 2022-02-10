@@ -4,6 +4,7 @@
 
 #include "Robot.h"
 #include <lib/pathplanner/PathPlanner.h>
+#include <frc/livewindow/LiveWindow.h>
 #include <cmath>
 
 using namespace pathplanner;
@@ -31,6 +32,11 @@ double Robot::deadband(double val, double min = 0.1, double max = 1.0)
 
 void Robot::RobotInit()
 {
+  // Disable Live Window, we don't use it...
+  SetNetworkTablesFlushEnabled(false);
+  frc::LiveWindow::GetInstance()->DisableAllTelemetry();
+  frc::LiveWindow::GetInstance()->SetEnabled(false);
+
   IO.watchdog.Disable();
   IO.ConfigureSystem();
   IO.drivetrain.SetCoastMode();
