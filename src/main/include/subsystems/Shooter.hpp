@@ -78,9 +78,11 @@ public:
     State CalculateShot(units::inch_t distance);
     void SetShooterState(State shotStats);
     bool TempUpToSpeed();
+    void FalconSlotConfig(WPI_TalonFX& motor, int slot, const SlotConfiguration& config);
 
     // Smartdash Sendable Interface
     void InitSendable(wpi::SendableBuilder &builder) override;
+    void FalconSendableHelper(wpi::SendableBuilder &builder, WPI_TalonFX& motor, std::string name);
 
 private:
 
@@ -102,18 +104,11 @@ private:
     static constexpr double kScaleFactorFly = (1.0 / 2048);
 
     // Controllers
+    SlotConfiguration shooterSlotConfig;
+
     frc::ProfiledPIDController<units::radian> turretPID{
         0.5, 0.0, 0.1, // Rotation-error
         frc::TrapezoidProfile<units::radian>::Constraints{
             180_deg_per_s,
             360_deg_per_s / 1_s}};
-
-    // Command Inputs for telemetry
-    int cmd_intake = 0.0;
-    int cmd_indexer = 0.0;
-    int cmd_feeder = 0.0;
-    int cmd_shooter = 0.0;
-    int cmd_shooterTop = 0.0;
-    int cmd_turret = 0.0;
-    int cmd_hood = 0.0;
 };
