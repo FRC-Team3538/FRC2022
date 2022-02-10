@@ -36,6 +36,7 @@ Shooter::Shooter()
 
 
     // Closed Loop Configuration
+    shooterA.GetSlotConfigs(shooterSlotConfig, 0);
     shooterSlotConfig.kF = 0.056494409;
     shooterSlotConfig.kP = 0.225;
     shooterSlotConfig.kI = 0.0001;
@@ -184,7 +185,7 @@ bool Shooter::TempUpToSpeed()
         && (std::abs(shooterA.GetSelectedSensorVelocity() - shooterA.GetClosedLoopTarget()) < 100);
 }
 
-void Shooter::FalconSlotConfig(WPI_TalonFX& motor, int slot, const SlotConfiguration& config)
+void Shooter::FalconSlotConfig(WPI_TalonFX& motor, int slot, SlotConfiguration& config)
 {
     motor.Config_kF(slot, config.kF);
     motor.Config_kP(slot, config.kP);
@@ -195,6 +196,10 @@ void Shooter::FalconSlotConfig(WPI_TalonFX& motor, int slot, const SlotConfigura
     motor.ConfigMaxIntegralAccumulator(slot, config.maxIntegralAccumulator);
     motor.ConfigClosedLoopPeakOutput(slot, config.closedLoopPeakOutput);
     motor.ConfigClosedLoopPeriod(slot, config.closedLoopPeriod);
+
+    // Note: CTRE is adding this function for us in the next release
+    // https://github.com/CrossTheRoadElec/Phoenix-Releases/issues/27
+    //motor.ConfigureSlot(config, 0);
 }
 
 void Shooter::FalconSendableHelper(wpi::SendableBuilder &builder, WPI_TalonFX& motor, std::string name)

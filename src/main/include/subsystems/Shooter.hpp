@@ -78,7 +78,7 @@ public:
     State CalculateShot(units::inch_t distance);
     void SetShooterState(State shotStats);
     bool TempUpToSpeed();
-    void FalconSlotConfig(WPI_TalonFX& motor, int slot, const SlotConfiguration& config);
+    void FalconSlotConfig(WPI_TalonFX& motor, int slot, SlotConfiguration& config);
 
     // Smartdash Sendable Interface
     void InitSendable(wpi::SendableBuilder &builder) override;
