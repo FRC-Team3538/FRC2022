@@ -188,11 +188,11 @@ bool Shooter::Shoot()
     //SetIntakeState(Position::Deployed); 
 
     // Wait for shooter to settle before feeding the ball
-    if(settleTimer.Get() > 0.5_s)
+    if(settleTimer.Get() > 0.5_s) // TODO: Move to NT Parameter / Class Constant?
     {
         //SetIntake(10_V);
         //SetIndexer(10_V);
-        SetFeeder(10_V);
+        SetFeeder(10_V); // TODO: Move to NT Parameter / Class Constant?
     } else {
         //SetIntake(0_V);
         //SetIndexer(0_V);
@@ -200,7 +200,7 @@ bool Shooter::Shoot()
     }
 
     // Wait for balls to exit robot in auto
-    return (settleTimer.Get() > 2.0_s);
+    return (settleTimer.Get() > 2.0_s); // TODO: Move to NT Parameter / Class Constant?
 }
 
 Shooter::State Shooter::CalculateShot(units::inch_t distance)
@@ -214,12 +214,6 @@ Shooter::State Shooter::CalculateShot(units::inch_t distance)
         units::revolutions_per_minute_t{mainWheel}, 
         units::revolutions_per_minute_t{mainWheel * ratio}
     };
-}
-
-bool Shooter::TempUpToSpeed()
-{
-    return (std::abs(shooterTop.GetSelectedSensorVelocity() - shooterTop.GetClosedLoopTarget()) < 100) 
-        && (std::abs(shooterA.GetSelectedSensorVelocity() - shooterA.GetClosedLoopTarget()) < 100);
 }
 
 void Shooter::FalconSlotConfig(WPI_TalonFX& motor, int slot, SlotConfiguration& config)
@@ -265,6 +259,16 @@ void Shooter::InitSendable(wpi::SendableBuilder &builder)
 {
     builder.SetSmartDashboardType("Shooter");
     builder.SetActuator(true);
+
+    // Commands
+    builder.AddDoubleProperty(
+        "cmd/shooterRPM", 
+        [this] { return cmd_shooterRPM.value(); }, 
+        [this] (double value) {  cmd_shooterRPM = units::revolutions_per_minute_t{value}; });
+    builder.AddDoubleProperty(
+        "cmd/shooterTopRPM", 
+        [this] { return cmd_shooterTopRPM.value(); }, 
+        [this] (double value) {  cmd_shooterTopRPM = units::revolutions_per_minute_t{value}; });
 
     // Basic Motors
     FalconSendableHelper(builder, intake, "intake");

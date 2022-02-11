@@ -25,11 +25,11 @@ void Robot::RobotInit()
 
   // Smartdash Stuff
   frc::SmartDashboard::PutData("Power", &IO.pdp);
-  frc::SmartDashboard::PutData("Drivebase", &IO.drivetrain);
-  frc::SmartDashboard::PutData("Gamepad_Dr", &IO.mainController);
-  frc::SmartDashboard::PutData("Gamepad_Op", &IO.secondaryController);
+  frc::SmartDashboard::PutData("Dr", &IO.mainController);
+  frc::SmartDashboard::PutData("Op", &IO.secondaryController);
+  frc::SmartDashboard::PutData("Drive", &IO.drivetrain);
   frc::SmartDashboard::PutData("Shooter", &IO.shooter);
-  // TODO: PDH
+  // TODO: Climber, Vision, PDH
 
   ntRobotName.ForceSetString(ntRobotName.GetString("UnnamedRobot"));
   ntRobotName.SetPersistent();
@@ -92,10 +92,7 @@ void Robot::TeleopPeriodic()
 
       // Shoot
       units::degree_t tol{ntVisionAngleTol.GetDouble(kVisionAngleTolDefault)};
-      if (IO.drivetrain.TurnRel(0.0, data.angle, tol))
-      {
-        shoot = true;
-      }
+      shoot = IO.drivetrain.TurnRel(0.0, data.angle, tol);
     }
   }
   else

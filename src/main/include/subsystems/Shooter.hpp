@@ -79,9 +79,7 @@ public:
 
     // Helpers
     bool Shoot();
-
     State CalculateShot(units::inch_t distance);
-    bool TempUpToSpeed();
     void FalconSlotConfig(WPI_TalonFX& motor, int slot, SlotConfiguration& config);
 
     // Smartdash Sendable Interface
