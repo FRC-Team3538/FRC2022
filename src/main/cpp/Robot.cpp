@@ -30,6 +30,12 @@ void Robot::RobotInit()
   frc::SmartDashboard::PutData("Gamepad_Op", &IO.secondaryController);
   frc::SmartDashboard::PutData("Shooter", &IO.shooter);
 
+  ntRobotName.ForceSetString(ntRobotName.GetString("UnnamedRobot"));
+  ntRobotName.SetPersistent();
+
+  ntVisionAngleTol.ForceSetDouble(ntVisionAngleTol.GetDouble(kVisionAngleTolDefault));
+  ntVisionAngleTol.SetPersistent();
+  
   // Logging Stuff
 #ifdef LOGGER
   dataLogUtils.EnableNTConnectionLogging();
@@ -84,7 +90,8 @@ void Robot::TeleopPeriodic()
       IO.shooter.SetShooterTopRPM(shotStat.shooterTopRPM);
 
       // Shoot
-      if (IO.drivetrain.TurnRel(0.0, data.angle, 0.75_deg))
+      units::degree_t tol{ntVisionAngleTol.GetDouble(kVisionAngleTolDefault)};
+      if (IO.drivetrain.TurnRel(0.0, data.angle, tol))
       {
         shoot = true;
       }
@@ -149,10 +156,10 @@ void Robot::TeleopPeriodic()
   //
   // *** INTAKE, INDEXER, & FEEDER ***  
   //
-  double drL2 = deadband((IO.mainController.GetL2Axis() + 1.0) / 2.0);
-  double drR2 = deadband((IO.mainController.GetR2Axis() + 1.0) / 2.0);
-  double opL2 = deadband((IO.secondaryController.GetL2Axis() + 1.0) / 2.0);
-  double opR2 = deadband((IO.secondaryController.GetR2Axis() + 1.0) / 2.0);
+  double drL2 = IO.mainController.IsConnected() ? deadband((IO.mainController.GetL2Axis() + 1.0) / 2.0) : 0.0;
+  double drR2 = IO.mainController.IsConnected() ? deadband((IO.mainController.GetR2Axis() + 1.0) / 2.0) : 0.0;
+  double opL2 = IO.secondaryController.IsConnected() ? deadband((IO.secondaryController.GetL2Axis() + 1.0) / 2.0) : 0.0;
+  double opR2 = IO.secondaryController.IsConnected() ? deadband((IO.secondaryController.GetR2Axis() + 1.0) / 2.0) : 0.0;
 
   auto intakeCmd = (opR2 - opL2 + drR2 - drL2) * 13.0_V;
   IO.shooter.SetIntake(intakeCmd);

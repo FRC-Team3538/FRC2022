@@ -56,4 +56,11 @@ private:
     Shooter = 0,
     Climber
   } m_csmode;
+
+  // Smartdash
+  nt::NetworkTableEntry ntRobotName = frc::SmartDashboard::GetEntry("robot/RobotName");
+
+  static constexpr double kVisionAngleTolDefault = 0.75;
+  nt::NetworkTableEntry ntVisionAngleTol = frc::SmartDashboard::GetEntry("robot/visionAngleTol");
+
 };
