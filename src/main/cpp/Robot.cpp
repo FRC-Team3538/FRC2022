@@ -11,34 +11,32 @@ using namespace pathplanner;
 
 void Robot::RobotInit()
 {
-  // Disable Live Window, we don't use it...
+  // Disable Live Window Stuff, we don't use it...
   frc::LiveWindow::DisableAllTelemetry();
   frc::LiveWindow::SetEnabled(false);
   
-  // Unsure if we need this or not, leaving here as a reminder that it's an option.
+  // Unsure if we need this stuff or not, leaving here as a reminder that it's an option.
   // SetNetworkTablesFlushEnabled(false);
 
+  // System Setup Stuff
   IO.watchdog.Disable();
   IO.ConfigureSystem();
   IO.drivetrain.SetCoastMode();
 
+  // Smartdash Stuff
   frc::SmartDashboard::PutData("Power", &IO.pdp);
   frc::SmartDashboard::PutData("Drivebase", &IO.drivetrain);
   frc::SmartDashboard::PutData("Gamepad_Dr", &IO.mainController);
   frc::SmartDashboard::PutData("Gamepad_Op", &IO.secondaryController);
   frc::SmartDashboard::PutData("Shooter", &IO.shooter);
 
+  // Logging Stuff
 #ifdef LOGGER
   dataLogUtils.EnableNTConnectionLogging();
   dataLogUtils.EnableNTEntryLogging();
   // arg bool - log joystick data if true
   dataLogUtils.InitDSLogging(true);
 #endif // LOGGER
-  
-  frc::SmartDashboard::PutNumber("Feeder Voltage", 7.0);
-  // frc::SmartDashboard::PutNumber("Multiplier", 1.0);
-  frc::SmartDashboard::PutNumber("Shooter RPM", 3000.0);
-  frc::SmartDashboard::PutNumber("Hood Wheel RPM", 4000.0);
 }
 
 void Robot::RobotPeriodic()
@@ -65,96 +63,30 @@ void Robot::AutonomousPeriodic()
 
 void Robot::TeleopInit()
 {
-  lockShooterVoltage.SetBoolean(true);
-  targetShooterVoltage.SetDouble(0.0);
   IO.drivetrain.SetBrakeMode();
 }
 
 void Robot::TeleopPeriodic()
 {
+  bool shoot = false;
 
-  
-  double intakeSpd = 0.0;
-  double feederSpd = 0.0;
-  double indexerSpd = 0.0;
-  // *** PRESETS ***
-
-  switch (IO.secondaryController.GetPOV())
-  {
-  case 0:
-  {
-    // FENDER
-    auto kShooterRPM = units::revolutions_per_minute_t{frc::SmartDashboard::GetNumber("Shooter RPM", 0.0)};
-    auto kHoodRPM = units::revolutions_per_minute_t{frc::SmartDashboard::GetNumber("Hood Wheel RPM", 0.0)};
-
-    shotStats = {kShooterRPM, kHoodRPM, 0.0_deg};
-    break;
-  }
-
-  case 90:
-  {
-    // MIDFIELD
-    auto kShooterRPM = 0.0_rpm;
-    auto kHoodRPM = 0.0_rpm;
-
-    shotStats = {kShooterRPM, kHoodRPM, 0.0_deg};
-    break;
-  }
-
-  case 180:
-  {
-    // LAUNCHPAD
-    auto kShooterRPM = 0.0_rpm;
-    auto kHoodRPM = 0.0_rpm;
-
-    shotStats = {kShooterRPM, kHoodRPM, 0.0_deg};
-    break;
-  }
-
-  case 270:
-  {
-    // TARMAC
-    auto kShooterRPM = 0.0_rpm;
-    auto kHoodRPM = 0.0_rpm;
-
-    shotStats = {kShooterRPM, kHoodRPM, 0.0_deg};
-    break;
-  }
-
-  default:
-  {
-  }
-  }
-
-  // *** MANUAL SHOOTING ***
-
-  if (IO.secondaryController.GetCircleButtonPressed())
-    IO.shooter.SetShooterState(shotStats);
-  else if (IO.secondaryController.GetCrossButtonPressed())
-    IO.shooter.SetShooterState({0.0_rpm, 0.0_rpm, 0.0_deg});
-
-  if (!climberMode)
-  {
-    // HOOD CODE
-  }
-
+  //
   // *** VISION AND DRIVING ***
-
-  if (IO.mainController.GetR1Button())
+  //
+  if (IO.mainController.GetR1Button() || IO.secondaryController.GetTriangleButtonPressed())
   {
     vision::RJVisionPipeline::visionData data = IO.rjVision.Run();
     if (data.filled)
-    {
+    { 
+      // Start Shooter
+      Shooter::State shotStat = IO.shooter.CalculateShot(data.distance);
+      IO.shooter.SetShooterRPM(shotStat.shooterRPM);
+      IO.shooter.SetShooterTopRPM(shotStat.shooterTopRPM);
+
+      // Shoot
       if (IO.drivetrain.TurnRel(0.0, data.angle, 0.75_deg))
       {
-        Shooter::State shotStat = IO.shooter.CalculateShot(data.distance);
-        IO.shooter.SetShooterState(shotStat);
-        if (IO.shooter.TempUpToSpeed())
-        {
-          feederSpd = 10.0;
-          intakeSpd = 10.0;
-          indexerSpd = 10.0;
-        }
+        shoot = true;
       }
     }
   }
@@ -163,97 +95,115 @@ void Robot::TeleopPeriodic()
     double fwd = -deadband(IO.mainController.GetLeftY());
     double rot = -deadband(IO.mainController.GetRightX());
     IO.drivetrain.Arcade(fwd, rot);
-    // Can neg rot if want to be lazy
-  }
+  }  
 
-  if (IO.secondaryController.GetShareButton())
+  //
+  // *** SHOOTER ***
+  //
+  switch (IO.secondaryController.GetPOV())
   {
-    //ClimberShooterMode(ClimberShooterMode::Shooter);
+  case 0:
+    // FENDER
+    IO.shooter.SetShooterRPM(0_rpm);
+    IO.shooter.SetShooterTopRPM(0_rpm);
     m_csmode = ClimberShooterMode::Shooter;
+    break;
+
+  case 90:
+    // MIDFIELD
+    IO.shooter.SetShooterRPM(0_rpm);
+    IO.shooter.SetShooterTopRPM(0_rpm);
+    m_csmode = ClimberShooterMode::Shooter;
+    break;
+
+  case 180:
+    // LAUNCHPAD
+    IO.shooter.SetShooterRPM(0_rpm);
+    IO.shooter.SetShooterTopRPM(0_rpm);
+    m_csmode = ClimberShooterMode::Shooter;
+    break;
+
+  case 270:
+    // TARMAC
+    IO.shooter.SetShooterRPM(0_rpm);
+    IO.shooter.SetShooterTopRPM(0_rpm);
+    m_csmode = ClimberShooterMode::Shooter;
+    break;
   }
 
-  if (IO.secondaryController.GetOptionsButton())
+  // Manual Shoot
+  if (IO.secondaryController.GetSquareButtonPressed())
   {
-    //ClimberShooterMode(ClimberShooterMode::Climber);
-    m_csmode = ClimberShooterMode::Climber;
-
+    m_csmode = ClimberShooterMode::Shooter;
+    IO.shooter.Shoot();
+    shoot = true;
   }
 
-  if (m_csmode == ClimberShooterMode::Climber)
+  // Stop Shooter
+  if (IO.secondaryController.GetCrossButtonPressed())
   {
-    if (IO.secondaryController.GetR1Button())
-    {
-     IO.climber.SetClimberState(Climber::ClimbState::Up);
-    }
-  } 
-
-  // *** SETTING VALUES FOR FEEDER AND INTAKE ***
-
-  if (IO.mainController.GetSquareButton())
-    feederSpd = -10.0;
-  else if (IO.secondaryController.GetTriangleButton())
-    feederSpd = frc::SmartDashboard::GetNumber("Feeder Voltage", 0.0);
-  else
-    feederSpd = 0.0;
-
-  if (intakeSpd == 0.0)
-  {
-    intakeSpd += IO.secondaryController.IsConnected() ? (((deadband((IO.secondaryController.GetR2Axis() + 1.0) / 2.0)) - (deadband((IO.secondaryController.GetL2Axis() + 1.0) / 2.0))) * 13.0) : 0.0;
-    intakeSpd += IO.mainController.IsConnected() ? (((deadband((IO.mainController.GetR2Axis() + 1.0) / 2.0)) - (deadband((IO.mainController.GetL2Axis() + 1.0) / 2.0))) * 13.0) : 0.0;
-    
+    IO.shooter.SetShooter(0_V);
+    IO.shooter.SetShooterTop(0_V);
   }
 
-  if (indexerSpd == 0.0)
-  {
-    indexerSpd += IO.secondaryController.IsConnected() ? (((deadband((IO.secondaryController.GetR2Axis() + 1.0) / 2.0)) - (deadband((IO.secondaryController.GetL2Axis() + 1.0) / 2.0))) * 13.0) : 0.0;
-    indexerSpd += IO.mainController.IsConnected() ? (((deadband((IO.mainController.GetR2Axis() + 1.0) / 2.0)) - (deadband((IO.mainController.GetL2Axis() + 1.0) / 2.0))) * 13.0) : 0.0;
-    
-  }
+  //
+  // *** INTAKE, INDEXER, & FEEDER ***  
+  //
+  double drL2 = deadband((IO.mainController.GetL2Axis() + 1.0) / 2.0);
+  double drR2 = deadband((IO.mainController.GetR2Axis() + 1.0) / 2.0);
+  double opL2 = deadband((IO.secondaryController.GetL2Axis() + 1.0) / 2.0);
+  double opR2 = deadband((IO.secondaryController.GetR2Axis() + 1.0) / 2.0);
 
-  if (IO.secondaryController.GetTriangleButton())
-  {
-    IO.shooter.SetFeeder(units::volt_t{feederSpd});
-    IO.shooter.SetIntake(units::volt_t{feederSpd});
-    IO.shooter.SetIndexer(7.0_V);
-  }
-  else
-  {
-    IO.shooter.SetIntake(units::volt_t{intakeSpd});
-    IO.shooter.SetIndexer(7.0_V);
-    IO.shooter.SetFeeder(-2.0_V);
-    //IO.shooter.SetIndexer(0_V);
-    //IO.shooter.SetFeeder(0_V);
-  }
+  auto intakeCmd = (opR2 - opL2 + drR2 - drL2) * 13.0_V;
+  IO.shooter.SetIntake(intakeCmd);
 
-  // *** INTAKE DEPOY CODE ***
-
-  if (intakeSpd != 0.0)
+  if (units::math::abs(intakeCmd) > 0.0_V)
   {
     IO.shooter.SetIntakeState(Shooter::Position::Deployed);
     intakeTimer.Start();
     intakeTimer.Reset();
+
+    IO.shooter.SetIndexer(intakeCmd);
+  } 
+  else if(shoot) 
+  {
+    IO.shooter.SetIndexer(10_V);
+  } 
+  else 
+  {
+    IO.shooter.SetIndexer(0_V);
+    IO.shooter.SetFeeder(0_V);
   }
-  else if (intakeTimer.Get() > 0.5_s)
+
+  // Retract Intake Automatically
+  if (intakeTimer.Get() > 0.5_s)
   {
     IO.shooter.SetIntakeState(Shooter::Position::Stowed);
   }
-  
 
-  // *** CLIMBER CODE ***
+ 
+  //
+  // *** Climber ***
+  //
+  if (IO.secondaryController.GetR1Button())
+  {
+    IO.climber.SetClimberState(Climber::ClimbState::Up);
+    m_csmode = ClimberShooterMode::Climber;
+  }
 
-  if (IO.secondaryController.GetPSButtonPressed())
-    climberMode = !climberMode;
+  if (IO.secondaryController.GetL1Button())
+  {
+    IO.climber.SetClimberState(Climber::ClimbState::Down);
+    m_csmode = ClimberShooterMode::Climber;
+  }
 
-  if (climberMode)
+  if (m_csmode == ClimberShooterMode::Climber)
   {
     IO.climber.SetClimber(deadband(IO.secondaryController.GetLeftY()));
-
-    // CLIMB ANGLE SETTING
   }
   else
   {
     IO.climber.SetClimber(0.0);
-    IO.climber.SetClimberState(Climber::ClimbState::Down);
   }
 }
 

@@ -27,15 +27,17 @@ class Shooter : public Subsystem,
 public:
     struct State
     {
-        units::revolutions_per_minute_t shooterVelocity = 0_rpm;
-
-        units::revolutions_per_minute_t hoodVelocity = 0_rpm;
-
-        units::degree_t turretAngle = 0_deg;
+        units::revolutions_per_minute_t shooterRPM = 0_rpm;
+        units::revolutions_per_minute_t shooterTopRPM = 0_rpm;
+        // units::degree_t turretAngle = 0_deg;
+        // units::degree_t hoodAngle = 0_deg;
 
         bool operator==(const State &param)
         {
-            return ((this->shooterVelocity == param.shooterVelocity) && (this->hoodVelocity == param.hoodVelocity) && (this->turretAngle == param.turretAngle));
+            return ((this->shooterRPM == param.shooterRPM)
+                    && (this->shooterTopRPM == param.shooterTopRPM) );
+                    //&& (this->turretAngle == param.turretAngle) &&
+                    //&& (this->hoodAngle == param.hoodAngle) );
         }
     };
 
@@ -72,11 +74,13 @@ public:
 
     // *** GETTERS ***
     units::revolutions_per_minute_t GetShooterRPM();
+    units::revolutions_per_minute_t GetShooterTopRPM();
     // units::degree_t GetTurretAngle();
 
     // Helpers
+    bool Shoot();
+
     State CalculateShot(units::inch_t distance);
-    void SetShooterState(State shotStats);
     bool TempUpToSpeed();
     void FalconSlotConfig(WPI_TalonFX& motor, int slot, SlotConfiguration& config);
 
@@ -101,7 +105,7 @@ private:
 
     // Constants
     static constexpr double kScaleFactorTurret = 1.0;
-    static constexpr double kScaleFactorFly = (1.0 / 2048);
+    static constexpr double kTicks2RPM = 1.0 / (2048.0 * 10.0 * 60.0);
 
     // Controllers
     SlotConfiguration shooterSlotConfig;
@@ -111,4 +115,8 @@ private:
         frc::TrapezoidProfile<units::radian>::Constraints{
             180_deg_per_s,
             360_deg_per_s / 1_s}};
+
+    // Current Command
+    units::revolutions_per_minute_t cmd_shooterRPM{0_rpm};
+    units::revolutions_per_minute_t cmd_shooterTopRPM{0_rpm};
 };

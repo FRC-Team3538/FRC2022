@@ -37,27 +37,15 @@ public:
   void TestPeriodic() override;
 
 private:
+
+  double deadband(double val, double min = 0.1, double max = 1.0);
+
   Robotmap IO;
+  AutoPrograms autoprograms{IO};
+
 #ifdef LOGGER
   rj::DataLogUtils dataLogUtils{};
 #endif
-  AutoPrograms autoprograms{IO};
-
-  double shooterPresetVal = 0.0;
-  double hoodPresetVal = 0.0;
-  double feederPresetVal = 0.0;
-
-  nt::NetworkTableEntry lockShooterVoltage = frc::SmartDashboard::GetEntry("/lockShooterVoltage");
-  nt::NetworkTableEntry targetShooterVoltage = frc::SmartDashboard::GetEntry("/targetShooterVoltage");
-  nt::NetworkTableEntry lockHoodVoltage = frc::SmartDashboard::GetEntry("/lockHoodVoltage");
-  nt::NetworkTableEntry targetHoodVoltage = frc::SmartDashboard::GetEntry("/targetHoodVoltage");
-  nt::NetworkTableEntry lockFeederVoltage = frc::SmartDashboard::GetEntry("/lockFeederVoltage");
-  nt::NetworkTableEntry targetFeederVoltage = frc::SmartDashboard::GetEntry("/targetFeederVoltage");
-  nt::NetworkTableEntry targetIntakePercent = frc::SmartDashboard::GetEntry("/targetIntakePercent");
-
-  const double deadbandVal = 0.1;
-
-  double deadband(double val, double min = 0.1, double max = 1.0);
 
   frc::Timer shotTimer;
   frc::Timer brakeTimer;
@@ -68,8 +56,4 @@ private:
     Shooter = 0,
     Climber
   } m_csmode;
-
-  Shooter::State shotStats;
-
-  bool climberMode = true;
 };

@@ -1,5 +1,7 @@
 #include "subsystems/Shooter.hpp"
 
+#include <cmath>
+
 Shooter::Shooter()
 {
     // Factory Defaults
@@ -80,17 +82,18 @@ void Shooter::SetShooter(units::volt_t voltage)
 
 void Shooter::SetShooterRPM(units::revolutions_per_minute_t targetRPM)
 {
-    if (targetRPM == 0.0_rpm) // Riski
+    cmd_shooterRPM = targetRPM;
+
+    if (targetRPM < 1.0_rpm)
     {
         shooterA.Set(0.0);
         shooterB.Set(0.0);
         return;
     }
 
-    shooterA.Set(ControlMode::Velocity, ((targetRPM.value() / kScaleFactorFly) / 600.0));
-    shooterB.Set(ControlMode::Velocity, ((targetRPM.value() / kScaleFactorFly) / 600.0));
+    shooterA.Set(ControlMode::Velocity, targetRPM.value() / kTicks2RPM);
+    shooterB.Set(ControlMode::Velocity, targetRPM.value() / kTicks2RPM);
 }
-
 
 void Shooter::SetShooterTop(units::volt_t voltage)
 {
@@ -99,13 +102,15 @@ void Shooter::SetShooterTop(units::volt_t voltage)
 
 void Shooter::SetShooterTopRPM(units::revolutions_per_minute_t targetRPM)
 {    
-    if(targetRPM == 0.0_rpm)
+    cmd_shooterTopRPM = targetRPM;
+
+    if(targetRPM < 1.0_rpm)
     {
         shooterTop.Set(0.0);
         return;
     }
 
-    shooterTop.Set(ControlMode::Velocity, ((targetRPM.value() / kScaleFactorFly) / 600.0));
+    shooterTop.Set(ControlMode::Velocity, targetRPM.value() / kTicks2RPM);
 }
 
 // void Shooter::SetTurret(units::volt_t voltage)
@@ -144,7 +149,12 @@ void Shooter::SetShooterTopRPM(units::revolutions_per_minute_t targetRPM)
 
 units::revolutions_per_minute_t Shooter::GetShooterRPM()
 {
-    return units::revolutions_per_minute_t{shooterA.GetSelectedSensorVelocity() * kScaleFactorFly * 600.0};
+    return units::revolutions_per_minute_t{shooterA.GetSelectedSensorVelocity() * kTicks2RPM};
+}
+
+units::revolutions_per_minute_t Shooter::GetShooterTopRPM()
+{
+    return units::revolutions_per_minute_t{shooterTop.GetSelectedSensorVelocity() * kTicks2RPM};
 }
 
 // units::degree_t Shooter::GetTurretAngle()
@@ -154,29 +164,56 @@ units::revolutions_per_minute_t Shooter::GetShooterRPM()
 //     return 0_deg;
 // }
 
+bool Shooter::Shoot()
+{
+    static frc::Timer settleTimer;
+    settleTimer.Start();
+
+    // Resume Last Command (in case shooter was stopped)
+    SetShooterRPM(cmd_shooterRPM);
+    SetShooterTopRPM(cmd_shooterTopRPM);
+    // SetTurretAngle(cmd_turretAngle);
+    // SetHoodAngle(cmd_hoodAngle);
+
+    // Percent of setpoint to accept and begin shooting
+    // TODO: Sensor Override Mode
+    const double tol = 0.05;
+    if(units::math::abs(GetShooterRPM() - cmd_shooterRPM) > (cmd_shooterRPM * tol)) settleTimer.Reset();
+    if(units::math::abs(GetShooterTopRPM() - cmd_shooterTopRPM) > (cmd_shooterTopRPM * tol)) settleTimer.Reset();
+    //if(units::math::abs(GetTurretAngle() - cmd_TurretAngle) > (1.5_deg)) settleTimer.Reset();
+    //if(units::math::abs(GetHoodAngle() - cmd_HoodAngle) > (0.5_deg)) settleTimer.Reset();
+
+    // Prevent the intake from holding on to a ball while stowed
+    // TODO: Should intake be automatic?
+    //SetIntakeState(Position::Deployed); 
+
+    // Wait for shooter to settle before feeding the ball
+    if(settleTimer.Get() > 0.5_s)
+    {
+        //SetIntake(10_V);
+        //SetIndexer(10_V);
+        SetFeeder(10_V);
+    } else {
+        //SetIntake(0_V);
+        //SetIndexer(0_V);
+        SetFeeder(0_V);
+    }
+
+    // Wait for balls to exit robot in auto
+    return (settleTimer.Get() > 2.0_s);
+}
+
 Shooter::State Shooter::CalculateShot(units::inch_t distance)
 {
     double ratio = 7.5 / 7;
 
     double mainWheel = 8073 + (-0.00325 * std::pow(distance.value(), 3)) + (1.2191 * std::pow(distance.value(), 2)) + (-139.806 * std::pow(distance.value(), 1));
 
-    State shotStats = {units::revolutions_per_minute_t{mainWheel}, units::revolutions_per_minute_t{mainWheel * ratio}, 0_deg};
-    return shotStats;
-}
-
-void Shooter::SetShooterState(State shotStats)
-{
-    State zero = {0.0_rpm, 0.0_rpm, 0.0_deg};
-
-    if(shotStats == zero)
+    return 
     {
-        shooterA.Set(0.0);
-        shooterB.Set(0.0);
-        shooterTop.Set(0.0);
-        return;
-    }
-    SetShooterRPM(shotStats.shooterVelocity);
-    SetShooterTopRPM(shotStats.hoodVelocity);
+        units::revolutions_per_minute_t{mainWheel}, 
+        units::revolutions_per_minute_t{mainWheel * ratio}
+    };
 }
 
 bool Shooter::TempUpToSpeed()
@@ -214,8 +251,10 @@ void Shooter::FalconSendableHelper(wpi::SendableBuilder &builder, WPI_TalonFX& m
         [&motor](double value) { motor.SetVoltage(units::volt_t(value)); });
     builder.AddDoubleProperty(
         name + "/rpm", 
-        [&motor] { return motor.GetSelectedSensorVelocity() / 2048.0 * 10.0 * 60.0; }, 
-        [&motor](double value) { motor.Set(TalonFXControlMode::Velocity, value * 2048.0 / 10.0 / 60.0); });
+        [&motor] { return motor.GetSelectedSensorVelocity() * kTicks2RPM; }, 
+        [this, &motor](double value) { 
+            motor.Set(TalonFXControlMode::Velocity, value / kTicks2RPM); 
+        });
     builder.AddDoubleProperty(
         name + "/temperature", 
         [&motor] { return motor.GetTemperature(); }, 
@@ -227,15 +266,57 @@ void Shooter::InitSendable(wpi::SendableBuilder &builder)
     builder.SetSmartDashboardType("Shooter");
     builder.SetActuator(true);
 
-    // Motors
+    // Basic Motors
     FalconSendableHelper(builder, intake, "intake");
     FalconSendableHelper(builder, indexerA, "indexerA");
     //FalconSendableHelper(builder, indexerB, "indexerB");
-    FalconSendableHelper(builder, shooterA, "shooterA");
-    //FalconSendableHelper(builder, shooterA, "shooterB"); (Slaved)
-    FalconSendableHelper(builder, shooterTop, "shooterTop");
     //FalconSendableHelper(builder, turret, "turret");
     //FalconSendableHelper(builder, hood, "hood");
+
+    // Shooter
+    builder.AddDoubleProperty(
+        "shooter/percent", 
+        [this] { return shooterA.Get(); }, 
+        [this] (double value) { 
+            shooterA.Set(value); 
+            shooterB.Set(value); 
+        });
+    builder.AddDoubleProperty(
+        "shooter/voltage", 
+        [this] { return shooterA.GetMotorOutputVoltage(); }, 
+        [this](double value) { SetShooter(units::volt_t{value}); });
+    builder.AddDoubleProperty(
+        "shooter/rpm", 
+        [this] { return shooterA.GetSelectedSensorVelocity() * kTicks2RPM; }, 
+        [this](double value) { SetShooterRPM( units::revolutions_per_minute_t{value} ); });
+    builder.AddDoubleProperty(
+        "shooter/temperatureA", 
+        [this] { return shooterA.GetTemperature(); }, 
+        nullptr);
+    builder.AddDoubleProperty(
+        "shooter/temperatureB", 
+        [this] { return shooterB.GetTemperature(); }, 
+        nullptr);
+
+    // ShooterTop
+    builder.AddDoubleProperty(
+        "shooterTop/percent", 
+        [this] { return shooterTop.Get(); }, 
+        [this] (double value) { 
+            shooterTop.Set(value); 
+        });
+    builder.AddDoubleProperty(
+        "shooterTop/voltage", 
+        [this] { return shooterTop.GetMotorOutputVoltage(); }, 
+        [this](double value) { SetShooterTop(units::volt_t{value}); });
+    builder.AddDoubleProperty(
+        "shooterTop/rpm", 
+        [this] { return shooterTop.GetSelectedSensorVelocity() * kTicks2RPM; }, 
+        [this](double value) { SetShooterTopRPM( units::revolutions_per_minute_t{value} ); });
+    builder.AddDoubleProperty(
+        "shooterTop/temperature", 
+        [this] { return shooterTop.GetTemperature(); }, 
+        nullptr);
 
     // Shooter PID 
     // TODO: Disable this for Competition?
