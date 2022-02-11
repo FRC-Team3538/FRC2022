@@ -57,7 +57,7 @@ private:
 
   const double deadbandVal = 0.1;
 
-  double deadband(double val, double min, double max);
+  double deadband(double val, double min = 0.1, double max = 1.0);
 
   frc::Timer shotTimer;
   frc::Timer brakeTimer;

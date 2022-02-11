@@ -9,33 +9,14 @@
 
 using namespace pathplanner;
 
-double Robot::deadband(double val, double min = 0.1, double max = 1.0)
-{
-  if (val > max)
-  {
-    return max;
-  }
-  else if (val < -max)
-  {
-    return -max;
-  }
-  else if (std::abs(val) < min)
-  {
-    return 0.0;
-  }
-  else
-  {
-    double sgn = val / std::abs(val);
-    return sgn * (std::abs(val) - min) / (max - min) * max;
-  }
-}
-
 void Robot::RobotInit()
 {
   // Disable Live Window, we don't use it...
-  SetNetworkTablesFlushEnabled(false);
-  frc::LiveWindow::GetInstance()->DisableAllTelemetry();
-  frc::LiveWindow::GetInstance()->SetEnabled(false);
+  frc::LiveWindow::DisableAllTelemetry();
+  frc::LiveWindow::SetEnabled(false);
+  
+  // Unsure if we need this or not, leaving here as a reminder that it's an option.
+  // SetNetworkTablesFlushEnabled(false);
 
   IO.watchdog.Disable();
   IO.ConfigureSystem();
@@ -91,6 +72,8 @@ void Robot::TeleopInit()
 
 void Robot::TeleopPeriodic()
 {
+
+  
   double intakeSpd = 0.0;
   double feederSpd = 0.0;
   double indexerSpd = 0.0;
@@ -299,6 +282,27 @@ void Robot::SimulationPeriodic()
 
 void Robot::TestInit() {}
 void Robot::TestPeriodic() {}
+
+double Robot::deadband(double val, double min, double max)
+{
+  if (val > max)
+  {
+    return max;
+  }
+  else if (val < -max)
+  {
+    return -max;
+  }
+  else if (std::abs(val) < min)
+  {
+    return 0.0;
+  }
+  else
+  {
+    double sgn = val / std::abs(val);
+    return sgn * (std::abs(val) - min) / (max - min) * max;
+  }
+}
 
 #ifndef RUNNING_FRC_TESTS
 int main()
