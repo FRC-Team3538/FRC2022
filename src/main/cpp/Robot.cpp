@@ -29,6 +29,7 @@ void Robot::RobotInit()
   frc::SmartDashboard::PutData("Gamepad_Dr", &IO.mainController);
   frc::SmartDashboard::PutData("Gamepad_Op", &IO.secondaryController);
   frc::SmartDashboard::PutData("Shooter", &IO.shooter);
+  // TODO: PDH
 
   ntRobotName.ForceSetString(ntRobotName.GetString("UnnamedRobot"));
   ntRobotName.SetPersistent();
@@ -138,8 +139,8 @@ void Robot::TeleopPeriodic()
     break;
   }
 
-  // Manual Shoot
-  if (IO.secondaryController.GetSquareButtonPressed())
+  // Shoot
+  if (shoot || IO.secondaryController.GetSquareButtonPressed())
   {
     m_csmode = ClimberShooterMode::Shooter;
     IO.shooter.Shoot();
