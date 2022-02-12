@@ -21,4 +21,7 @@ void RJ::PS4Controller::InitSendable(wpi::SendableBuilder &builder)
     builder.AddDoubleProperty(
         "axis/RightY", [this] { return GetRightY(); }, nullptr);
     // TODO: Finish this?
+    builder.AddBooleanProperty(
+        "button/Options", [this ] { return GetOptionsButton(); }, nullptr
+    );
 }
