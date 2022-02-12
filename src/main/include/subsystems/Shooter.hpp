@@ -103,7 +103,7 @@ private:
 
     // Constants
     static constexpr double kScaleFactorTurret = 1.0;
-    static constexpr double kTicks2RPM = 1.0 / (2048.0 * 10.0 * 60.0);
+    static constexpr double kTicks2RPM = (1.0 / (2048.0)) * 10.0 * 60.0;
 
     // Controllers
     SlotConfiguration shooterSlotConfig;
