@@ -40,3 +40,26 @@ Climber::ClimbState Climber::GetClimberState()
 {
     return tiltPiston.Get() ? ClimbState::Up : ClimbState::Down;
 }
+
+void Climber::InitSendable(wpi::SendableBuilder &builder) 
+{
+   builder.SetSmartDashboardType("Climber");
+   builder.SetActuator(true);
+
+
+
+
+   builder.AddDoubleProperty(
+       "elevator/percent", [this] { return climberA.Get(); }, nullptr);
+   builder.AddDoubleProperty(
+       "elevator/voltage", [this] { return climberA.GetMotorOutputVoltage(); }, nullptr);
+   builder.AddDoubleProperty(
+       "elevator/position", [this] { return climberA.GetSelectedSensorPosition(); }, nullptr);
+   builder.AddDoubleProperty(
+       "elevator/velocity", [this] { return climberA.GetSelectedSensorVelocity(); }, nullptr);
+   builder.AddBooleanProperty(
+       "pitchedUp", [this] { return GetClimberState() == Climber::ClimbState::Up; }, nullptr);
+   
+   
+   
+}
