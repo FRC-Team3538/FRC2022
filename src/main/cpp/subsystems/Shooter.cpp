@@ -177,7 +177,7 @@ bool Shooter::Shoot()
 
     // Percent of setpoint to accept and begin shooting
     // TODO: Sensor Override Mode
-    const double tol = 0.05;
+    const double tol = 0.1;
     if(units::math::abs(GetShooterRPM() - cmd_shooterRPM) > (cmd_shooterRPM * tol)) settleTimer.Reset();
     if(units::math::abs(GetShooterTopRPM() - cmd_shooterTopRPM) > (cmd_shooterTopRPM * tol)) settleTimer.Reset();
     //if(units::math::abs(GetTurretAngle() - cmd_TurretAngle) > (1.5_deg)) settleTimer.Reset();
@@ -188,16 +188,16 @@ bool Shooter::Shoot()
     //SetIntakeState(Position::Deployed); 
 
     // Wait for shooter to settle before feeding the ball
-    if(settleTimer.Get() > 0.5_s) // TODO: Move to NT Parameter / Class Constant?
-    {
-        //SetIntake(10_V);
-        //SetIndexer(10_V);
-        SetFeeder(10_V); // TODO: Move to NT Parameter / Class Constant?
-    } else {
-        //SetIntake(0_V);
-        //SetIndexer(0_V);
-        SetFeeder(0_V);
-    }
+    // if(settleTimer.Get() > 0.5_s) // TODO: Move to NT Parameter / Class Constant?
+    // {
+    //     //SetIntake(10_V);
+    //     //SetIndexer(10_V);
+    //     SetFeeder(10_V); // TODO: Move to NT Parameter / Class Constant?
+    // } else {
+    //     //SetIntake(0_V);
+    //     //SetIndexer(0_V);
+    //     SetFeeder(-2_V);
+    // }
 
     // Wait for balls to exit robot in auto
     return (settleTimer.Get() > 2.0_s); // TODO: Move to NT Parameter / Class Constant?
@@ -237,18 +237,18 @@ void Shooter::FalconSendableHelper(wpi::SendableBuilder &builder, WPI_TalonFX& m
 {
     builder.AddDoubleProperty(
         name + "/percent", 
-        [&motor] { return motor.Get(); }, 
-        [&motor] (double value) { motor.Set(value); });
+        [&motor] { return motor.Get(); }, nullptr );
+        //[&motor] (double value) { motor.Set(value); });
     builder.AddDoubleProperty(
         name + "/voltage", 
-        [&motor] { return motor.GetMotorOutputVoltage(); }, 
-        [&motor](double value) { motor.SetVoltage(units::volt_t(value)); });
+        [&motor] { return motor.GetMotorOutputVoltage(); },  nullptr );
+        //[&motor](double value) { motor.SetVoltage(units::volt_t(value)); });
     builder.AddDoubleProperty(
         name + "/rpm", 
-        [&motor] { return motor.GetSelectedSensorVelocity() * kTicks2RPM; }, 
-        [this, &motor](double value) { 
-            motor.Set(TalonFXControlMode::Velocity, value / kTicks2RPM); 
-        });
+        [&motor] { return motor.GetSelectedSensorVelocity() * kTicks2RPM; },  nullptr );
+        // [this, &motor](double value) { 
+        //     motor.Set(TalonFXControlMode::Velocity, value / kTicks2RPM); 
+        // });
     builder.AddDoubleProperty(
         name + "/temperature", 
         [&motor] { return motor.GetTemperature(); }, 
@@ -263,16 +263,17 @@ void Shooter::InitSendable(wpi::SendableBuilder &builder)
     // Commands
     builder.AddDoubleProperty(
         "cmd/shooterRPM", 
-        [this] { return cmd_shooterRPM.value(); }, 
-        [this] (double value) {  cmd_shooterRPM = units::revolutions_per_minute_t{value}; });
+        [this] { return cmd_shooterRPM.value(); },  nullptr );
+        //[this] (double value) {  cmd_shooterRPM = units::revolutions_per_minute_t{value}; });
     builder.AddDoubleProperty(
         "cmd/shooterTopRPM", 
-        [this] { return cmd_shooterTopRPM.value(); }, 
-        [this] (double value) {  cmd_shooterTopRPM = units::revolutions_per_minute_t{value}; });
+        [this] { return cmd_shooterTopRPM.value(); },  nullptr );
+        //[this] (double value) {  cmd_shooterTopRPM = units::revolutions_per_minute_t{value}; });
 
     // Basic Motors
     FalconSendableHelper(builder, intake, "intake");
     FalconSendableHelper(builder, indexerA, "indexerA");
+    FalconSendableHelper(builder, feeder, "feeder");
     //FalconSendableHelper(builder, indexerB, "indexerB");
     //FalconSendableHelper(builder, turret, "turret");
     //FalconSendableHelper(builder, hood, "hood");
@@ -287,12 +288,12 @@ void Shooter::InitSendable(wpi::SendableBuilder &builder)
         });
     builder.AddDoubleProperty(
         "shooter/voltage", 
-        [this] { return shooterA.GetMotorOutputVoltage(); }, 
-        [this](double value) { SetShooter(units::volt_t{value}); });
+        [this] { return shooterA.GetMotorOutputVoltage(); },  nullptr );
+        //[this](double value) { SetShooter(units::volt_t{value}); });
     builder.AddDoubleProperty(
         "shooter/rpm", 
-        [this] { return shooterA.GetSelectedSensorVelocity() * kTicks2RPM; }, 
-        [this](double value) { SetShooterRPM( units::revolutions_per_minute_t{value} ); });
+        [this] { return shooterA.GetSelectedSensorVelocity() * kTicks2RPM; },  nullptr );
+        //[this](double value) { SetShooterRPM( units::revolutions_per_minute_t{value} ); });
     builder.AddDoubleProperty(
         "shooter/temperatureA", 
         [this] { return shooterA.GetTemperature(); }, 
@@ -305,18 +306,18 @@ void Shooter::InitSendable(wpi::SendableBuilder &builder)
     // ShooterTop
     builder.AddDoubleProperty(
         "shooterTop/percent", 
-        [this] { return shooterTop.Get(); }, 
-        [this] (double value) { 
-            shooterTop.Set(value); 
-        });
+        [this] { return shooterTop.Get(); },  nullptr );
+        // [this] (double value) { 
+        //     shooterTop.Set(value); 
+        // });
     builder.AddDoubleProperty(
         "shooterTop/voltage", 
-        [this] { return shooterTop.GetMotorOutputVoltage(); }, 
-        [this](double value) { SetShooterTop(units::volt_t{value}); });
+        [this] { return shooterTop.GetMotorOutputVoltage(); },  nullptr );
+        //[this](double value) { SetShooterTop(units::volt_t{value}); });
     builder.AddDoubleProperty(
         "shooterTop/rpm", 
-        [this] { return shooterTop.GetSelectedSensorVelocity() * kTicks2RPM; }, 
-        [this](double value) { SetShooterTopRPM( units::revolutions_per_minute_t{value} ); });
+        [this] { return shooterTop.GetSelectedSensorVelocity() * kTicks2RPM; },  nullptr );
+        //[this](double value) { SetShooterTopRPM( units::revolutions_per_minute_t{value} ); });
     builder.AddDoubleProperty(
         "shooterTop/temperature", 
         [this] { return shooterTop.GetTemperature(); }, 
@@ -364,7 +365,7 @@ void Shooter::InitSendable(wpi::SendableBuilder &builder)
         "shooter/kIZ", 
         [this] { return shooterSlotConfig.integralZone; }, 
         [this] (double value) { 
-            shooterSlotConfig.kF = value; 
+            shooterSlotConfig.integralZone = value; 
             shooterA.Config_IntegralZone(0, value); 
             shooterB.Config_IntegralZone(0, value); 
             shooterTop.Config_IntegralZone(0, value); 

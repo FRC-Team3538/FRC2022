@@ -14,7 +14,7 @@ void Robot::RobotInit()
   // Disable Live Window Stuff, we don't use it...
   frc::LiveWindow::DisableAllTelemetry();
   frc::LiveWindow::SetEnabled(false);
-  
+
   // Unsure if we need this stuff or not, leaving here as a reminder that it's an option.
   // SetNetworkTablesFlushEnabled(false);
 
@@ -36,7 +36,14 @@ void Robot::RobotInit()
 
   ntVisionAngleTol.ForceSetDouble(ntVisionAngleTol.GetDouble(kVisionAngleTolDefault));
   ntVisionAngleTol.SetPersistent();
-  
+
+  ntShooterRPM.ForceSetDouble(ntShooterRPM.GetDouble(kShooterRPMDefault));
+  ntShooterRPM.SetPersistent();
+  ntShooterTopRPM.ForceSetDouble(ntShooterTopRPM.GetDouble(kShooterTopRPMDefault));
+  ntShooterTopRPM.SetPersistent();
+  ntFeederVoltage.ForceSetDouble(ntFeederVoltage.GetDouble(kFeederVoltageDefault));
+  ntFeederVoltage.SetPersistent();
+
   // Logging Stuff
 #ifdef LOGGER
   dataLogUtils.EnableNTConnectionLogging();
@@ -80,11 +87,11 @@ void Robot::TeleopPeriodic()
   //
   // *** VISION AND DRIVING ***
   //
-  if (IO.mainController.GetR1Button() || IO.secondaryController.GetTriangleButtonPressed())
+  if (IO.mainController.GetR1Button())
   {
     vision::RJVisionPipeline::visionData data = IO.rjVision.Run();
     if (data.filled)
-    { 
+    {
       // Start Shooter
       Shooter::State shotStat = IO.shooter.CalculateShot(data.distance);
       IO.shooter.SetShooterRPM(shotStat.shooterRPM);
@@ -100,17 +107,20 @@ void Robot::TeleopPeriodic()
     double fwd = -deadband(IO.mainController.GetLeftY());
     double rot = -deadband(IO.mainController.GetRightX());
     IO.drivetrain.Arcade(fwd, rot);
-  }  
+  }
 
   //
   // *** SHOOTER ***
   //
+  auto s = units::revolutions_per_minute_t{ntShooterRPM.GetDouble(kShooterRPMDefault)};
+  auto st = units::revolutions_per_minute_t{ntShooterTopRPM.GetDouble(kShooterTopRPMDefault)};
+
   switch (IO.secondaryController.GetPOV())
   {
   case 0:
     // FENDER
-    IO.shooter.SetShooterRPM(0_rpm);
-    IO.shooter.SetShooterTopRPM(0_rpm);
+    IO.shooter.SetShooterRPM(s);
+    IO.shooter.SetShooterTopRPM(st);
     m_csmode = ClimberShooterMode::Shooter;
     break;
 
@@ -137,7 +147,7 @@ void Robot::TeleopPeriodic()
   }
 
   // Shoot
-  if (shoot || IO.secondaryController.GetSquareButtonPressed())
+  if (shoot || IO.secondaryController.GetSquareButton() || IO.mainController.GetSquareButton())
   {
     m_csmode = ClimberShooterMode::Shooter;
     IO.shooter.Shoot();
@@ -152,7 +162,7 @@ void Robot::TeleopPeriodic()
   }
 
   //
-  // *** INTAKE, INDEXER, & FEEDER ***  
+  // *** INTAKE, INDEXER, & FEEDER ***
   //
   double drL2 = IO.mainController.IsConnected() ? deadband((IO.mainController.GetL2Axis() + 1.0) / 2.0) : 0.0;
   double drR2 = IO.mainController.IsConnected() ? deadband((IO.mainController.GetR2Axis() + 1.0) / 2.0) : 0.0;
@@ -168,16 +178,25 @@ void Robot::TeleopPeriodic()
     intakeTimer.Start();
     intakeTimer.Reset();
 
-    IO.shooter.SetIndexer(intakeCmd);
-  } 
-  else if(shoot) 
+    if (intakeCmd > 0.0_V)
+      IO.shooter.SetIndexer(7_V);
+    else
+      IO.shooter.SetIndexer(-7_V);
+  }
+
+  if (shoot)
   {
-    IO.shooter.SetIndexer(10_V);
-  } 
-  else 
+    IO.shooter.SetIndexer(7_V);
+    IO.shooter.SetFeeder(units::volt_t{ntFeederVoltage.GetDouble(kFeederVoltageDefault)});
+  }
+
+  if (!(units::math::abs(intakeCmd) > 0.0_V) && !shoot)
   {
     IO.shooter.SetIndexer(0_V);
-    IO.shooter.SetFeeder(0_V);
+    if (IO.shooter.GetShooterRPM() > 10.0_rpm || IO.shooter.GetShooterTopRPM() > 10.0_rpm)
+      IO.shooter.SetFeeder(-2.0_V);
+    else
+      IO.shooter.SetFeeder(0.0_V);
   }
 
   // Retract Intake Automatically
@@ -186,7 +205,6 @@ void Robot::TeleopPeriodic()
     IO.shooter.SetIntakeState(Shooter::Position::Stowed);
   }
 
- 
   //
   // *** Climber ***
   //
@@ -216,7 +234,6 @@ void Robot::DisabledInit()
 {
   brakeTimer.Reset();
   brakeTimer.Start();
-
 }
 
 void Robot::DisabledPeriodic()
