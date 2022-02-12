@@ -62,9 +62,11 @@ public:
 
     void SetShooter(units::volt_t targetVolts);
     void SetShooterRPM(units::revolutions_per_minute_t targetRPM);
+    void SetShooterRPM();
 
     void SetShooterTop(units::volt_t targetVolts);
     void SetShooterTopRPM(units::revolutions_per_minute_t targetRPM);
+    void SetShooterTopRPM();
     
     // void SetTurret(units::volt_t targetVolts);
     // void SetTurretAngle(units::degree_t targetAngle);

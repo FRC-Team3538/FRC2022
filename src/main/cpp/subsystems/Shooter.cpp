@@ -78,6 +78,7 @@ void Shooter::SetFeeder(units::volt_t voltage)
 void Shooter::SetShooter(units::volt_t voltage)
 {
     shooterA.SetVoltage(voltage);
+    shooterB.SetVoltage(voltage);
 }
 
 void Shooter::SetShooterRPM(units::revolutions_per_minute_t targetRPM)
@@ -93,6 +94,11 @@ void Shooter::SetShooterRPM(units::revolutions_per_minute_t targetRPM)
 
     shooterA.Set(ControlMode::Velocity, targetRPM.value() / kTicks2RPM);
     shooterB.Set(ControlMode::Velocity, targetRPM.value() / kTicks2RPM);
+}
+
+void Shooter::SetShooterRPM()
+{
+    SetShooterRPM(cmd_shooterRPM);
 }
 
 void Shooter::SetShooterTop(units::volt_t voltage)
@@ -111,6 +117,11 @@ void Shooter::SetShooterTopRPM(units::revolutions_per_minute_t targetRPM)
     }
 
     shooterTop.Set(ControlMode::Velocity, targetRPM.value() / kTicks2RPM);
+}
+
+void Shooter::SetShooterTopRPM()
+{
+    SetShooterRPM(cmd_shooterTopRPM);
 }
 
 // void Shooter::SetTurret(units::volt_t voltage)
@@ -283,8 +294,8 @@ void Shooter::InitSendable(wpi::SendableBuilder &builder)
         "shooter/percent", 
         [this] { return shooterA.Get(); }, 
         [this] (double value) { 
-            shooterA.Set(value); 
-            shooterB.Set(value); 
+            // shooterA.Set(value); 
+            // shooterB.Set(value); 
         });
     builder.AddDoubleProperty(
         "shooter/voltage", 

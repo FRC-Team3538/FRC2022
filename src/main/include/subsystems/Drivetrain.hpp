@@ -55,6 +55,7 @@ public:
                units::radians_per_second_t rot);
     bool TurnRel(double forward, units::degree_t target, units::degree_t tolerance);
     void Drive(const frc::Trajectory::State& target);
+    // TODO: Turn2Goal() 
 
     void UpdateOdometry();
     void ResetOdometry(const frc::Pose2d &pose);

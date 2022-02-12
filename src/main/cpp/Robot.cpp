@@ -31,6 +31,8 @@ void Robot::RobotInit()
   frc::SmartDashboard::PutData("Shooter", &IO.shooter);
   frc::SmartDashboard::PutData("Climber", &IO.climber);
   // TODO: Climber, Vision, PDH
+  // TODO: Move to a separate table so it doesn't fill smartdash automatically?
+  // TODO: Canbus utlization
 
   ntRobotName.ForceSetString(ntRobotName.GetString("UnnamedRobot"));
   ntRobotName.SetPersistent();
@@ -44,6 +46,8 @@ void Robot::RobotInit()
   ntShooterTopRPM.SetPersistent();
   ntFeederVoltage.ForceSetDouble(ntFeederVoltage.GetDouble(kFeederVoltageDefault));
   ntFeederVoltage.SetPersistent();
+  ntIndexerVoltage.ForceSetDouble(ntIndexerVoltage.GetDouble(kIndexerVoltageDefault));
+  ntIndexerVoltage.SetPersistent();
 
   // Logging Stuff
 #ifdef LOGGER
@@ -88,7 +92,7 @@ void Robot::TeleopPeriodic()
   //
   // *** VISION AND DRIVING ***
   //
-  if (IO.mainController.GetR1Button())
+  if (IO.mainController.GetR1Button() ||  IO.secondaryController.GetTriangleButton() )
   {
     vision::RJVisionPipeline::visionData data = IO.rjVision.Run();
     if (data.filled)
@@ -107,6 +111,14 @@ void Robot::TeleopPeriodic()
   {
     double fwd = -deadband(IO.mainController.GetLeftY());
     double rot = -deadband(IO.mainController.GetRightX());
+
+    // Sniper Mode
+    if (IO.mainController.GetR3Button()) 
+    {
+      fwd *= 0.3;
+      rot *= 0.3;
+    }
+
     IO.drivetrain.Arcade(fwd, rot);
   }
 
@@ -156,7 +168,7 @@ void Robot::TeleopPeriodic()
   }
 
   // Stop Shooter
-  if (IO.secondaryController.GetCrossButtonPressed())
+  if (IO.secondaryController.GetCrossButtonPressed() || IO.mainController.GetCrossButtonPressed())
   {
     IO.shooter.SetShooter(0_V);
     IO.shooter.SetShooterTop(0_V);
@@ -172,39 +184,51 @@ void Robot::TeleopPeriodic()
 
   auto intakeCmd = (opR2 - opL2 + drR2 - drL2) * 13.0_V;
   IO.shooter.SetIntake(intakeCmd);
-
+  
+  // Deploy Intake
   if (units::math::abs(intakeCmd) > 0.0_V)
   {
     IO.shooter.SetIntakeState(Shooter::Position::Deployed);
     intakeTimer.Start();
     intakeTimer.Reset();
-
-    if (intakeCmd > 0.0_V)
-      IO.shooter.SetIndexer(7_V);
-    else
-      IO.shooter.SetIndexer(-7_V);
   }
 
-  if (shoot)
-  {
-    IO.shooter.SetIndexer(7_V);
-    IO.shooter.SetFeeder(units::volt_t{ntFeederVoltage.GetDouble(kFeederVoltageDefault)});
-  }
-
-  if (!(units::math::abs(intakeCmd) > 0.0_V) && !shoot)
-  {
-    IO.shooter.SetIndexer(0_V);
-    if (IO.shooter.GetShooterRPM() > 10.0_rpm || IO.shooter.GetShooterTopRPM() > 10.0_rpm)
-      IO.shooter.SetFeeder(-2.0_V);
-    else
-      IO.shooter.SetFeeder(0.0_V);
-  }
-
-  // Retract Intake Automatically
+  // Retract Intake after a short delay
   if (intakeTimer.Get() > 0.5_s)
   {
     IO.shooter.SetIntakeState(Shooter::Position::Stowed);
   }
+
+  // Indexer is shared between Intake and Shooter
+  if (units::math::abs(intakeCmd) > 0.0_V || shoot)
+  {
+    IO.shooter.SetIndexer(units::volt_t{ntIndexerVoltage.GetDouble(kIndexerVoltageDefault)});
+  } 
+  else if(units::math::abs(intakeCmd) < 0.0_V)
+  {
+    IO.shooter.SetIndexer(-1 * units::volt_t{ntIndexerVoltage.GetDouble(kIndexerVoltageDefault)});
+  }
+  else
+  {
+    IO.shooter.SetIndexer(0_V);
+  }
+
+  // Feeder
+  if(shoot) 
+  {
+    IO.shooter.SetFeeder(units::volt_t{ntFeederVoltage.GetDouble(kFeederVoltageDefault)});
+  }
+  else if (IO.shooter.GetShooterRPM() > 10.0_rpm || 
+      IO.shooter.GetShooterTopRPM() > 10.0_rpm || 
+      units::math::abs(intakeCmd) > 0.0_V)
+  {
+    IO.shooter.SetFeeder(-2_V);
+  } 
+  else 
+  {
+    IO.shooter.SetFeeder(0_V);
+  }
+
 
   //
   // *** Climber ***
@@ -273,6 +297,7 @@ double Robot::deadband(double val, double min, double max)
   else
   {
     double sgn = val / std::abs(val);
+    // return sgn * (std::abs(val) - min) / (max - min) * max;
     return sgn * (std::abs(val) - min) / (max - min) * max;
   }
 }
