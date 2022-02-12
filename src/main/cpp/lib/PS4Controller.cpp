@@ -20,7 +20,10 @@ void RJ::PS4Controller::InitSendable(wpi::SendableBuilder& builder)
         "axis/RightX", [this] { return GetRightX(); }, nullptr);
     builder.AddDoubleProperty(
         "axis/RightY", [this] { return GetRightY(); }, nullptr);
-    // TODO: Finish this?
+    builder.AddDoubleProperty(
+        "axis/LeftTrigger", [this] { return GetL2Axis(); }, nullptr);
+    builder.AddDoubleProperty(
+        "axis/RightTrigger", [this] { return GetR2Axis(); }, nullptr);
     builder.AddBooleanProperty(
         "button/Options", [this] { return GetOptionsButton(); }, nullptr
     );
@@ -49,22 +52,22 @@ void RJ::PS4Controller::InitSendable(wpi::SendableBuilder& builder)
         "button/Circlebutton", [this] { return GetCircleButton(); }, nullptr
     );
     builder.AddBooleanProperty(
-        "button/R1", [this] { return GetR1Button(); }, nullptr
-    );
-    builder.AddBooleanProperty(
-        "button/R2", [this] { return GetR2Button(); }, nullptr
-    );
-    builder.AddBooleanProperty(
         "button/L1", [this] { return GetL1Button(); }, nullptr
     );
     builder.AddBooleanProperty(
         "button/L2", [this] { return GetL2Button(); }, nullptr
     );
     builder.AddBooleanProperty(
-        "button/R3", [this] { return GetR3Button(); }, nullptr
+        "button/R1", [this] { return GetR1Button(); }, nullptr
+    );
+    builder.AddBooleanProperty(
+        "button/R2", [this] { return GetR2Button(); }, nullptr
     );
     builder.AddBooleanProperty(
         "button/L3", [this] { return GetL3Button(); }, nullptr
+    );
+     builder.AddBooleanProperty(
+        "button/R3", [this] { return GetR3Button(); }, nullptr
     );
     builder.AddBooleanProperty(
         "button/Isconected", [this] { return IsConnected(); }, nullptr
