@@ -59,6 +59,9 @@ void Climber::InitSendable(wpi::SendableBuilder &builder)
        "elevator/velocity", [this] { return climberA.GetSelectedSensorVelocity(); }, nullptr);
    builder.AddBooleanProperty(
        "pitchedUp", [this] { return GetClimberState() == Climber::ClimbState::Up; }, nullptr);
+
+    builder.AddStringProperty(
+        "sol", [this] { return  (GetClimberState() == Climber::ClimbState::Up) ? "UP":"DOWN"; }, nullptr);
    
    
    

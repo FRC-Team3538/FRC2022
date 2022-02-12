@@ -29,6 +29,7 @@ void Robot::RobotInit()
   frc::SmartDashboard::PutData("Op", &IO.secondaryController);
   frc::SmartDashboard::PutData("Drive", &IO.drivetrain);
   frc::SmartDashboard::PutData("Shooter", &IO.shooter);
+  frc::SmartDashboard::PutData("Climber", &IO.climber);
   // TODO: Climber, Vision, PDH
 
   ntRobotName.ForceSetString(ntRobotName.GetString("UnnamedRobot"));
