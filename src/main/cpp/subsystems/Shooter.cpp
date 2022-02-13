@@ -264,6 +264,11 @@ void Shooter::FalconSendableHelper(wpi::SendableBuilder &builder, WPI_TalonFX& m
         name + "/temperature", 
         [&motor] { return motor.GetTemperature(); }, 
         nullptr);
+
+    builder.AddDoubleProperty(
+        name + "/current", 
+        [&motor] { return motor.GetSupplyCurrent(); }, 
+        nullptr);
 }
 
 void Shooter::InitSendable(wpi::SendableBuilder &builder)

@@ -201,11 +201,11 @@ void Robot::TeleopPeriodic()
   }
 
   // Indexer is shared between Intake and Shooter
-  if (units::math::abs(intakeCmd) > 0.0_V || shoot)
+  if (intakeCmd > 0.0_V || shoot)
   {
     IO.shooter.SetIndexer(units::volt_t{ntIndexerVoltage.GetDouble(kIndexerVoltageDefault)});
   } 
-  else if(units::math::abs(intakeCmd) < 0.0_V)
+  else if(intakeCmd < 0.0_V)
   {
     IO.shooter.SetIndexer(-1 * units::volt_t{ntIndexerVoltage.GetDouble(kIndexerVoltageDefault)});
   }
