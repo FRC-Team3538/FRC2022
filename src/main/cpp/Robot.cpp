@@ -30,6 +30,7 @@ void Robot::RobotInit()
   frc::SmartDashboard::PutData("Drive", &IO.drivetrain);
   frc::SmartDashboard::PutData("Shooter", &IO.shooter);
   frc::SmartDashboard::PutData("Climber", &IO.climber);
+  frc::SmartDashboard::PutData("Ph" ,&IO.ph);
   // TODO: Climber, Vision, PDH
   // TODO: Move to a separate table so it doesn't fill smartdash automatically?
   // TODO: Canbus utlization

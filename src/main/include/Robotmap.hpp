@@ -9,6 +9,8 @@
 
 #include <lib/PS4Controller.hpp>
 
+#include <lib/PneumaticHub.hpp>
+
 #include <frc/PowerDistribution.h>
 #include <frc/TimedRobot.h>
 
@@ -29,6 +31,7 @@ public:
     RJ::PS4Controller secondaryController{1};
 
     frc::PowerDistribution pdp;
+    RJ::PneumaticHub ph;
     frc::Watchdog watchdog{units::second_t{0.02}, test};
 
     // *** PUT SUBSYSTEMS HERE ***
