@@ -6,6 +6,15 @@ Climber::Climber()
 
 void Climber::ConfigureSystem()
 {
+    climberA.ConfigFactoryDefault();
+    climberB.ConfigFactoryDefault();
+
+    climberA.SetInverted(false);
+    climberB.SetInverted(false);
+
+    climberA.SetNeutralMode(ctre::phoenix::motorcontrol::NeutralMode::Brake);
+    climberB.SetNeutralMode(ctre::phoenix::motorcontrol::NeutralMode::Brake);
+
     climberB.Follow(climberA);
 }
 
@@ -13,9 +22,9 @@ void Climber::UpdateTelemetry()
 {
 }
 
-void Climber::SetClimber(double setValue)
-{
-    climberA.SetVoltage(units::volt_t{setValue * 13.0});
+void Climber::SetClimber(units::volt_t targetVoltage)
+{ 
+    climberA.SetVoltage(targetVoltage);
 }
 
 void Climber::SetClimberState(ClimbState climbPosition)

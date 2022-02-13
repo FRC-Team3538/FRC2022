@@ -31,11 +31,11 @@ namespace vision
         int pipeSwitchCt = 0;
         frc::Timer pipeSwitch;
 
-    // Angle of elevation of camera
-    const units::degree_t cameraAngle = 16.0_deg;
-       
-    // Distance between camera lens and vision target midpoint
-    const units::inch_t deltaH = 59.0_in;   
+        // Angle of elevation of camera
+        const units::degree_t cameraAngle = 16.0_deg;
+
+        // Distance between camera lens and vision target midpoint
+        const units::inch_t deltaH = 59.0_in;
 
     public:
         struct visionData

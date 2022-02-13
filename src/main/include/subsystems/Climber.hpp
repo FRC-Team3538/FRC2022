@@ -39,7 +39,7 @@ public:
 
     // *** SETTERS ***
 
-    void SetClimber(double setValue);
+    void SetClimber(units::volt_t targetVoltage);
     void SetClimberState(ClimbState climbPosition);
 
     // *** GETTERS ***

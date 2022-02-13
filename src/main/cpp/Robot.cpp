@@ -248,11 +248,11 @@ void Robot::TeleopPeriodic()
 
   if (m_csmode == ClimberShooterMode::Climber)
   {
-    IO.climber.SetClimber(deadband(IO.secondaryController.GetLeftY()));
+    IO.climber.SetClimber(units::volt_t{deadband(IO.secondaryController.GetLeftY()) * 13.0});
   }
   else
   {
-    IO.climber.SetClimber(0.0);
+    IO.climber.SetClimber(0.0_V);
   }
 }
 
