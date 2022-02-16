@@ -6,15 +6,6 @@ Climber::Climber()
 
 void Climber::ConfigureSystem()
 {
-    climberA.ConfigFactoryDefault();
-    climberB.ConfigFactoryDefault();
-
-    climberA.SetInverted(false);
-    climberB.SetInverted(false);
-
-    climberA.SetNeutralMode(ctre::phoenix::motorcontrol::NeutralMode::Brake);
-    climberB.SetNeutralMode(ctre::phoenix::motorcontrol::NeutralMode::Brake);
-
     climberB.Follow(climberA);
 }
 
@@ -23,8 +14,8 @@ void Climber::UpdateTelemetry()
 }
 
 void Climber::SetClimber(units::volt_t targetVoltage)
-{ 
-    climberA.SetVoltage(targetVoltage);
+{
+    climberA.SetVoltage(targetVoltage * 13.0);
 }
 
 void Climber::SetClimberState(ClimbState climbPosition)
@@ -68,9 +59,6 @@ void Climber::InitSendable(wpi::SendableBuilder &builder)
        "elevator/velocity", [this] { return climberA.GetSelectedSensorVelocity(); }, nullptr);
    builder.AddBooleanProperty(
        "pitchedUp", [this] { return GetClimberState() == Climber::ClimbState::Up; }, nullptr);
-
-    builder.AddStringProperty(
-        "sol", [this] { return  (GetClimberState() == Climber::ClimbState::Up) ? "UP":"DOWN"; }, nullptr);
    
    
    

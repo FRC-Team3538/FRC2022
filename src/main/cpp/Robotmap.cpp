@@ -42,6 +42,7 @@ void Robotmap::UpdateSmartDash()
  */
 void Robotmap::ConfigureSystem()
 {
+    pdp.SetSwitchableChannel(true);
     for (auto system : subsystems)
         system->ConfigureSystem();
 }

@@ -5,6 +5,9 @@
 #include "auto/AutoLine_Backward.hpp"
 #include "auto/AutoTurn.hpp"
 #include "auto/AutoBackForward.hpp"
+#include "auto/Auto4ft.hpp"
+#include "auto/Twoball.hpp"
+#include "auto/NinetyDegreeAngle.hpp"
 // Constructor requires a reference to the robot map
 AutoPrograms::AutoPrograms(Robotmap &IO) : IO(IO)
 {
@@ -14,6 +17,9 @@ AutoPrograms::AutoPrograms(Robotmap &IO) : IO(IO)
     m_chooser.AddOption(AutoLine_Backward::GetName(), AutoLine_Backward::GetName());
     m_chooser.AddOption(AutoTurn::GetName(), AutoTurn::GetName());
     m_chooser.AddOption(AutoBackForward::GetName(), AutoBackForward::GetName());
+    m_chooser.AddOption(Auto4ft::GetName(), Auto4ft::GetName());
+    m_chooser.AddOption(Twoball::GetName(), Twoball::GetName());
+    m_chooser.AddOption(NinetyDegreeAngle::GetName(), NinetyDegreeAngle::GetName());
 }
 
 // Initialize the selected auto program
@@ -43,6 +49,10 @@ void AutoPrograms::Init()
     else if (name == AutoBackForward::GetName())
     {
         m_autoProgram = new AutoBackForward(IO);
+    }
+    else if (name == Auto4ft::GetName())
+    {
+        m_autoProgram = new Auto4ft(IO);
     }
     if (m_autoProgram != NULL)
         m_autoProgram->Init();

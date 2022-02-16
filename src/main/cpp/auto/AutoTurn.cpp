@@ -8,7 +8,7 @@
 // Name for Smart Dash Chooser
 std::string AutoTurn::GetName()
 {
-    return "3 - Turn";
+    return " 3 - Turn";
 }
 
 // Initialization
@@ -53,26 +53,8 @@ void AutoTurn::Init()
 // Execute the program
 void AutoTurn::Run()
 {
-    switch (m_state)
-    {
-    case 0:
-    {
-        auto reference = m_trajectory.Sample(m_autoTimer.Get());
-
-        IO.drivetrain.Drive(reference);
-
-        if ((m_autoTimer.Get() > m_trajectory.TotalTime()))
-        {
-            NextState();
-        }
-        break;
-    }
-    default:
-    {
-        IO.drivetrain.Arcade(0.0, 0.0);
-    }
-    }
-
+   
+    IO.drivetrain.Arcade(0.0, 0.0);
     UpdateSmartDash();
 }
 

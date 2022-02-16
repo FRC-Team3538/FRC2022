@@ -25,8 +25,8 @@ void Robot::RobotInit()
 
   // Smartdash Stuff
   frc::SmartDashboard::PutData("Power", &IO.pdp);
-  frc::SmartDashboard::PutData("Dr", &IO.mainController);
-  frc::SmartDashboard::PutData("Op", &IO.secondaryController);
+  // frc::SmartDashboard::PutData("Dr", &IO.mainController);
+  // frc::SmartDashboard::PutData("Op", &IO.secondaryController);
   frc::SmartDashboard::PutData("Drive", &IO.drivetrain);
   frc::SmartDashboard::PutData("Shooter", &IO.shooter);
   frc::SmartDashboard::PutData("Climber", &IO.climber);
