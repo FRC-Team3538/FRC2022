@@ -9,6 +9,7 @@
 #include "auto/AutoTwoBall.hpp"
 #include "auto/NinetyDegreeAngle.hpp"
 #include "auto/AutoFourBall.hpp"
+#include "auto/AutoFiveBall.hpp"
 
 
 // Constructor requires a reference to the robot map
@@ -24,6 +25,7 @@ AutoPrograms::AutoPrograms(Robotmap &IO) : IO(IO)
     m_chooser.AddOption(AutoTwoBall::GetName(), AutoTwoBall::GetName());
     m_chooser.AddOption(NinetyDegreeAngle::GetName(), NinetyDegreeAngle::GetName());
     m_chooser.AddOption(AutoFourBall::GetName(), AutoFourBall::GetName());
+    m_chooser.AddOption(AutoFiveBall::GetName(), AutoFiveBall::GetName());
 }
 
 // Initialize the selected auto program
@@ -65,6 +67,10 @@ void AutoPrograms::Init()
     else if (name == AutoFourBall::GetName())
     {
         m_autoProgram = new AutoFourBall(IO);
+    }
+    else if (name == AutoFiveBall::GetName())
+    {
+        m_autoProgram = new AutoFiveBall(IO);
     }
     if (m_autoProgram != NULL)
         m_autoProgram->Init();
