@@ -11,7 +11,7 @@
 // Name for Smart Dash Chooser
 std::string AutoLine::GetName()
 {
-    return "1 - Line";
+    return "01 - Line";
 }
 
 // Initialization

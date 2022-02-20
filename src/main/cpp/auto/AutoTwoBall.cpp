@@ -11,7 +11,7 @@
 // Name for Smart Dash Chooser
 std::string AutoTwoBall::GetName()
 {
-    return "7 - Two Ball";
+    return "02 - Two Ball";
 }
 
 // Initialization

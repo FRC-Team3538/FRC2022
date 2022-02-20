@@ -140,6 +140,11 @@ void Drivetrain::ResetOdometry(const frc::Pose2d &pose)
     m_driveL0.SetSelectedSensorPosition(0);
     m_driveR0.SetSelectedSensorPosition(0);
 
+    // Delay for Falcons to reset
+    frc::Timer t;
+    t.Start();
+    while (t.Get() < 20_ms);
+
     // auto res = m_imu.SetFusedHeading(pose.Rotation().Degrees().value(), 50);
     // if (res != 0) {
     //     std::cout << "ERROR: Fused Heading Set Failed: " << res << std::endl;
@@ -149,7 +154,9 @@ void Drivetrain::ResetOdometry(const frc::Pose2d &pose)
     m_odometry.ResetPosition(pose, GetYaw());
     // std::cout << "Heading after reset: " << m_odometry.GetPose().Rotation().Radians().value() << std::endl;
 
-    //m_drivetrainSimulator.SetPose(pose);
+    // Simulator
+    // Reset the pose of the robot but do not reset the Simulated IMU.
+    m_drivetrainSimulator.SetPose({pose.Translation(), GetYaw()});
 }
 
 frc::Rotation2d Drivetrain::GetYaw()

@@ -11,7 +11,7 @@
 // Name for Smart Dash Chooser
 std::string AutoFourBall::GetName()
 {
-    return "9 - Four Ball";
+    return "04 - Four Ball";
 }
 
 // Initialization

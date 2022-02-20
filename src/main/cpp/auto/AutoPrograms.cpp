@@ -16,7 +16,7 @@
 AutoPrograms::AutoPrograms(Robotmap &IO) : IO(IO)
 {
     // SmartDash Chooser [List 2 of 3]
-    m_chooser.SetDefaultOption("0 - None", "0 - None");
+    m_chooser.SetDefaultOption("00 - None", "00 - None");
     m_chooser.AddOption(AutoLine::GetName(), AutoLine::GetName());
     m_chooser.AddOption(AutoLine_Backward::GetName(), AutoLine_Backward::GetName());
     m_chooser.AddOption(AutoTurn::GetName(), AutoTurn::GetName());

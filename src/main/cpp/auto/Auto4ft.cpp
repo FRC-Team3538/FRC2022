@@ -9,7 +9,7 @@
 // Name for Smart Dash Chooser
 std::string Auto4ft::GetName()
 {
-    return "5 - Auto4ft";
+    return "90 - Auto4ft";
 }
 
 // Initialization

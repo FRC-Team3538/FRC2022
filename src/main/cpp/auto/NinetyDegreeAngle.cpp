@@ -9,7 +9,7 @@
 // Name for Smart Dash Chooser
 std::string NinetyDegreeAngle::GetName()
 {
-    return "6 - NinetyDegAngle";
+    return "96 - NinetyDegAngle";
 }
 
 // Initialization
