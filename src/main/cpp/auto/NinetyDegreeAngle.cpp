@@ -86,5 +86,5 @@ void NinetyDegreeAngle::Run()
 
 void NinetyDegreeAngle::UpdateSmartDash()
 {
-    frc::SmartDashboard::PutNumber("Auto State", m_state);
+    frc::SmartDashboard::PutNumber("Auto/State", m_state);
 }

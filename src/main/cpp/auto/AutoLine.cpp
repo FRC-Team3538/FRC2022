@@ -45,7 +45,7 @@ void AutoLine::Init()
     // config.AddConstraint(frc::DifferentialDriveKinematicsConstraint{IO.drivetrain.GetKinematics(), 4_fps});
     config.SetReversed(false);
 
-    m_trajectory = rj::AutoHelper::LoadTrajectory("Straight Line path", &config);
+    m_trajectory = rj::AutoHelper::LoadTrajectory("01 - Line", &config);
 
     m_autoTimer.Reset();
     m_autoTimer.Start();
@@ -93,5 +93,5 @@ void AutoLine::Run()
 // Called Automagically by AutoPrograms (RobotPeriodic)
 void AutoLine::UpdateSmartDash()
 {
-    frc::SmartDashboard::PutNumber("Auto State", m_state);
+    frc::SmartDashboard::PutNumber("Auto/State", m_state);
 }

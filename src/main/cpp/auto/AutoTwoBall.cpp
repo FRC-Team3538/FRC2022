@@ -143,5 +143,5 @@ void AutoTwoBall::Run()
 // Called Automagically by AutoPrograms (RobotPeriodic)
 void AutoTwoBall::UpdateSmartDash()
 {
-    frc::SmartDashboard::PutNumber("Auto State", m_state);
+    frc::SmartDashboard::PutNumber("Auto/State", m_state);
 }

@@ -194,5 +194,5 @@ void AutoFourBall::Run()
 // Called Automagically by AutoPrograms (RobotPeriodic)
 void AutoFourBall::UpdateSmartDash()
 {
-    frc::SmartDashboard::PutNumber("Auto State", m_state);
+    frc::SmartDashboard::PutNumber("Auto/State", m_state);
 }

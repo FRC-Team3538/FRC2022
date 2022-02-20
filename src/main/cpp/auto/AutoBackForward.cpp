@@ -86,5 +86,5 @@ void AutoBackForward::Run()
 
 void AutoBackForward::UpdateSmartDash()
 {
-    frc::SmartDashboard::PutNumber("Auto State", m_state);
+    frc::SmartDashboard::PutNumber("Auto/State", m_state);
 }

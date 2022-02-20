@@ -86,5 +86,5 @@ void Auto4ft::Run()
 
 void Auto4ft::UpdateSmartDash()
 {
-    frc::SmartDashboard::PutNumber("Auto State", m_state);
+    frc::SmartDashboard::PutNumber("Auto/State", m_state);
 }

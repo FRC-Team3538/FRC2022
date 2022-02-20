@@ -90,4 +90,10 @@ void AutoPrograms::SmartDash()
     frc::SmartDashboard::PutData("Choose Auto", &m_chooser);
     std::string name = m_chooser.GetSelected();
     frc::SmartDashboard::PutString("Selected Auto", name);
+
+    // Update Smartdash
+    if (m_autoProgram != NULL)
+    {
+        m_autoProgram->UpdateSmartDash();
+    }
 }

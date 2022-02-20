@@ -86,5 +86,5 @@ void AutoLine_Backward::Run()
 
 void AutoLine_Backward::UpdateSmartDash()
 {
-    frc::SmartDashboard::PutNumber("Auto State", m_state);
+    frc::SmartDashboard::PutNumber("Auto/State", m_state);
 }

@@ -239,5 +239,5 @@ void AutoFiveBall::Run()
 // Called Automagically by AutoPrograms (RobotPeriodic)
 void AutoFiveBall::UpdateSmartDash()
 {
-    frc::SmartDashboard::PutNumber("Auto State", m_state);
+    frc::SmartDashboard::PutNumber("Auto/State", m_state);
 }
