@@ -86,15 +86,21 @@ void AutoFiveBall::NextState()
         {
             IO.drivetrain.Arcade(0.0, 0.0);
             IO.shooter.SetFeeder(8_V);
+
+            break;
         }
         case 7:
-        IO.drivetrain.Arcade(0.0, 0.0);
-        IO.shooter.SetIntakeState(Shooter::Position::Stowed);
-        IO.shooter.SetIntake(0_V);
-        IO.shooter.SetShooterRPM(0_rpm);
-        IO.shooter.SetShooterTopRPM(0_rpm);
-        IO.shooter.SetIndexer(0_V);
-        IO.shooter.SetFeeder(0_V);
+        {
+            IO.drivetrain.Arcade(0.0, 0.0);
+            IO.shooter.SetIntakeState(Shooter::Position::Stowed);
+            IO.shooter.SetIntake(0_V);
+            IO.shooter.SetShooterRPM(0_rpm);
+            IO.shooter.SetShooterTopRPM(0_rpm);
+            IO.shooter.SetIndexer(0_V);
+            IO.shooter.SetFeeder(0_V);
+
+            break;
+        }
         default:
         {
             IO.drivetrain.Arcade(0.0, 0.0);
@@ -147,14 +153,17 @@ void AutoFiveBall::Run()
             {
                 NextState();
             }
+
+            break;
         }
         case 2:
         {
-        
             if (m_autoTimer.Get() > units::time::second_t(2.0))
             {
                 NextState();
             }
+
+            break;
         }
         case 3:
         {
@@ -171,10 +180,11 @@ void AutoFiveBall::Run()
 
             IO.drivetrain.Drive(reference);
 
-            if ((m_autoTimer.Get() > m_trajectory_first.TotalTime() & IO.shooter.Shoot()))
+            if ((m_autoTimer.Get() > m_trajectory_first.TotalTime() && IO.shooter.Shoot()))
             {
                 NextState();
             }
+
             break;
         }
         case 4:
@@ -185,9 +195,9 @@ void AutoFiveBall::Run()
             {
                 NextState();
             }
+
             break;
         }
-        
         case 5:
         {
             auto reference = m_trajectory_second.Sample(m_autoTimer.Get());
@@ -202,10 +212,11 @@ void AutoFiveBall::Run()
 
             IO.drivetrain.Drive(reference);
 
-            if ((m_autoTimer.Get() > m_trajectory_second.TotalTime() & IO.shooter.Shoot()))
+            if ((m_autoTimer.Get() > m_trajectory_second.TotalTime() && IO.shooter.Shoot()))
             {
                 NextState();
             }
+
             break;
         }
         case 6:
@@ -214,6 +225,8 @@ void AutoFiveBall::Run()
             {
                 NextState();
             }
+
+            break;
         }
         default:
         {
