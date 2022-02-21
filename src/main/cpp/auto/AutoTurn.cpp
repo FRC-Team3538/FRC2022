@@ -30,19 +30,17 @@ void AutoTurn::NextState()
 
 void AutoTurn::Init()
 {
+    units::feet_per_second_t maxLinearVel = 8_fps;
+    units::feet_per_second_squared_t maxLinearAcc = 8_fps_sq;
 
-    units::feet_per_second_t maxLinearVel = 2_fps;
-    // units::standard_gravity_t maxCentripetalAcc = 0.5_SG;
-    units::feet_per_second_squared_t maxLinearAcc = 2_fps_sq;
-
-    // frc::TrajectoryConfig config(Drivetrain::kMaxSpeedLinear, Drivetrain::kMaxAccelerationLinear);
     frc::TrajectoryConfig config(maxLinearVel, maxLinearAcc);
     config.AddConstraint(frc::CentripetalAccelerationConstraint{5_mps_sq});
-    config.AddConstraint(frc::DifferentialDriveVoltageConstraint{IO.drivetrain.GetFeedForward(), IO.drivetrain.GetKinematics(), 3_V});
-    config.AddConstraint(frc::DifferentialDriveKinematicsConstraint{IO.drivetrain.GetKinematics(), 4_fps});
+    config.AddConstraint(frc::DifferentialDriveVoltageConstraint{IO.drivetrain.GetFeedForward(), IO.drivetrain.GetKinematics(), 10_V});
+    config.AddConstraint(frc::DifferentialDriveKinematicsConstraint{IO.drivetrain.GetKinematics(), maxLinearVel});
     config.SetReversed(false);
 
     m_trajectory = rj::AutoHelper::LoadTrajectory("94 - Turning Left and Right", &config);
+    //m_trajectory = rj::AutoHelper::LoadTrajectory("95 - Big Circle", &config);
 
     m_autoTimer.Reset();
     m_autoTimer.Start();
@@ -72,7 +70,7 @@ void AutoTurn::Run()
 
         if ((m_autoTimer.Get() > m_trajectory.TotalTime()))
         {
-            NextState();
+            //NextState();
         }
         break;
     }
