@@ -155,8 +155,14 @@ bool Shooter::Shoot()
 
     // Percent of setpoint to accept and begin shooting
     // TODO: Sensor Override Mode
-    const double tol = 0.1;
-    if(units::math::abs(GetShooterRPM() - cmd_shooterRPM) > (cmd_shooterRPM * tol)) settleTimer.Reset();
+    #ifdef __FRC_ROBORIO__
+        // Real Robot
+        const double tol = 0.1;
+        if(units::math::abs(GetShooterRPM() - cmd_shooterRPM) > (cmd_shooterRPM * tol)) settleTimer.Reset();
+    #else
+        // Simulator
+        // Just wait and proceed.
+    #endif
     //if(units::math::abs(GetTurretAngle() - cmd_TurretAngle) > (1.5_deg)) settleTimer.Reset();
     //if(units::math::abs(GetHoodAngle() - cmd_HoodAngle) > (0.5_deg)) settleTimer.Reset();
 
