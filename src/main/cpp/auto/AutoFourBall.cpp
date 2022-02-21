@@ -98,7 +98,7 @@ void AutoFourBall::Init()
     config.AddConstraint(frc::DifferentialDriveKinematicsConstraint{IO.drivetrain.GetKinematics(), 2_mps});
     config.SetReversed(false);
 
-    m_trajectory_first = rj::AutoHelper::LoadTrajectory("04 - Four Ball Pt 1", &config);
+    m_trajectory_first = rj::AutoHelper::LoadTrajectory("04 - Four Ball Pt 2", &config);
 
     config.SetReversed(false);
     m_trajectory_second = rj::AutoHelper::LoadTrajectory("04 - Four Ball Pt 2", &config);

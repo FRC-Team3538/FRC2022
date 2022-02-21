@@ -42,7 +42,7 @@ void AutoTurn::Init()
     config.AddConstraint(frc::DifferentialDriveKinematicsConstraint{IO.drivetrain.GetKinematics(), 4_fps});
     config.SetReversed(false);
 
-    m_trajectory = rj::AutoHelper::LoadTrajectory("Turning Left and Right", &config);
+    m_trajectory = rj::AutoHelper::LoadTrajectory("94 - Turning Left and Right", &config);
 
     m_autoTimer.Reset();
     m_autoTimer.Start();
@@ -53,9 +53,35 @@ void AutoTurn::Init()
 // Execute the program
 void AutoTurn::Run()
 {
-   
-    IO.drivetrain.Arcade(0.0, 0.0);
-    UpdateSmartDash();
+    switch (m_state)
+    {
+    case 0:
+    {
+        // std::cout << m_autoTimer.Get().value() << std::endl;
+        auto reference = m_trajectory.Sample(m_autoTimer.Get());
+
+        frc::SmartDashboard::PutNumber("traj/t", reference.t.value());
+        frc::SmartDashboard::PutNumber("traj/x", reference.pose.Translation().X().value());
+        frc::SmartDashboard::PutNumber("traj/y", reference.pose.Translation().Y().value());
+        frc::SmartDashboard::PutNumber("traj/theta", reference.pose.Rotation().Radians().value());
+        frc::SmartDashboard::PutNumber("traj/k", reference.curvature.value());
+        frc::SmartDashboard::PutNumber("traj/v", reference.velocity.value());
+        frc::SmartDashboard::PutNumber("traj/a", reference.acceleration.value());
+
+        IO.drivetrain.Drive(reference);
+
+        if ((m_autoTimer.Get() > m_trajectory.TotalTime()))
+        {
+            NextState();
+        }
+        break;
+    }
+    default:
+    {
+        // std::cout << "Done!" << std::endl;
+        IO.drivetrain.Arcade(0.0, 0.0);
+    }
+    }
 }
 
 void AutoTurn::UpdateSmartDash()
