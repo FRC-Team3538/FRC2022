@@ -30,8 +30,8 @@ void Robot::RobotInit()
   frc::SmartDashboard::PutData("Drive", &IO.drivetrain);
   frc::SmartDashboard::PutData("Shooter", &IO.shooter);
   frc::SmartDashboard::PutData("Climber", &IO.climber);
-  frc::SmartDashboard::PutData("Ph" ,&IO.ph);
-  // TODO: Climber, Vision, PDH
+  frc::SmartDashboard::PutData("PH", &IO.ph);
+  // TODO: Vision
   // TODO: Move to a separate table so it doesn't fill smartdash automatically?
   // TODO: Canbus utlization
 
@@ -43,8 +43,6 @@ void Robot::RobotInit()
 
   ntShooterRPM.ForceSetDouble(ntShooterRPM.GetDouble(kShooterRPMDefault));
   ntShooterRPM.SetPersistent();
-  ntShooterTopRPM.ForceSetDouble(ntShooterTopRPM.GetDouble(kShooterTopRPMDefault));
-  ntShooterTopRPM.SetPersistent();
   ntFeederVoltage.ForceSetDouble(ntFeederVoltage.GetDouble(kFeederVoltageDefault));
   ntFeederVoltage.SetPersistent();
   ntIndexerVoltage.ForceSetDouble(ntIndexerVoltage.GetDouble(kIndexerVoltageDefault));
@@ -101,7 +99,6 @@ void Robot::TeleopPeriodic()
       // Start Shooter
       Shooter::State shotStat = IO.shooter.CalculateShot(data.distance);
       IO.shooter.SetShooterRPM(shotStat.shooterRPM);
-      IO.shooter.SetShooterTopRPM(shotStat.shooterTopRPM);
 
       // Shoot
       units::degree_t tol{ntVisionAngleTol.GetDouble(kVisionAngleTolDefault)};
@@ -127,35 +124,30 @@ void Robot::TeleopPeriodic()
   // *** SHOOTER ***
   //
   auto s = units::revolutions_per_minute_t{ntShooterRPM.GetDouble(kShooterRPMDefault)};
-  auto st = units::revolutions_per_minute_t{ntShooterTopRPM.GetDouble(kShooterTopRPMDefault)};
 
   switch (IO.secondaryController.GetPOV())
   {
   case 0:
     // FENDER
     IO.shooter.SetShooterRPM(s);
-    IO.shooter.SetShooterTopRPM(st);
     m_csmode = ClimberShooterMode::Shooter;
     break;
 
   case 90:
     // MIDFIELD
     IO.shooter.SetShooterRPM(0_rpm);
-    IO.shooter.SetShooterTopRPM(0_rpm);
     m_csmode = ClimberShooterMode::Shooter;
     break;
 
   case 180:
     // LAUNCHPAD
     IO.shooter.SetShooterRPM(0_rpm);
-    IO.shooter.SetShooterTopRPM(0_rpm);
     m_csmode = ClimberShooterMode::Shooter;
     break;
 
   case 270:
     // TARMAC
     IO.shooter.SetShooterRPM(0_rpm);
-    IO.shooter.SetShooterTopRPM(0_rpm);
     m_csmode = ClimberShooterMode::Shooter;
     break;
   }
@@ -172,7 +164,6 @@ void Robot::TeleopPeriodic()
   if (IO.secondaryController.GetCrossButtonPressed() || IO.mainController.GetCrossButtonPressed())
   {
     IO.shooter.SetShooter(0_V);
-    IO.shooter.SetShooterTop(0_V);
   }
 
   //
@@ -220,7 +211,6 @@ void Robot::TeleopPeriodic()
     IO.shooter.SetFeeder(units::volt_t{ntFeederVoltage.GetDouble(kFeederVoltageDefault)});
   }
   else if (IO.shooter.GetShooterRPM() > 10.0_rpm || 
-      IO.shooter.GetShooterTopRPM() > 10.0_rpm || 
       units::math::abs(intakeCmd) > 0.0_V)
   {
     IO.shooter.SetFeeder(-2_V);
