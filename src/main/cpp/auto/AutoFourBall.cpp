@@ -53,14 +53,10 @@ void AutoFourBall::NextState()
         }
         case 3:
         {
-            IO.shooter.SetIntakeState(Shooter::Position::Deployed);
-            IO.shooter.SetIntake(8_V);
-            IO.shooter.SetShooterRPM(4000_rpm);
-            IO.shooter.SetIndexer(8_V);
             IO.shooter.SetFeeder(-2_V);
 
-            IO.drivetrain.ResetOdometry(m_trajectory_second.InitialPose());
-
+            //IO.drivetrain.ResetOdometry(m_trajectory_second.InitialPose());
+            startPathTime = m_autoTimer.Get();
             break;
         }
         case 4:
@@ -102,10 +98,10 @@ void AutoFourBall::Init()
     config.AddConstraint(frc::DifferentialDriveKinematicsConstraint{IO.drivetrain.GetKinematics(), 2_mps});
     config.SetReversed(false);
 
-    m_trajectory_first = rj::AutoHelper::LoadTrajectory("Four Ball Pt 1", &config);
+    m_trajectory_first = rj::AutoHelper::LoadTrajectory("04 - Four Ball Pt 1", &config);
 
-    config.SetReversed(true);
-    m_trajectory_second = rj::AutoHelper::LoadTrajectory("Four Ball Pt 2", &config);
+    config.SetReversed(false);
+    m_trajectory_second = rj::AutoHelper::LoadTrajectory("04 - Four Ball Pt 2", &config);
 
     IO.drivetrain.ResetOdometry(m_trajectory_first.InitialPose());
 
@@ -154,7 +150,7 @@ void AutoFourBall::Run()
         }
         case 3:
         {
-            auto reference = m_trajectory_second.Sample(m_autoTimer.Get());
+            auto reference = m_trajectory_second.Sample(m_autoTimer.Get() - startPathTime);
 
             frc::SmartDashboard::PutNumber("traj/t", reference.t.value());
             frc::SmartDashboard::PutNumber("traj/x", reference.pose.Translation().X().value());
@@ -166,7 +162,7 @@ void AutoFourBall::Run()
 
             IO.drivetrain.Drive(reference);
 
-            if ((m_autoTimer.Get() > m_trajectory_second.TotalTime()))
+            if (((m_autoTimer.Get() - startPathTime) > m_trajectory_second.TotalTime()))
             {
                 NextState();
             }

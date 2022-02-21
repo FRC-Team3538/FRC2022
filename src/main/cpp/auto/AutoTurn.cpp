@@ -8,7 +8,7 @@
 // Name for Smart Dash Chooser
 std::string AutoTurn::GetName()
 {
-    return "93 - Turn";
+    return "94 - Turn";
 }
 
 // Initialization

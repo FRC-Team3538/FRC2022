@@ -35,6 +35,8 @@ private:
     frc::Trajectory m_trajectory_first;
     frc::Trajectory m_trajectory_second;
 
+    units::time::second_t startPathTime;
+
 public:
     // Constructor requires a reference to the RobotMap
     AutoFourBall() = delete;

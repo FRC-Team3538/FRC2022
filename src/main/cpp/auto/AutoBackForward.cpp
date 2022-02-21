@@ -9,7 +9,7 @@
 // Name for Smart Dash Chooser
 std::string AutoBackForward::GetName()
 {
-    return "92 - BackForward";
+    return "91 - BackForward";
 }
 
 // Initialization

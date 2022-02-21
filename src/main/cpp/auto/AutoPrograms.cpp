@@ -18,14 +18,16 @@ AutoPrograms::AutoPrograms(Robotmap &IO) : IO(IO)
     // SmartDash Chooser [List 2 of 3]
     m_chooser.SetDefaultOption("00 - None", "00 - None");
     m_chooser.AddOption(AutoLine::GetName(), AutoLine::GetName());
-    m_chooser.AddOption(AutoLine_Backward::GetName(), AutoLine_Backward::GetName());
-    m_chooser.AddOption(AutoTurn::GetName(), AutoTurn::GetName());
-    m_chooser.AddOption(AutoBackForward::GetName(), AutoBackForward::GetName());
-    m_chooser.AddOption(Auto4ft::GetName(), Auto4ft::GetName());
     m_chooser.AddOption(AutoTwoBall::GetName(), AutoTwoBall::GetName());
-    m_chooser.AddOption(NinetyDegreeAngle::GetName(), NinetyDegreeAngle::GetName());
     m_chooser.AddOption(AutoFourBall::GetName(), AutoFourBall::GetName());
     m_chooser.AddOption(AutoFiveBall::GetName(), AutoFiveBall::GetName());
+
+    // Test programs
+    m_chooser.AddOption(Auto4ft::GetName(), Auto4ft::GetName());
+    m_chooser.AddOption(AutoLine_Backward::GetName(), AutoLine_Backward::GetName());
+    m_chooser.AddOption(AutoBackForward::GetName(), AutoBackForward::GetName());
+    m_chooser.AddOption(NinetyDegreeAngle::GetName(), NinetyDegreeAngle::GetName());
+    m_chooser.AddOption(AutoTurn::GetName(), AutoTurn::GetName());
 }
 
 // Initialize the selected auto program
