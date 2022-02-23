@@ -103,6 +103,7 @@ void Drivetrain::Drive(units::meters_per_second_t xSpeed,
 void Drivetrain::Drive(const frc::Trajectory::State& target)
 {
     auto pose = GetPose();
+    // std::cout << "Heading @ " << target.t.value() << "s: " << pose.Rotation().Radians().value() << std::endl;
     auto speeds = m_ramsete.Calculate(pose, target);
 
     cmd_vx = speeds.vx.value();
@@ -139,19 +140,31 @@ void Drivetrain::ResetOdometry(const frc::Pose2d &pose)
     m_driveL0.SetSelectedSensorPosition(0);
     m_driveR0.SetSelectedSensorPosition(0);
 
+    // Delay for Falcons to reset
+    frc::Timer t;
+    t.Start();
+    while (t.Get() < 20_ms);
+
     // auto res = m_imu.SetFusedHeading(pose.Rotation().Degrees().value(), 50);
     // if (res != 0) {
     //     std::cout << "ERROR: Fused Heading Set Failed: " << res << std::endl;
     // }
-    m_odometry.ResetPosition(pose, pose.Rotation());
 
-    //m_drivetrainSimulator.SetPose(pose);
+    // std::cout << "Resetting heading to: " << pose.Rotation().Radians().value() << std::endl;
+    m_odometry.ResetPosition(pose, GetYaw());
+    // std::cout << "Heading after reset: " << m_odometry.GetPose().Rotation().Radians().value() << std::endl;
+
+    // Simulator
+    // Reset the pose of the robot but do not reset the Simulated IMU.
+    m_drivetrainSimulator.SetPose({pose.Translation(), GetYaw()});
 }
 
 frc::Rotation2d Drivetrain::GetYaw()
 {
     //ctre::phoenix::sensors::PigeonIMU::FusionStatus status;
-    //m_imu.GetFusedHeading(status);
+    // this can probably be reverted, but see TODO
+    double heading = m_imu.GetFusedHeading();
+    return frc::Rotation2d(units::degree_t{heading});
     //double heading = status.heading;
 
     // std::cout << status.bIsFusing << std::endl;
@@ -160,7 +173,7 @@ frc::Rotation2d Drivetrain::GetYaw()
     // std::cout << status.lastError << std::endl;
 
     // TODO(Dereck): Verify the sensor data is valid...
-    return m_imu.GetRotation2d();
+    // return m_imu.GetRotation2d();
 }
 
 bool Drivetrain::TurnRel(double forward, units::degree_t target, units::degree_t tolerance)
@@ -294,8 +307,12 @@ void Drivetrain::InitSendable(wpi::SendableBuilder &builder)
         "right/velocity", [this] { return m_driveR0.GetSelectedSensorVelocity() * kDPP.value() * 10; }, nullptr);
 
     // IMU
+    // doing this because I want yaw within -pi, pi
     builder.AddDoubleProperty(
-        "IMU/yaw", [this] { return GetYaw().Degrees().value(); }, nullptr);
+        "IMU/yaw", [this] { 
+            auto yaw =  GetYaw();
+            return frc::Rotation2d(yaw.Cos(), yaw.Sin()).Radians().value();
+        }, nullptr);
 
     // Pose
     builder.AddDoubleProperty(

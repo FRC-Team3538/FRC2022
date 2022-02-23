@@ -9,7 +9,7 @@
 // Name for Smart Dash Chooser
 std::string AutoLine_Backward::GetName()
 {
-    return "2 - Backward";
+    return "91 - Backward";
 }
 
 // Initialization
@@ -43,7 +43,7 @@ void AutoLine_Backward::Init()
     config.AddConstraint(frc::DifferentialDriveKinematicsConstraint{IO.drivetrain.GetKinematics(), 4_fps});
     config.SetReversed(true);
 
-    m_trajectory = rj::AutoHelper::LoadTrajectory("Backwards", &config);
+    m_trajectory = rj::AutoHelper::LoadTrajectory("91 - Backwards", &config);
 
     m_autoTimer.Reset();
     m_autoTimer.Start();
@@ -59,13 +59,13 @@ void AutoLine_Backward::Run()
     case 0:
     {
         auto reference = m_trajectory.Sample(m_autoTimer.Get());
-        frc::SmartDashboard::PutNumber("Drive State/X", reference.pose.Translation().X().value());
-        frc::SmartDashboard::PutNumber("Drive State/Y", reference.pose.Translation().Y().value());
-        frc::SmartDashboard::PutNumber("Drive State/Theta", reference.pose.Rotation().Radians().value());
-        frc::SmartDashboard::PutNumber("Drive State/T", reference.t.value());
-        frc::SmartDashboard::PutNumber("Drive State/V", reference.velocity.value());
-        frc::SmartDashboard::PutNumber("Drive State/A", reference.acceleration.value());
-        frc::SmartDashboard::PutNumber("Drive State/k", reference.curvature.value());
+        frc::SmartDashboard::PutNumber("traj/t", reference.t.value());
+        frc::SmartDashboard::PutNumber("traj/x", reference.pose.Translation().X().value());
+        frc::SmartDashboard::PutNumber("traj/y", reference.pose.Translation().Y().value());
+        frc::SmartDashboard::PutNumber("traj/theta", reference.pose.Rotation().Radians().value());
+        frc::SmartDashboard::PutNumber("traj/k", reference.curvature.value());
+        frc::SmartDashboard::PutNumber("traj/v", reference.velocity.value());
+        frc::SmartDashboard::PutNumber("traj/a", reference.acceleration.value());
 
         IO.drivetrain.Drive(reference);
         
@@ -86,5 +86,5 @@ void AutoLine_Backward::Run()
 
 void AutoLine_Backward::UpdateSmartDash()
 {
-    frc::SmartDashboard::PutNumber("Auto State", m_state);
+    frc::SmartDashboard::PutNumber("Auto/State", m_state);
 }

@@ -1,11 +1,4 @@
 {
-  "HALProvider": {
-    "Other Devices": {
-      "window": {
-        "visible": false
-      }
-    }
-  },
   "NTProvider": {
     "types": {
       "/FMSInfo": "FMSInfo",
@@ -29,7 +22,23 @@
         }
       },
       "/SmartDashboard/Field": {
+        "Robot": {
+          "arrowSize": 37,
+          "color": [
+            0.0,
+            0.5803921818733215,
+            0.5803921818733215,
+            255.0
+          ],
+          "length": 0.8381999731063843,
+          "selectable": false,
+          "style": "Box/Image",
+          "weight": 2.0,
+          "width": 0.8381999731063843
+        },
+        "height": 8.229599952697754,
         "image": "/home/dereck/projects/FRC2022/field22.png",
+        "width": 16.459199905395508,
         "window": {
           "visible": true
         }
@@ -38,6 +47,11 @@
   },
   "NetworkTables": {
     "SmartDashboard": {
+      "Drive": {
+        "pose": {
+          "open": true
+        }
+      },
       "DriveBase": {
         "IMU": {
           "open": true
@@ -53,6 +67,12 @@
           "open": true
         }
       },
+      "open": true,
+      "traj": {
+        "open": true
+      }
+    },
+    "limelight": {
       "open": true
     }
   }

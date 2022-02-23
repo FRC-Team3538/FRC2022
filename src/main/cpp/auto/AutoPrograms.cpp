@@ -5,15 +5,29 @@
 #include "auto/AutoLine_Backward.hpp"
 #include "auto/AutoTurn.hpp"
 #include "auto/AutoBackForward.hpp"
+#include "auto/Auto4ft.hpp"
+#include "auto/AutoTwoBall.hpp"
+#include "auto/NinetyDegreeAngle.hpp"
+#include "auto/AutoFourBall.hpp"
+#include "auto/AutoFiveBall.hpp"
+
+
 // Constructor requires a reference to the robot map
 AutoPrograms::AutoPrograms(Robotmap &IO) : IO(IO)
 {
     // SmartDash Chooser [List 2 of 3]
-    m_chooser.SetDefaultOption("0 - None", "0 - None");
+    m_chooser.SetDefaultOption("00 - None", "00 - None");
     m_chooser.AddOption(AutoLine::GetName(), AutoLine::GetName());
+    m_chooser.AddOption(AutoTwoBall::GetName(), AutoTwoBall::GetName());
+    m_chooser.AddOption(AutoFourBall::GetName(), AutoFourBall::GetName());
+    m_chooser.AddOption(AutoFiveBall::GetName(), AutoFiveBall::GetName());
+
+    // Test programs
+    m_chooser.AddOption(Auto4ft::GetName(), Auto4ft::GetName());
     m_chooser.AddOption(AutoLine_Backward::GetName(), AutoLine_Backward::GetName());
-    m_chooser.AddOption(AutoTurn::GetName(), AutoTurn::GetName());
     m_chooser.AddOption(AutoBackForward::GetName(), AutoBackForward::GetName());
+    m_chooser.AddOption(NinetyDegreeAngle::GetName(), NinetyDegreeAngle::GetName());
+    m_chooser.AddOption(AutoTurn::GetName(), AutoTurn::GetName());
 }
 
 // Initialize the selected auto program
@@ -44,6 +58,22 @@ void AutoPrograms::Init()
     {
         m_autoProgram = new AutoBackForward(IO);
     }
+    else if (name == Auto4ft::GetName())
+    {
+        m_autoProgram = new Auto4ft(IO);
+    }
+    else if (name == AutoTwoBall::GetName())
+    {
+        m_autoProgram = new AutoTwoBall(IO);
+    }
+    else if (name == AutoFourBall::GetName())
+    {
+        m_autoProgram = new AutoFourBall(IO);
+    }
+    else if (name == AutoFiveBall::GetName())
+    {
+        m_autoProgram = new AutoFiveBall(IO);
+    }
     if (m_autoProgram != NULL)
         m_autoProgram->Init();
 }
@@ -62,4 +92,10 @@ void AutoPrograms::SmartDash()
     frc::SmartDashboard::PutData("Choose Auto", &m_chooser);
     std::string name = m_chooser.GetSelected();
     frc::SmartDashboard::PutString("Selected Auto", name);
+
+    // Update Smartdash
+    if (m_autoProgram != NULL)
+    {
+        m_autoProgram->UpdateSmartDash();
+    }
 }

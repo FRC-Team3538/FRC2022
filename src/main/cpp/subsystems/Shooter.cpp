@@ -11,20 +11,18 @@ Shooter::Shooter()
     feeder.ConfigFactoryDefault();
     shooterA.ConfigFactoryDefault();
     shooterB.ConfigFactoryDefault();
-    shooterTop.ConfigFactoryDefault();
-    // turret.ConfigFactoryDefault();
-    // hood.ConfigFactoryDefault();
+    //turret.ConfigFactoryDefault();
+    //hood.ConfigFactoryDefault();
 
     // Invert motors
     intake.SetInverted(false);
     indexerA.SetInverted(true);
     // indexerB.SetInverted(false);
     feeder.SetInverted(false);
-    shooterA.SetInverted(false);
-    shooterB.SetInverted(true);
-    shooterTop.SetInverted(false);
-    // turret.SetInverted(false);
-    // hood.SetInverted(false);
+    shooterA.SetInverted(true);
+    shooterB.SetInverted(false);
+    //turret.SetInverted(false);
+    //hood.SetInverted(false);
 
     // Break / Coast mode (Not affected by ConfigFactoryDefault)
     intake.SetNeutralMode(NeutralMode::Coast);
@@ -32,9 +30,9 @@ Shooter::Shooter()
     // indexerB.SetNeutralMode(NeutralMode::Coast);
     shooterA.SetNeutralMode(NeutralMode::Coast);
     shooterB.SetNeutralMode(NeutralMode::Coast);
-    shooterTop.SetNeutralMode(NeutralMode::Coast);
-    // turret.SetNeutralMode(NeutralMode::Coast);
-    // hood.SetNeutralMode(NeutralMode::Coast);
+    //turret.SetNeutralMode(NeutralMode::Coast);
+    //hood.SetNeutralMode(NeutralMode::Coast);
+
 
     // Closed Loop Configuration
     shooterA.GetSlotConfigs(shooterSlotConfig, 0);
@@ -46,7 +44,6 @@ Shooter::Shooter()
 
     FalconSlotConfig(shooterA, 0, shooterSlotConfig);
     FalconSlotConfig(shooterB, 0, shooterSlotConfig);
-    FalconSlotConfig(shooterTop, 0, shooterSlotConfig);
 }
 
 void Shooter::ConfigureSystem() {}
@@ -98,29 +95,6 @@ void Shooter::SetShooterRPM(units::revolutions_per_minute_t targetRPM)
 void Shooter::SetShooterRPM()
 {
     SetShooterRPM(cmd_shooterRPM);
-}
-
-void Shooter::SetShooterTop(units::volt_t voltage)
-{
-    shooterTop.SetVoltage(voltage);
-}
-
-void Shooter::SetShooterTopRPM(units::revolutions_per_minute_t targetRPM)
-{
-    cmd_shooterTopRPM = targetRPM;
-
-    if (targetRPM < 1.0_rpm)
-    {
-        shooterTop.Set(0.0);
-        return;
-    }
-
-    shooterTop.Set(ControlMode::Velocity, targetRPM.value() / kTicks2RPM);
-}
-
-void Shooter::SetShooterTopRPM()
-{
-    SetShooterRPM(cmd_shooterTopRPM);
 }
 
 // void Shooter::SetTurret(units::volt_t voltage)
@@ -212,11 +186,6 @@ units::revolutions_per_minute_t Shooter::GetShooterRPM()
     return units::revolutions_per_minute_t{shooterA.GetSelectedSensorVelocity() * kTicks2RPM};
 }
 
-units::revolutions_per_minute_t Shooter::GetShooterTopRPM()
-{
-    return units::revolutions_per_minute_t{shooterTop.GetSelectedSensorVelocity() * kTicks2RPM};
-}
-
 // units::degree_t Shooter::GetTurretAngle()
 // {
 //     // double ang = turret.GetSelectedSensorPosition() * kScaleFactorTurret;
@@ -231,19 +200,21 @@ bool Shooter::Shoot()
 
     // Resume Last Command (in case shooter was stopped)
     SetShooterRPM(cmd_shooterRPM);
-    SetShooterTopRPM(cmd_shooterTopRPM);
     // SetTurretAngle(cmd_turretAngle);
     // SetHoodAngle(cmd_hoodAngle);
 
     // Percent of setpoint to accept and begin shooting
     // TODO: Sensor Override Mode
-    const double tol = 0.1;
-    if (units::math::abs(GetShooterRPM() - cmd_shooterRPM) > (cmd_shooterRPM * tol))
-        settleTimer.Reset();
-    if (units::math::abs(GetShooterTopRPM() - cmd_shooterTopRPM) > (cmd_shooterTopRPM * tol))
-        settleTimer.Reset();
-    // if(units::math::abs(GetTurretAngle() - cmd_TurretAngle) > (1.5_deg)) settleTimer.Reset();
-    // if(units::math::abs(GetHoodAngle() - cmd_HoodAngle) > (0.5_deg)) settleTimer.Reset();
+    #ifdef __FRC_ROBORIO__
+        // Real Robot
+        const double tol = 0.1;
+        if(units::math::abs(GetShooterRPM() - cmd_shooterRPM) > (cmd_shooterRPM * tol)) settleTimer.Reset();
+    #else
+        // Simulator
+        // Just wait and proceed.
+    #endif
+    //if(units::math::abs(GetTurretAngle() - cmd_TurretAngle) > (1.5_deg)) settleTimer.Reset();
+    //if(units::math::abs(GetHoodAngle() - cmd_HoodAngle) > (0.5_deg)) settleTimer.Reset();
 
     // Prevent the intake from holding on to a ball while stowed
     // TODO: Should intake be automatic?
@@ -267,13 +238,12 @@ bool Shooter::Shoot()
 
 Shooter::State Shooter::CalculateShot(units::inch_t distance)
 {
-    double ratio = 7.5 / 7;
-
     double mainWheel = 8073 + (-0.00325 * std::pow(distance.value(), 3)) + (1.2191 * std::pow(distance.value(), 2)) + (-139.806 * std::pow(distance.value(), 1));
 
-    return {
-        units::revolutions_per_minute_t{mainWheel},
-        units::revolutions_per_minute_t{mainWheel * ratio}};
+    return 
+    {
+        units::revolutions_per_minute_t{mainWheel}
+    };
 }
 
 void Shooter::FalconSlotConfig(WPI_TalonFX &motor, int slot, SlotConfiguration &config)
@@ -320,6 +290,11 @@ void Shooter::FalconSendableHelper(wpi::SendableBuilder &builder, WPI_TalonFX &m
         [&motor]
         { return motor.GetTemperature(); },
         nullptr);
+
+    builder.AddDoubleProperty(
+        name + "/current", 
+        [&motor] { return motor.GetSupplyCurrent(); }, 
+        nullptr);
 }
 
 void Shooter::InitSendable(wpi::SendableBuilder &builder)
@@ -329,165 +304,78 @@ void Shooter::InitSendable(wpi::SendableBuilder &builder)
 
     // Commands
     builder.AddDoubleProperty(
-        "cmd/shooterRPM",
-        [this]
-        { return cmd_shooterRPM.value(); },
-        nullptr);
-    //[this] (double value) {  cmd_shooterRPM = units::revolutions_per_minute_t{value}; });
-    builder.AddDoubleProperty(
-        "cmd/shooterTopRPM",
-        [this]
-        { return cmd_shooterTopRPM.value(); },
-        nullptr);
-    //[this] (double value) {  cmd_shooterTopRPM = units::revolutions_per_minute_t{value}; });
+        "cmd/shooterRPM", 
+        [this] { return cmd_shooterRPM.value(); },  nullptr );
+        //[this] (double value) {  cmd_shooterRPM = units::revolutions_per_minute_t{value}; });
 
     // Basic Motors
     FalconSendableHelper(builder, intake, "intake");
     FalconSendableHelper(builder, indexerA, "indexerA");
     FalconSendableHelper(builder, feeder, "feeder");
-    // FalconSendableHelper(builder, indexerB, "indexerB");
-    // FalconSendableHelper(builder, turret, "turret");
-    // FalconSendableHelper(builder, hood, "hood");
+    FalconSendableHelper(builder, shooterA, "shooterA");
+    FalconSendableHelper(builder, shooterB, "shooterB");
+    //FalconSendableHelper(builder, turret, "turret");
+    //FalconSendableHelper(builder, hood, "hood");
 
-    // Shooter
-    builder.AddDoubleProperty(
-        "shooter/percent",
-        [this]
-        { return shooterA.Get(); },
-        [this](double value)
-        {
-            // shooterA.Set(value);
-            // shooterB.Set(value);
-        });
-    builder.AddDoubleProperty(
-        "shooter/voltage",
-        [this]
-        { return shooterA.GetMotorOutputVoltage(); },
-        nullptr);
-    //[this](double value) { SetShooter(units::volt_t{value}); });
-    builder.AddDoubleProperty(
-        "shooter/rpm",
-        [this]
-        { return shooterA.GetSelectedSensorVelocity() * kTicks2RPM; },
-        nullptr);
-    //[this](double value) { SetShooterRPM( units::revolutions_per_minute_t{value} ); });
-    builder.AddDoubleProperty(
-        "shooter/temperatureA",
-        [this]
-        { return shooterA.GetTemperature(); },
-        nullptr);
-    builder.AddDoubleProperty(
-        "shooter/temperatureB",
-        [this]
-        { return shooterB.GetTemperature(); },
-        nullptr);
-
-    // ShooterTop
-    builder.AddDoubleProperty(
-        "shooterTop/percent",
-        [this]
-        { return shooterTop.Get(); },
-        nullptr);
-    // [this] (double value) {
-    //     shooterTop.Set(value);
-    // });
-    builder.AddDoubleProperty(
-        "shooterTop/voltage",
-        [this]
-        { return shooterTop.GetMotorOutputVoltage(); },
-        nullptr);
-    //[this](double value) { SetShooterTop(units::volt_t{value}); });
-    builder.AddDoubleProperty(
-        "shooterTop/rpm",
-        [this]
-        { return shooterTop.GetSelectedSensorVelocity() * kTicks2RPM; },
-        nullptr);
-    //[this](double value) { SetShooterTopRPM( units::revolutions_per_minute_t{value} ); });
-    builder.AddDoubleProperty(
-        "shooterTop/temperature",
-        [this]
-        { return shooterTop.GetTemperature(); },
-        nullptr);
-
-    // Shooter PID
+    
+    // Shooter PID 
     // TODO: Disable this for Competition?
     builder.AddDoubleProperty(
-        "shooter/kP",
-        [this]
-        { return shooterSlotConfig.kP; },
-        [this](double value)
-        {
-            shooterSlotConfig.kP = value;
-            shooterA.Config_kP(0, value);
-            shooterB.Config_kP(0, value);
-            shooterTop.Config_kP(0, value);
-        });
+        "shooter/kP", 
+        [this] { return shooterSlotConfig.kP; }, 
+        [this] (double value) { 
+            shooterSlotConfig.kP = value; 
+            shooterA.Config_kP(0, value); 
+            shooterB.Config_kP(0, value); 
+            });
     builder.AddDoubleProperty(
-        "shooter/kI",
-        [this]
-        { return shooterSlotConfig.kI; },
-        [this](double value)
-        {
-            shooterSlotConfig.kI = value;
-            shooterA.Config_kI(0, value);
-            shooterB.Config_kI(0, value);
-            shooterTop.Config_kI(0, value);
-        });
+        "shooter/kI", 
+        [this] { return shooterSlotConfig.kI; }, 
+        [this] (double value) { 
+            shooterSlotConfig.kI = value; 
+            shooterA.Config_kI(0, value); 
+            shooterB.Config_kI(0, value); 
+            });
     builder.AddDoubleProperty(
-        "shooter/kD",
-        [this]
-        { return shooterSlotConfig.kD; },
-        [this](double value)
-        {
-            shooterSlotConfig.kD = value;
-            shooterA.Config_kD(0, value);
-            shooterB.Config_kD(0, value);
-            shooterTop.Config_kD(0, value);
-        });
+        "shooter/kD", 
+        [this] { return shooterSlotConfig.kD; }, 
+        [this] (double value) { 
+            shooterSlotConfig.kD = value; 
+            shooterA.Config_kD(0, value); 
+            shooterB.Config_kD(0, value); 
+            });
     builder.AddDoubleProperty(
-        "shooter/kF",
-        [this]
-        { return shooterSlotConfig.kF; },
-        [this](double value)
-        {
-            shooterSlotConfig.kF = value;
-            shooterA.Config_kF(0, value);
-            shooterB.Config_kF(0, value);
-            shooterTop.Config_kF(0, value);
-        });
+        "shooter/kF", 
+        [this] { return shooterSlotConfig.kF; }, 
+        [this] (double value) { 
+            shooterSlotConfig.kF = value; 
+            shooterA.Config_kF(0, value); 
+            shooterB.Config_kF(0, value); 
+            });
     builder.AddDoubleProperty(
-        "shooter/kIZ",
-        [this]
-        { return shooterSlotConfig.integralZone; },
-        [this](double value)
-        {
-            shooterSlotConfig.integralZone = value;
-            shooterA.Config_IntegralZone(0, value);
-            shooterB.Config_IntegralZone(0, value);
-            shooterTop.Config_IntegralZone(0, value);
-        });
+        "shooter/kIZ", 
+        [this] { return shooterSlotConfig.integralZone; }, 
+        [this] (double value) { 
+            shooterSlotConfig.integralZone = value; 
+            shooterA.Config_IntegralZone(0, value); 
+            shooterB.Config_IntegralZone(0, value); 
+            });
     builder.AddDoubleProperty(
-        "shooter/kMaxError",
-        [this]
-        { return shooterSlotConfig.allowableClosedloopError; },
-        [this](double value)
-        {
-            shooterSlotConfig.allowableClosedloopError = value;
-            shooterA.ConfigAllowableClosedloopError(0, value);
-            shooterB.ConfigAllowableClosedloopError(0, value);
-            shooterTop.ConfigAllowableClosedloopError(0, value);
-        });
+        "shooter/kMaxError", 
+        [this] { return shooterSlotConfig.allowableClosedloopError; }, 
+        [this] (double value) { 
+            shooterSlotConfig.allowableClosedloopError = value; 
+            shooterA.ConfigAllowableClosedloopError(0, value); 
+            shooterB.ConfigAllowableClosedloopError(0, value); 
+            });
     builder.AddDoubleProperty(
-        "shooter/kMaxIntergral",
-        [this]
-        { return shooterSlotConfig.maxIntegralAccumulator; },
-        [this](double value)
-        {
-            shooterSlotConfig.maxIntegralAccumulator = value;
-            shooterA.ConfigMaxIntegralAccumulator(0, value);
-            shooterB.ConfigMaxIntegralAccumulator(0, value);
-            shooterTop.ConfigMaxIntegralAccumulator(0, value);
-        });
+        "shooter/kMaxIntergral", 
+        [this] { return shooterSlotConfig.maxIntegralAccumulator; }, 
+        [this] (double value) { 
+            shooterSlotConfig.maxIntegralAccumulator = value; 
+            shooterA.ConfigMaxIntegralAccumulator(0, value); 
+            shooterB.ConfigMaxIntegralAccumulator(0, value); 
+            });
 
     // Pneumatics
     // TODO: Log PSI & compressor state

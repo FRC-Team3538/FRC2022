@@ -139,7 +139,7 @@ private:
     // Dynamics
     //
     frc::DifferentialDriveKinematics m_kinematics{kTrackWidth};
-    frc::DifferentialDriveOdometry m_odometry{frc::Rotation2d()};
+    frc::DifferentialDriveOdometry m_odometry{GetYaw()};
     frc::SimpleMotorFeedforward<units::meters> m_feedforward{kStatic, kVlinear, kAlinear};
     frc::RamseteController m_ramsete{units::unit_t<frc::RamseteController::b_unit>{2.0},
                                      units::unit_t<frc::RamseteController::zeta_unit>{0.7}};

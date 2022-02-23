@@ -28,14 +28,12 @@ public:
     struct State
     {
         units::revolutions_per_minute_t shooterRPM = 0_rpm;
-        units::revolutions_per_minute_t shooterTopRPM = 0_rpm;
         // units::degree_t turretAngle = 0_deg;
         // units::degree_t hoodAngle = 0_deg;
 
         bool operator==(const State &param)
         {
-            return ((this->shooterRPM == param.shooterRPM)
-                    && (this->shooterTopRPM == param.shooterTopRPM) );
+            return ((this->shooterRPM == param.shooterRPM) );
                     //&& (this->turretAngle == param.turretAngle) &&
                     //&& (this->hoodAngle == param.hoodAngle) );
         }
@@ -71,10 +69,6 @@ public:
     void SetShooterRPM(units::revolutions_per_minute_t targetRPM);
     void SetShooterRPM();
 
-    void SetShooterTop(units::volt_t targetVolts);
-    void SetShooterTopRPM(units::revolutions_per_minute_t targetRPM);
-    void SetShooterTopRPM();
-    
     // void SetTurret(units::volt_t targetVolts);
     // void SetTurretAngle(units::degree_t targetAngle);
 
@@ -84,7 +78,6 @@ public:
 
     // *** GETTERS ***
     units::revolutions_per_minute_t GetShooterRPM();
-    units::revolutions_per_minute_t GetShooterTopRPM();
     // units::degree_t GetTurretAngle();
 
     // Helpers
@@ -105,7 +98,7 @@ private:
     WPI_TalonFX feeder{13};
     WPI_TalonFX shooterA{14};
     WPI_TalonFX shooterB{15};
-    WPI_TalonFX shooterTop{16};
+    // WPI_TalonFX shooterTop{16};
     // WPI_TalonFX turret{17};
     // WPI_TalonFX hood{18};
 
@@ -129,7 +122,6 @@ private:
 
     // Current Command
     units::revolutions_per_minute_t cmd_shooterRPM{0_rpm};
-    units::revolutions_per_minute_t cmd_shooterTopRPM{0_rpm};
 
     HoodPosition cmd_hoodPosition = HoodPosition::Bottom;
 

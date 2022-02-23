@@ -1,71 +1,64 @@
-#include "auto/AutoLine.hpp"
-
-#include "lib/AutoHelper.h"
+#include "auto/Auto4ft.hpp"
 
 #include <frc/trajectory/constraint/DifferentialDriveKinematicsConstraint.h>
 #include <frc/trajectory/constraint/DifferentialDriveVoltageConstraint.h>
 #include <frc/trajectory/constraint/CentripetalAccelerationConstraint.h>
 
-#include <iostream>
+#include <lib/AutoHelper.h>
 
 // Name for Smart Dash Chooser
-std::string AutoLine::GetName()
+std::string Auto4ft::GetName()
 {
-    return "01 - Line";
+    return "90 - Auto4ft";
 }
 
 // Initialization
 // Constructor requires a reference to the robot map
-AutoLine::AutoLine(Robotmap &IO) : IO(IO)
+Auto4ft::Auto4ft(Robotmap &IO) : IO(IO)
 {
     m_state = 0;
 }
 
-AutoLine::~AutoLine() {}
+Auto4ft::~Auto4ft() {}
 
 //State Machine
-void AutoLine::NextState()
+void Auto4ft::NextState()
 {
     m_state++;
     m_autoTimer.Reset();
     m_autoTimer.Start();
 }
 
-void AutoLine::Init()
+void Auto4ft::Init()
 {
 
-    units::feet_per_second_t maxLinearVel = 4_fps;
+    units::feet_per_second_t maxLinearVel = 2_fps;
     // units::standard_gravity_t maxCentripetalAcc = 0.5_SG;
-    units::feet_per_second_squared_t maxLinearAcc = 4_fps_sq;
+    units::feet_per_second_squared_t maxLinearAcc = 2_fps_sq;
 
     // frc::TrajectoryConfig config(Drivetrain::kMaxSpeedLinear, Drivetrain::kMaxAccelerationLinear);
     frc::TrajectoryConfig config(maxLinearVel, maxLinearAcc);
-    // config.AddConstraint(frc::CentripetalAccelerationConstraint{5_mps_sq});
-    // config.AddConstraint(frc::DifferentialDriveVoltageConstraint{IO.drivetrain.GetFeedForward(), IO.drivetrain.GetKinematics(), 5_V});
-    // config.AddConstraint(frc::DifferentialDriveKinematicsConstraint{IO.drivetrain.GetKinematics(), 4_fps});
+    config.AddConstraint(frc::CentripetalAccelerationConstraint{3_mps_sq});
+    config.AddConstraint(frc::DifferentialDriveVoltageConstraint{IO.drivetrain.GetFeedForward(), IO.drivetrain.GetKinematics(), 4_V});
+    config.AddConstraint(frc::DifferentialDriveKinematicsConstraint{IO.drivetrain.GetKinematics(), 2_fps});
     config.SetReversed(false);
 
-    m_trajectory = rj::AutoHelper::LoadTrajectory("01 - Line", &config);
+    m_trajectory = rj::AutoHelper::LoadTrajectory("90 - 4ft Straight", &config); 
 
     m_autoTimer.Reset();
     m_autoTimer.Start();
 
-    auto pose = m_trajectory.InitialPose();
-    IO.drivetrain.ResetOdometry(pose);
-    // IO.drivetrain.GetField().GetObject("traj")->SetTrajectory(m_trajectory);
-    // std::cout << m_trajectory.States().size() << ", " << m_trajectory.TotalTime().value() << std::endl;
+    IO.drivetrain.ResetOdometry(m_trajectory.InitialPose());
 }
 
 // Execute the program
-void AutoLine::Run()
+void Auto4ft::Run()
 {
     switch (m_state)
     {
     case 0:
     {
-        // std::cout << m_autoTimer.Get().value() << std::endl;
         auto reference = m_trajectory.Sample(m_autoTimer.Get());
-
         frc::SmartDashboard::PutNumber("traj/t", reference.t.value());
         frc::SmartDashboard::PutNumber("traj/x", reference.pose.Translation().X().value());
         frc::SmartDashboard::PutNumber("traj/y", reference.pose.Translation().Y().value());
@@ -75,7 +68,7 @@ void AutoLine::Run()
         frc::SmartDashboard::PutNumber("traj/a", reference.acceleration.value());
 
         IO.drivetrain.Drive(reference);
-
+        
         if ((m_autoTimer.Get() > m_trajectory.TotalTime()))
         {
             NextState();
@@ -84,14 +77,14 @@ void AutoLine::Run()
     }
     default:
     {
-        // std::cout << "Done!" << std::endl;
         IO.drivetrain.Arcade(0.0, 0.0);
     }
     }
+
+    UpdateSmartDash();
 }
 
-// Called Automagically by AutoPrograms (RobotPeriodic)
-void AutoLine::UpdateSmartDash()
+void Auto4ft::UpdateSmartDash()
 {
     frc::SmartDashboard::PutNumber("Auto/State", m_state);
 }
