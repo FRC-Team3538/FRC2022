@@ -94,12 +94,12 @@ private:
     // Hardware
     WPI_TalonFX intake{10};
     WPI_TalonFX indexerA{11};
-    // WPI_TalonFX indexerB{12};
+    // WPI_TalonFX indexerB{s12};
     WPI_TalonFX feeder{13};
     WPI_TalonFX shooterA{14};
     WPI_TalonFX shooterB{15};
     // WPI_TalonFX shooterTop{16};
-    // WPI_TalonFX turret{17};
+    WPI_TalonFX turret{17};
     // WPI_TalonFX hood{18};
 
     frc::Solenoid deployPiston{frc::PneumaticsModuleType::REVPH, 0};

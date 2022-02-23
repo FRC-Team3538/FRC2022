@@ -38,8 +38,8 @@ void AutoTwoBall::NextState()
         {
             IO.shooter.SetIntakeState(Shooter::Position::Deployed);
             IO.shooter.SetIntake(8_V);
-            IO.shooter.SetShooterRPM(4000_rpm);
-            IO.shooter.SetIndexer(8_V);
+            IO.shooter.SetShooterRPM(3025_rpm);
+            IO.shooter.SetIndexer(4_V);
             IO.shooter.SetFeeder(-2_V);
 
             break;
@@ -47,8 +47,7 @@ void AutoTwoBall::NextState()
         case 2:
         {
             IO.drivetrain.Arcade(0.0, 0.0);
-            IO.shooter.SetFeeder(8_V);
-
+            IO.shooter.SetFeeder(6_V);
             break;
         }
         case 3:
@@ -72,15 +71,15 @@ void AutoTwoBall::NextState()
 
 void AutoTwoBall::Init()
 {
-    units::feet_per_second_t maxLinearVel = 2_mps;
+    units::feet_per_second_t maxLinearVel = 5_fps;
     // units::standard_gravity_t maxCentripetalAcc = 0.5_SG;
     units::feet_per_second_squared_t maxLinearAcc = 2_mps_sq;
 
     // frc::TrajectoryConfig config(Drivetrain::kMaxSpeedLinear, Drivetrain::kMaxAccelerationLinear);
     frc::TrajectoryConfig config(maxLinearVel, maxLinearAcc);
-    config.AddConstraint(frc::CentripetalAccelerationConstraint{5_mps_sq});
-    config.AddConstraint(frc::DifferentialDriveVoltageConstraint{IO.drivetrain.GetFeedForward(), IO.drivetrain.GetKinematics(), 10_V});
-    config.AddConstraint(frc::DifferentialDriveKinematicsConstraint{IO.drivetrain.GetKinematics(), 2_mps});
+    config.AddConstraint(frc::CentripetalAccelerationConstraint{maxLinearAcc});
+    config.AddConstraint(frc::DifferentialDriveVoltageConstraint{IO.drivetrain.GetFeedForward(), IO.drivetrain.GetKinematics(), 8_V});
+    config.AddConstraint(frc::DifferentialDriveKinematicsConstraint{IO.drivetrain.GetKinematics(), maxLinearVel});
     config.SetReversed(false);
 
     m_trajectory = rj::AutoHelper::LoadTrajectory("02 - Two Ball", &config);
@@ -116,7 +115,7 @@ void AutoTwoBall::Run()
 
             IO.drivetrain.Drive(reference);
 
-            if ((m_autoTimer.Get() > m_trajectory.TotalTime()))
+            if ((m_autoTimer.Get() > m_trajectory.TotalTime()+1_s))
             {
                 NextState();
             }

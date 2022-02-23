@@ -11,7 +11,7 @@ Shooter::Shooter()
     feeder.ConfigFactoryDefault();
     shooterA.ConfigFactoryDefault();
     shooterB.ConfigFactoryDefault();
-    //turret.ConfigFactoryDefault();
+    turret.ConfigFactoryDefault();
     //hood.ConfigFactoryDefault();
 
     // Invert motors
@@ -19,8 +19,8 @@ Shooter::Shooter()
     indexerA.SetInverted(true);
     // indexerB.SetInverted(false);
     feeder.SetInverted(false);
-    shooterA.SetInverted(true);
-    shooterB.SetInverted(false);
+    shooterA.SetInverted(false);
+    shooterB.SetInverted(true);
     //turret.SetInverted(false);
     //hood.SetInverted(false);
 
@@ -30,7 +30,7 @@ Shooter::Shooter()
     // indexerB.SetNeutralMode(NeutralMode::Coast);
     shooterA.SetNeutralMode(NeutralMode::Coast);
     shooterB.SetNeutralMode(NeutralMode::Coast);
-    //turret.SetNeutralMode(NeutralMode::Coast);
+    turret.SetNeutralMode(NeutralMode::Brake);
     //hood.SetNeutralMode(NeutralMode::Coast);
 
 
