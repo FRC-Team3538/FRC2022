@@ -51,6 +51,8 @@ private:
   frc::Timer brakeTimer;
   frc::Timer intakeTimer;
 
+  bool hoodOS = false;
+
   enum class ClimberShooterMode:uint8_t
   {
     Shooter = 0,

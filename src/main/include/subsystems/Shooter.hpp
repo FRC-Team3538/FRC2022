@@ -47,6 +47,13 @@ public:
         Deployed = 1
     };
 
+    enum class HoodPosition : uint8_t
+    {
+        Top = 0,
+        Middle,
+        Bottom
+    };
+
     // Constructor
     Shooter();
 
@@ -72,7 +79,8 @@ public:
     // void SetTurretAngle(units::degree_t targetAngle);
 
     // void SetHood(units::volt_t targetVolts);
-    // void SetHoodAngle(units::degree_t targetAngle);
+    void SetHoodAngle(HoodPosition pos);
+    void SetHoodAngle();
 
     // *** GETTERS ***
     units::revolutions_per_minute_t GetShooterRPM();
@@ -101,7 +109,10 @@ private:
     // WPI_TalonFX turret{17};
     // WPI_TalonFX hood{18};
 
-    frc::Solenoid deployPiston{frc::PneumaticsModuleType::REVPH, 15};
+    frc::Solenoid deployPiston{frc::PneumaticsModuleType::REVPH, 0};
+
+    frc::Solenoid hood{frc::PneumaticsModuleType::REVPH, 2};
+    frc::Solenoid hoodStop{frc::PneumaticsModuleType::REVPH, 3};
 
     // Constants
     static constexpr double kScaleFactorTurret = 1.0;
@@ -119,4 +130,9 @@ private:
     // Current Command
     units::revolutions_per_minute_t cmd_shooterRPM{0_rpm};
     units::revolutions_per_minute_t cmd_shooterTopRPM{0_rpm};
+
+    HoodPosition cmd_hoodPosition = HoodPosition::Bottom;
+
+    bool hoodPosOS = false;
+    frc::Timer hoodPosTimer;
 };

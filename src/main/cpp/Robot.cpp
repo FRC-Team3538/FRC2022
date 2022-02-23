@@ -30,7 +30,7 @@ void Robot::RobotInit()
   frc::SmartDashboard::PutData("Drive", &IO.drivetrain);
   frc::SmartDashboard::PutData("Shooter", &IO.shooter);
   frc::SmartDashboard::PutData("Climber", &IO.climber);
-  frc::SmartDashboard::PutData("Ph" ,&IO.ph);
+  frc::SmartDashboard::PutData("Ph", &IO.ph);
   // TODO: Climber, Vision, PDH
   // TODO: Move to a separate table so it doesn't fill smartdash automatically?
   // TODO: Canbus utlization
@@ -93,7 +93,7 @@ void Robot::TeleopPeriodic()
   //
   // *** VISION AND DRIVING ***
   //
-  if (IO.mainController.GetR1Button() ||  IO.secondaryController.GetTriangleButton() )
+  if (IO.mainController.GetR1Button() || IO.secondaryController.GetTriangleButton())
   {
     vision::RJVisionPipeline::visionData data = IO.rjVision.Run();
     if (data.filled)
@@ -114,7 +114,7 @@ void Robot::TeleopPeriodic()
     double rot = -deadband(IO.mainController.GetRightX());
 
     // Sniper Mode
-    if (IO.mainController.GetR3Button()) 
+    if (IO.mainController.GetR3Button())
     {
       fwd *= 0.3;
       rot *= 0.3;
@@ -131,25 +131,43 @@ void Robot::TeleopPeriodic()
 
   switch (IO.secondaryController.GetPOV())
   {
+  case -1:
+    hoodOS = false;
+    break;
   case 0:
     // FENDER
     IO.shooter.SetShooterRPM(s);
     IO.shooter.SetShooterTopRPM(st);
     m_csmode = ClimberShooterMode::Shooter;
+    if (!hoodOS)
+    {
+      IO.shooter.SetHoodAngle(Shooter::HoodPosition::Bottom);
+      hoodOS = true;
+    }
     break;
 
   case 90:
     // MIDFIELD
-    IO.shooter.SetShooterRPM(0_rpm);
-    IO.shooter.SetShooterTopRPM(0_rpm);
+    IO.shooter.SetShooterRPM(s);
+    IO.shooter.SetShooterTopRPM(st);
     m_csmode = ClimberShooterMode::Shooter;
+    if (!hoodOS)
+    {
+      IO.shooter.SetHoodAngle(Shooter::HoodPosition::Middle);
+      hoodOS = true;
+    }
     break;
 
   case 180:
     // LAUNCHPAD
-    IO.shooter.SetShooterRPM(0_rpm);
-    IO.shooter.SetShooterTopRPM(0_rpm);
+    IO.shooter.SetShooterRPM(s);
+    IO.shooter.SetShooterTopRPM(st);
     m_csmode = ClimberShooterMode::Shooter;
+    if (!hoodOS)
+    {
+      IO.shooter.SetHoodAngle(Shooter::HoodPosition::Top);
+      hoodOS = true;
+    }
     break;
 
   case 270:
@@ -157,8 +175,15 @@ void Robot::TeleopPeriodic()
     IO.shooter.SetShooterRPM(0_rpm);
     IO.shooter.SetShooterTopRPM(0_rpm);
     m_csmode = ClimberShooterMode::Shooter;
+    if (!hoodOS)
+    {
+      IO.shooter.SetHoodAngle(Shooter::HoodPosition::Middle);
+      hoodOS = true;
+    }
     break;
   }
+
+  IO.shooter.SetHoodAngle();
 
   // Shoot
   if (shoot || IO.secondaryController.GetSquareButton() || IO.mainController.GetSquareButton())
@@ -185,7 +210,7 @@ void Robot::TeleopPeriodic()
 
   auto intakeCmd = (opR2 - opL2 + drR2 - drL2) * 13.0_V;
   IO.shooter.SetIntake(intakeCmd);
-  
+
   // Deploy Intake
   if (units::math::abs(intakeCmd) > 0.0_V)
   {
@@ -201,13 +226,13 @@ void Robot::TeleopPeriodic()
   }
 
   // Indexer is shared between Intake and Shooter
-  if (units::math::abs(intakeCmd) > 0.0_V || shoot)
+  if (intakeCmd > 0.0_V || shoot)
   {
     IO.shooter.SetIndexer(units::volt_t{ntIndexerVoltage.GetDouble(kIndexerVoltageDefault)});
-  } 
-  else if(units::math::abs(intakeCmd) < 0.0_V)
+  }
+  else if (intakeCmd < 0.0_V)
   {
-    IO.shooter.SetIndexer(-1 * units::volt_t{ntIndexerVoltage.GetDouble(kIndexerVoltageDefault)});
+    IO.shooter.SetIndexer(units::volt_t{(-1) * ntIndexerVoltage.GetDouble(kIndexerVoltageDefault)});
   }
   else
   {
@@ -215,21 +240,20 @@ void Robot::TeleopPeriodic()
   }
 
   // Feeder
-  if(shoot) 
+  if (shoot)
   {
     IO.shooter.SetFeeder(units::volt_t{ntFeederVoltage.GetDouble(kFeederVoltageDefault)});
   }
-  else if (IO.shooter.GetShooterRPM() > 10.0_rpm || 
-      IO.shooter.GetShooterTopRPM() > 10.0_rpm || 
-      units::math::abs(intakeCmd) > 0.0_V)
+  else if (IO.shooter.GetShooterRPM() > 10.0_rpm ||
+           IO.shooter.GetShooterTopRPM() > 10.0_rpm ||
+           units::math::abs(intakeCmd) > 0.0_V)
   {
     IO.shooter.SetFeeder(-2_V);
-  } 
-  else 
+  }
+  else
   {
     IO.shooter.SetFeeder(0_V);
   }
-
 
   //
   // *** Climber ***
