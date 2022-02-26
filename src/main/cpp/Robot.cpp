@@ -72,6 +72,7 @@ void Robot::AutonomousInit()
 {
   autoprograms.Init();
   IO.drivetrain.SetBrakeMode();
+  IO.rjVision.SetLED(false);
 }
 
 void Robot::AutonomousPeriodic()
@@ -82,6 +83,7 @@ void Robot::AutonomousPeriodic()
 void Robot::TeleopInit()
 {
   IO.drivetrain.SetBrakeMode();
+  IO.rjVision.SetLED(false);
 }
 
 void Robot::TeleopPeriodic()
@@ -132,7 +134,7 @@ void Robot::TeleopPeriodic()
     break;
   case 0:
     // FENDER
-    IO.shooter.SetShooterRPM();
+    IO.shooter.SetShooterRPM(s);
     m_csmode = ClimberShooterMode::Shooter;
     if (!hoodOS)
     {
@@ -235,8 +237,8 @@ void Robot::TeleopPeriodic()
   {
     IO.shooter.SetFeeder(units::volt_t{ntFeederVoltage.GetDouble(kFeederVoltageDefault)});
   }
-  else if (IO.shooter.GetShooterRPM() > 10.0_rpm || 
-      units::math::abs(intakeCmd) > 0.0_V)
+  else if (IO.shooter.GetShooterRPM() > 10.0_rpm ||
+           units::math::abs(intakeCmd) > 0.0_V)
   {
     IO.shooter.SetFeeder(-2_V);
   }
@@ -262,12 +264,15 @@ void Robot::TeleopPeriodic()
 
   if (m_csmode == ClimberShooterMode::Climber)
   {
-    IO.climber.SetClimber(units::volt_t{deadband(IO.secondaryController.GetLeftY()) * 13.0});
+    IO.climber.SetClimber(units::volt_t{-deadband(IO.secondaryController.GetLeftY()) * 13.0});
   }
   else
   {
     IO.climber.SetClimber(0.0_V);
   }
+
+  if (IO.secondaryController.GetShareButtonPressed())
+    IO.climber.SetSensorOverride(!IO.climber.GetSensorOverride());
 }
 
 void Robot::DisabledInit()
@@ -282,6 +287,7 @@ void Robot::DisabledPeriodic()
   if (brakeTimer.Get() > 3.0_s)
   {
     IO.drivetrain.SetCoastMode();
+    IO.rjVision.SetLED(false);
   }
 }
 

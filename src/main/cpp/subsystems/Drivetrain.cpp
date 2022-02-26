@@ -67,6 +67,9 @@ Drivetrain::Drivetrain()
     SetStatusFrames(m_driveR0, 250);
     SetStatusFrames(m_driveR1, 250);
     SetStatusFrames(m_driveR2, 250);
+    
+    m_driveL0.SetStatusFramePeriod(ctre::phoenix::motorcontrol::StatusFrameEnhanced::Status_3_Quadrature, 18);
+    m_driveR0.SetStatusFramePeriod(ctre::phoenix::motorcontrol::StatusFrameEnhanced::Status_3_Quadrature, 18);
 }
 
 // Teleop Control

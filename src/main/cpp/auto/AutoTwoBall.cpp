@@ -28,41 +28,38 @@ void AutoTwoBall::NextState()
 {
     m_state++;
 
-    switch(m_state)
+    switch (m_state)
     {
-        case 0:
-        {
-            break;
-        }
-        case 1:
-        {
-            IO.shooter.SetIntakeState(Shooter::Position::Deployed);
-            IO.shooter.SetIntake(8_V);
-            IO.shooter.SetShooterRPM(3025_rpm);
-            IO.shooter.SetIndexer(4_V);
-            IO.shooter.SetFeeder(-2_V);
+    case 1:
+    {
+        IO.shooter.SetHoodAngle(Shooter::HoodPosition::Middle);
+        IO.shooter.SetIntakeState(Shooter::Position::Deployed);
+        IO.shooter.SetIntake(8_V);
+        IO.shooter.SetShooterRPM(2600_rpm);
+        IO.shooter.SetIndexer(4_V);
+        IO.shooter.SetFeeder(-2_V);
 
-            break;
-        }
-        case 2:
-        {
-            IO.drivetrain.Arcade(0.0, 0.0);
-            IO.shooter.SetFeeder(6_V);
-            break;
-        }
-        case 3:
-        {
-            IO.shooter.SetIntakeState(Shooter::Position::Stowed);
-            IO.shooter.SetIntake(0_V);
-            IO.shooter.SetShooterRPM(0_rpm);
-            IO.shooter.SetIndexer(0_V);
-            IO.shooter.SetFeeder(0_V);
-            break;
-        }
-        default:
-        {
-            break;
-        }
+        break;
+    }
+    case 2:
+    {
+        IO.drivetrain.Arcade(0.0, 0.0);
+        IO.shooter.SetFeeder(6_V);
+        break;
+    }
+    case 3:
+    {
+        IO.shooter.SetIntakeState(Shooter::Position::Stowed);
+        IO.shooter.SetIntake(0_V);
+        IO.shooter.SetShooterRPM(0_rpm);
+        IO.shooter.SetIndexer(0_V);
+        IO.shooter.SetFeeder(0_V);
+        break;
+    }
+    default:
+    {
+        break;
+    }
     }
 
     m_autoTimer.Reset();
@@ -95,45 +92,47 @@ void AutoTwoBall::Run()
 {
     switch (m_state)
     {
-        case 0:
-        {        
+    case 0:
+    {
+        NextState();
+
+        break;
+    }
+    case 1:
+    {
+        IO.shooter.SetHoodAngle();
+
+        auto reference = m_trajectory.Sample(m_autoTimer.Get());
+
+        frc::SmartDashboard::PutNumber("traj/t", reference.t.value());
+        frc::SmartDashboard::PutNumber("traj/x", reference.pose.Translation().X().value());
+        frc::SmartDashboard::PutNumber("traj/y", reference.pose.Translation().Y().value());
+        frc::SmartDashboard::PutNumber("traj/theta", reference.pose.Rotation().Radians().value());
+        frc::SmartDashboard::PutNumber("traj/k", reference.curvature.value());
+        frc::SmartDashboard::PutNumber("traj/v", reference.velocity.value());
+        frc::SmartDashboard::PutNumber("traj/a", reference.acceleration.value());
+
+        IO.drivetrain.Drive(reference);
+
+        if ((m_autoTimer.Get() > m_trajectory.TotalTime() + 1.5_s))
+        {
             NextState();
-
-            break;
         }
-        case 1:
+        break;
+    }
+    case 2:
+    {
+        if (IO.shooter.Shoot())
         {
-            auto reference = m_trajectory.Sample(m_autoTimer.Get());
-
-            frc::SmartDashboard::PutNumber("traj/t", reference.t.value());
-            frc::SmartDashboard::PutNumber("traj/x", reference.pose.Translation().X().value());
-            frc::SmartDashboard::PutNumber("traj/y", reference.pose.Translation().Y().value());
-            frc::SmartDashboard::PutNumber("traj/theta", reference.pose.Rotation().Radians().value());
-            frc::SmartDashboard::PutNumber("traj/k", reference.curvature.value());
-            frc::SmartDashboard::PutNumber("traj/v", reference.velocity.value());
-            frc::SmartDashboard::PutNumber("traj/a", reference.acceleration.value());
-
-            IO.drivetrain.Drive(reference);
-
-            if ((m_autoTimer.Get() > m_trajectory.TotalTime()+1_s))
-            {
-                NextState();
-            }
-            break;
+            NextState();
         }
-        case 2:
-        {
-            if (IO.shooter.Shoot())
-            {
-                NextState();
-            }
-            break;
-        }
-        default:
-        {
-            // std::cout << "Done!" << std::endl;
-            IO.drivetrain.Arcade(0.0, 0.0);
-        }
+        break;
+    }
+    default:
+    {
+        // std::cout << "Done!" << std::endl;
+        IO.drivetrain.Arcade(0.0, 0.0);
+    }
     }
 }
 

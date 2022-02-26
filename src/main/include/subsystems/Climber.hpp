@@ -40,20 +40,25 @@ public:
 
     void SetClimber(units::volt_t targetVoltage);
     void SetClimberState(ClimbState climbPosition);
+    void SetSensorOverride(bool override);
 
     // *** GETTERS ***
 
     ClimbState GetClimberState();
+
+    bool GetSensorOverride();
 
     void InitSendable(wpi::SendableBuilder &builder) override;
     void FalconSendableHelper(wpi::SendableBuilder &builder, WPI_TalonFX& motor, std::string name);
 
 
 private:
+    bool sensorOverrode = false;
+
     WPI_TalonFX climberA{20};
     WPI_TalonFX climberB{21};
 
-    frc::Solenoid tiltPiston{frc::PneumaticsModuleType::REVPH, 4};
+    frc::Solenoid tiltPiston{frc::PneumaticsModuleType::REVPH, 1};
 
-    frc::DigitalInput bottomMagSwitch {0};
+    frc::DigitalInput bottomMagSwitch {9};
 };

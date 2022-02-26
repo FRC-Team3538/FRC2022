@@ -57,5 +57,6 @@ namespace vision
         RJVisionPipeline::visionData Run();
         units::inch_t DistEstimation();
         void Reset();
+        void SetLED(bool enable);
     };
 } // namespace vision

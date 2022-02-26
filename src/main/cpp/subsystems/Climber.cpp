@@ -9,8 +9,8 @@ void Climber::ConfigureSystem()
     climberA.ConfigFactoryDefault();
     climberB.ConfigFactoryDefault();
 
-    climberA.SetInverted(false);
-    climberB.SetInverted(false);
+    climberA.SetInverted(true);
+    climberB.SetInverted(true);
 
     climberA.SetNeutralMode(ctre::phoenix::motorcontrol::NeutralMode::Brake);
     climberB.SetNeutralMode(ctre::phoenix::motorcontrol::NeutralMode::Brake);
@@ -21,25 +21,44 @@ void Climber::ConfigureSystem()
 
 void Climber::UpdateTelemetry()
 {
+    frc::SmartDashboard::PutBoolean("Climber Sensor Enabled", !sensorOverrode);
+}
+
+void Climber::SetSensorOverride(bool override)
+{
+    sensorOverrode = override;
 }
 
 void Climber::SetClimber(units::volt_t targetVoltage)
 {
-    if (bottomMagSwitch.Get() && targetVoltage > 0.0_V)
+    if (!sensorOverrode)
     {
-        climberA.SetVoltage(targetVoltage);
-        climberB.SetVoltage(targetVoltage);
-    }
-    else if (bottomMagSwitch.Get() && targetVoltage < 0.0_V)
-    {
-        climberA.SetVoltage(0.0_V);
-        climberB.SetVoltage(0.0_V);
+        if (bottomMagSwitch.Get() && targetVoltage > 0.0_V)
+        {
+            climberA.SetVoltage(targetVoltage);
+            climberB.SetVoltage(targetVoltage);
+        }
+        else if (bottomMagSwitch.Get() && targetVoltage < 0.0_V)
+        {
+            climberA.SetVoltage(0.0_V);
+            climberB.SetVoltage(0.0_V);
+        }
+        else
+        {
+            climberA.SetVoltage(targetVoltage);
+            climberB.SetVoltage(targetVoltage);
+        }
     }
     else
     {
         climberA.SetVoltage(targetVoltage);
         climberB.SetVoltage(targetVoltage);
     }
+}
+
+bool Climber::GetSensorOverride()
+{
+    return sensorOverrode;
 }
 
 void Climber::SetClimberState(ClimbState climbPosition)

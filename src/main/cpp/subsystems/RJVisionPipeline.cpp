@@ -72,4 +72,16 @@ namespace vision
         estDist = dist;
         return estDist;
     }
+    
+    void RJVisionPipeline::SetLED(bool enable)
+    {
+        if (enable)
+        {
+            table->PutNumber("ledMode", 3.0); // Force On
+        }
+        else
+        {
+            table->PutNumber("ledMode", 1.0); // Force Off
+        }
+    }
 } // namespace vision
