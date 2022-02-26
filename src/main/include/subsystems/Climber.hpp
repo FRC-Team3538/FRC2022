@@ -13,8 +13,7 @@
 #include <wpi/sendable/SendableBuilder.h>
 #include <wpi/sendable/SendableHelper.h>
 #include <frc/Solenoid.h>
-
-#include <ctre/Phoenix.h>
+#include <frc/DigitalInput.h>
 
 #include "Subsystem.hpp"
 
@@ -55,4 +54,6 @@ private:
     WPI_TalonFX climberB{21};
 
     frc::Solenoid tiltPiston{frc::PneumaticsModuleType::REVPH, 4};
+
+    frc::DigitalInput bottomMagSwitch {0};
 };

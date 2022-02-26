@@ -44,6 +44,13 @@ Shooter::Shooter()
 
     FalconSlotConfig(shooterA, 0, shooterSlotConfig);
     FalconSlotConfig(shooterB, 0, shooterSlotConfig);
+
+    SetStatusFrames(shooterA, 250);
+    SetStatusFrames(shooterB, 250);
+    SetStatusFrames(intake, 250);
+    SetStatusFrames(indexerA, 250);
+    SetStatusFrames(feeder, 250);
+    SetStatusFrames(turret, 250);
 }
 
 void Shooter::ConfigureSystem() {}

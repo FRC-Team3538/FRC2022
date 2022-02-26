@@ -59,6 +59,14 @@ Drivetrain::Drivetrain()
 
     // Robot Pose Display
     frc::SmartDashboard::PutData("Field", &m_fieldSim);
+
+    // Set Status Frames but without spaces
+    SetStatusFrames(m_driveL0, 250);
+    SetStatusFrames(m_driveL1, 250);
+    SetStatusFrames(m_driveL2, 250);
+    SetStatusFrames(m_driveR0, 250);
+    SetStatusFrames(m_driveR1, 250);
+    SetStatusFrames(m_driveR2, 250);
 }
 
 // Teleop Control

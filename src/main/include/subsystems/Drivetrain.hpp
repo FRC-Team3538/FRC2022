@@ -27,7 +27,6 @@
 #include <wpi/numbers>
 #include <math.h>
 
-#include "ctre/Phoenix.h"
 #include "Subsystem.hpp"
 
 // leave this for wandows

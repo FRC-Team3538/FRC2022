@@ -132,7 +132,7 @@ void Robot::TeleopPeriodic()
     break;
   case 0:
     // FENDER
-    IO.shooter.SetShooterRPM(s);
+    IO.shooter.SetShooterRPM();
     m_csmode = ClimberShooterMode::Shooter;
     if (!hoodOS)
     {
@@ -165,7 +165,7 @@ void Robot::TeleopPeriodic()
 
   case 270:
     // TARMAC
-    IO.shooter.SetShooterRPM(0_rpm);
+    IO.shooter.SetShooterRPM(2762_rpm);
     m_csmode = ClimberShooterMode::Shooter;
     if (!hoodOS)
     {
