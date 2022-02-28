@@ -44,7 +44,7 @@ void AutoTwoBall::NextState()
     case 2:
     {
         IO.drivetrain.Arcade(0.0, 0.0);
-        IO.shooter.SetFeeder(6_V);
+        IO.shooter.SetFeeder(4_V);
         break;
     }
     case 3:

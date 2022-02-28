@@ -14,6 +14,7 @@
 
 #include "lib/Logging.h"
 #include "lib/DataLogUtils.h"
+#include "lib/VectorMath.hpp"
 
 class Robot : public frc::TimedRobot
 {
@@ -52,6 +53,7 @@ private:
   frc::Timer intakeTimer;
 
   bool hoodOS = false;
+  bool hoodOS2 = false;
 
   enum class ClimberShooterMode:uint8_t
   {

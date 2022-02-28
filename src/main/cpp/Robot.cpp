@@ -93,22 +93,77 @@ void Robot::TeleopPeriodic()
   //
   // *** VISION AND DRIVING ***
   //
-  if (IO.mainController.GetR1Button() || IO.secondaryController.GetTriangleButton())
+  if (IO.mainController.GetR1Button()) // || IO.secondaryController.GetTriangleButton())
   {
     vision::RJVisionPipeline::visionData data = IO.rjVision.Run();
     if (data.filled)
     {
+      // Adjust for Movement
+      VectorMath shotVector = VectorMath{data.distance, (IO.shooter.GetTurretAngle() - data.angle)}; // Plane Relative to Robot Direction, where back of the robot is 0 deg
+      // *** NEED ROBOT VELOCITY DATA ***
+      VectorMath robotMoveVector = VectorMath{0.0_in, 180.0_deg}; // Assuming about a 1 sec shot time. Maybe add a graph?
+      VectorMath adjustedShotVector = shotVector - robotMoveVector;
+
+      // Set Turret
+      units::degree_t tol{ntVisionAngleTol.GetDouble(kVisionAngleTolDefault)};
+
+      bool turretAtAngle = IO.shooter.SetTurretAngle(adjustedShotVector.GetTheta(), tol);
+
       // Start Shooter
-      Shooter::State shotStat = IO.shooter.CalculateShot(data.distance);
+      Shooter::State shotStat = IO.shooter.CalculateShot(adjustedShotVector.GetMagnitude()); // Magnitude from adjusted vector gets us distance
       IO.shooter.SetShooterRPM(shotStat.shooterRPM);
 
-      // Shoot
-      units::degree_t tol{ntVisionAngleTol.GetDouble(kVisionAngleTolDefault)};
-      shoot = IO.drivetrain.TurnRel(0.0, data.angle, tol);
+      // Set Hood
+
+      if (!hoodOS2)
+      {
+        IO.shooter.SetHoodAngle(shotStat.hoodAngle);
+        hoodOS2 = true;
+      }
+
+      // Shoot Maybe
+      shoot = turretAtAngle;
+
+      double fwd = -0.5 * deadband(IO.mainController.GetLeftY());
+
+      IO.drivetrain.Arcade(fwd, 0.0);
     }
   }
   else
   {
+    VectorMath hubLocation = VectorMath{324.5_in, 159.5_in};
+    VectorMath robotLocation = VectorMath{IO.drivetrain.GetPose().Translation()};
+    units::degree_t robotAngle = IO.drivetrain.GetPose().Rotation().Degrees();
+
+    units::degree_t turretAngle = -((robotAngle - 180.0_deg) - (hubLocation - robotLocation).GetTheta()); // Get the Estimated Turret Angle
+
+    if (turretAngle > 100_deg)
+    {
+      if (turretAngle > 180_deg)
+      {
+        turretAngle -= 360_deg;
+      }
+      else
+      {
+        turretAngle = 100_deg;
+      }
+    }
+    else if (turretAngle < -100_deg)
+    {
+      if(turretAngle < -180_deg)
+      {
+        turretAngle += 360_deg;
+      }
+      else
+      {
+        turretAngle = -100_deg;
+      }
+    }
+
+    IO.shooter.SetTurretAngle(turretAngle, 1.0_deg);
+
+    hoodOS2 = false;
+
     double fwd = -deadband(IO.mainController.GetLeftY());
     double rot = -deadband(IO.mainController.GetRightX());
 
@@ -167,7 +222,7 @@ void Robot::TeleopPeriodic()
 
   case 270:
     // TARMAC
-    IO.shooter.SetShooterRPM(2762_rpm);
+    IO.shooter.SetShooterRPM(2600_rpm);
     m_csmode = ClimberShooterMode::Shooter;
     if (!hoodOS)
     {
