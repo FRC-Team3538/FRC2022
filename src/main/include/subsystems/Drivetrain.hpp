@@ -132,7 +132,7 @@ private:
     };
 
 
-    WPI_PigeonIMU m_imu{30};
+    WPI_Pigeon2 m_imu{30};
 
     //
     // Dynamics

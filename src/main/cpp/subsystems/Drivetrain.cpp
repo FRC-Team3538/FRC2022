@@ -68,8 +68,8 @@ Drivetrain::Drivetrain()
     SetStatusFrames(m_driveR1, 250);
     SetStatusFrames(m_driveR2, 250);
     
-    m_driveL0.SetStatusFramePeriod(ctre::phoenix::motorcontrol::StatusFrameEnhanced::Status_3_Quadrature, 18);
-    m_driveR0.SetStatusFramePeriod(ctre::phoenix::motorcontrol::StatusFrameEnhanced::Status_3_Quadrature, 18);
+    // m_driveL0.SetStatusFramePeriod(ctre::phoenix::motorcontrol::StatusFrameEnhanced::Status_3_Quadrature, 18);
+    // m_driveR0.SetStatusFramePeriod(ctre::phoenix::motorcontrol::StatusFrameEnhanced::Status_3_Quadrature, 18);
 }
 
 // Teleop Control
@@ -174,8 +174,7 @@ frc::Rotation2d Drivetrain::GetYaw()
 {
     //ctre::phoenix::sensors::PigeonIMU::FusionStatus status;
     // this can probably be reverted, but see TODO
-    double heading = m_imu.GetFusedHeading();
-    return frc::Rotation2d(units::degree_t{heading});
+    return m_imu.GetRotation2d();
     //double heading = status.heading;
 
     // std::cout << status.bIsFusing << std::endl;

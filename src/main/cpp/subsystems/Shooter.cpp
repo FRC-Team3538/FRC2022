@@ -37,7 +37,7 @@ Shooter::Shooter()
     shooterSlotConfig.kP = 0.225;
     shooterSlotConfig.kI = 0.0001;
     shooterSlotConfig.kD = 6.000;
-    shooterSlotConfig.integralZone = 200.0;
+    shooterSlotConfig.integralZone = 400.0;
 
     FalconSlotConfig(shooterA, 0, shooterSlotConfig);
     FalconSlotConfig(shooterB, 0, shooterSlotConfig);
@@ -52,24 +52,37 @@ Shooter::Shooter()
     shooterA.SetStatusFramePeriod(ctre::phoenix::motorcontrol::StatusFrameEnhanced::Status_3_Quadrature, 18);
     shooterB.SetStatusFramePeriod(ctre::phoenix::motorcontrol::StatusFrameEnhanced::Status_3_Quadrature, 18);
 
-    turret.SetStatusFramePeriod(StatusFrameEnhanced::Status_1_General, 18, 50);
+    //turret.SetStatusFramePeriod(StatusFrameEnhanced::Status_1_General, 10, 50);
     turret.SetStatusFramePeriod(StatusFrameEnhanced::Status_13_Base_PIDF0, 18, 50);
     turret.SetStatusFramePeriod(ctre::phoenix::motorcontrol::StatusFrameEnhanced::Status_3_Quadrature, 18);
 
     turret.SetSelectedSensorPosition(0.0);
-    turret.SetInverted(false);
+    turret.SetInverted(true);
     turret.SetNeutralMode(ctre::phoenix::motorcontrol::NeutralMode::Brake);
     turret.ConfigPeakOutputForward(0.2);
     turret.ConfigPeakOutputReverse(-0.2);
-    turret.ConfigForwardSoftLimitThreshold(-100.0 / kScaleFactorTurret);
-    turret.ConfigReverseSoftLimitThreshold(100.0 / kScaleFactorTurret);
+    turret.ConfigForwardSoftLimitThreshold(kTurretMax / kScaleFactorTurret);
+    turret.ConfigReverseSoftLimitThreshold(kTurretMin / kScaleFactorTurret);
+    turret.Config_IntegralZone(0, 2.0 / kScaleFactorTurret);
+    turret.ConfigAllowableClosedloopError(0, 0.3 / kScaleFactorTurret);
     turret.ConfigForwardSoftLimitEnable(true);
     turret.ConfigReverseSoftLimitEnable(true);
+
+    frc::SmartDashboard::PutNumber("TURRET P", 0.4);
+    frc::SmartDashboard::PutNumber("TURRET I", 0.0001);
+    frc::SmartDashboard::PutNumber("TURRET D", 0.0);
 }
 
 void Shooter::ConfigureSystem() {}
 
-void Shooter::UpdateTelemetry() {}
+void Shooter::UpdateTelemetry()
+{
+    frc::SmartDashboard::PutNumber("Turret Angle Kekw", GetTurretAngle().value());
+
+    turret.Config_kP(0, frc::SmartDashboard::GetNumber("TURRET P", 0.4));
+    turret.Config_kI(0, frc::SmartDashboard::GetNumber("TURRET I", 0.0001));
+    turret.Config_kI(0, frc::SmartDashboard::GetNumber("TURRET D", 0.0));
+}
 
 void Shooter::SetIntakeState(Position pos)
 {
@@ -177,7 +190,7 @@ void Shooter::SetHoodAngle()
             hoodPosOS = true;
         }
 
-        if ((hoodPosTimer.Get() > 0.25_s) && (hoodPosOS))
+        if ((hoodPosTimer.Get() > 0.3_s) && (hoodPosOS))
             hood.Set(false);
     }
     break;

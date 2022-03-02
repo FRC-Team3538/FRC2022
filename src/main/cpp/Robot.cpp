@@ -24,13 +24,13 @@ void Robot::RobotInit()
   IO.drivetrain.SetCoastMode();
 
   // Smartdash Stuff
-  frc::SmartDashboard::PutData("Power", &IO.pdp);
-  // frc::SmartDashboard::PutData("Dr", &IO.mainController);
-  // frc::SmartDashboard::PutData("Op", &IO.secondaryController);
-  frc::SmartDashboard::PutData("Drive", &IO.drivetrain);
-  frc::SmartDashboard::PutData("Shooter", &IO.shooter);
-  frc::SmartDashboard::PutData("Climber", &IO.climber);
-  frc::SmartDashboard::PutData("Ph", &IO.ph);
+  // frc::SmartDashboard::PutData("Power", &IO.pdp);
+  // // frc::SmartDashboard::PutData("Dr", &IO.mainController);
+  // // frc::SmartDashboard::PutData("Op", &IO.secondaryController);
+  // frc::SmartDashboard::PutData("Drive", &IO.drivetrain);
+  // frc::SmartDashboard::PutData("Shooter", &IO.shooter);
+  // frc::SmartDashboard::PutData("Climber", &IO.climber);
+  // frc::SmartDashboard::PutData("Ph", &IO.ph);
   // TODO: Climber, Vision, PDH
   // TODO: Move to a separate table so it doesn't fill smartdash automatically?
   // TODO: Canbus utlization
@@ -47,6 +47,8 @@ void Robot::RobotInit()
   ntFeederVoltage.SetPersistent();
   ntIndexerVoltage.ForceSetDouble(ntIndexerVoltage.GetDouble(kIndexerVoltageDefault));
   ntIndexerVoltage.SetPersistent();
+  ntTurretTargetAng.ForceSetDouble(ntTurretTargetAng.GetDouble(kTurretTargetAngDefault));
+  ntTurretTargetAng.SetPersistent();
 
   // Logging Stuff
 #ifdef LOGGER
@@ -65,7 +67,7 @@ void Robot::RobotPeriodic()
   IO.UpdateSmartDash();
   IO.drivetrain.Periodic();
   autoprograms.SmartDash();
-  // IO.rjVision.Periodic();
+  IO.rjVision.Periodic();
 }
 
 void Robot::AutonomousInit()
@@ -95,6 +97,10 @@ void Robot::TeleopPeriodic()
   //
   if (IO.mainController.GetR1Button()) // || IO.secondaryController.GetTriangleButton())
   {
+    IO.shooter.SetIntakeState(Shooter::Position::Deployed);
+    intakeTimer.Start();
+    intakeTimer.Reset();
+
     vision::RJVisionPipeline::visionData data = IO.rjVision.Run();
     if (data.filled)
     {
@@ -107,17 +113,20 @@ void Robot::TeleopPeriodic()
       // Set Turret
       units::degree_t tol{ntVisionAngleTol.GetDouble(kVisionAngleTolDefault)};
 
-      bool turretAtAngle = IO.shooter.SetTurretAngle(adjustedShotVector.GetTheta(), tol);
+      //  bool turretAtAngle = IO.shooter.SetTurretAngle(adjustedShotVector.GetTheta(), tol);
+      bool turretAtAngle = IO.shooter.SetTurretAngle((IO.shooter.GetTurretAngle() + data.angle), tol);
 
       // Start Shooter
       Shooter::State shotStat = IO.shooter.CalculateShot(adjustedShotVector.GetMagnitude()); // Magnitude from adjusted vector gets us distance
-      IO.shooter.SetShooterRPM(shotStat.shooterRPM);
+      // IO.shooter.SetShooterRPM(shotStat.shooterRPM);
+      IO.shooter.SetShooterRPM(2750_rpm);
 
       // Set Hood
 
       if (!hoodOS2)
       {
-        IO.shooter.SetHoodAngle(shotStat.hoodAngle);
+        // IO.shooter.SetHoodAngle(shotStat.hoodAngle);
+        IO.shooter.SetHoodAngle(Shooter::HoodPosition::Middle);
         hoodOS2 = true;
       }
 
@@ -131,41 +140,44 @@ void Robot::TeleopPeriodic()
   }
   else
   {
+    IO.rjVision.SetLED(false);
+
     VectorMath hubLocation = VectorMath{324.5_in, 159.5_in};
     VectorMath robotLocation = VectorMath{IO.drivetrain.GetPose().Translation()};
     units::degree_t robotAngle = IO.drivetrain.GetPose().Rotation().Degrees();
 
     units::degree_t turretAngle = -((robotAngle - 180.0_deg) - (hubLocation - robotLocation).GetTheta()); // Get the Estimated Turret Angle
 
-    if (turretAngle > 100_deg)
+    if (turretAngle > 180_deg)
     {
-      if (turretAngle > 180_deg)
-      {
-        turretAngle -= 360_deg;
-      }
-      else
-      {
-        turretAngle = 100_deg;
-      }
-    }
-    else if (turretAngle < -100_deg)
-    {
-      if(turretAngle < -180_deg)
-      {
-        turretAngle += 360_deg;
-      }
-      else
-      {
-        turretAngle = -100_deg;
-      }
+      turretAngle -= 360_deg;
     }
 
-    IO.shooter.SetTurretAngle(turretAngle, 1.0_deg);
+    if (turretAngle < -180_deg)
+    {
+      turretAngle += 360_deg;
+    }
+
+    if (turretAngle > units::degree_t{Shooter::kTurretMax})
+    {
+      turretAngle = units::degree_t{Shooter::kTurretMax};
+    }
+    else if (turretAngle < units::degree_t{Shooter::kTurretMin})
+    {
+      turretAngle = units::degree_t{Shooter::kTurretMin};
+    }
+
+    IO.shooter.SetTurret(units::volt_t{-13.0 * deadband(IO.mainController.GetRightX())});
+
+    // IO.shooter.SetTurretAngle(turretAngle, 0.25_deg);
+
+    // IO.shooter.SetTurretAngle(units::degree_t{ntTurretTargetAng.GetDouble(kTurretTargetAngDefault)}, units::degree_t{0.5});
 
     hoodOS2 = false;
 
     double fwd = -deadband(IO.mainController.GetLeftY());
-    double rot = -deadband(IO.mainController.GetRightX());
+    double rot = 0.0;
+    // double rot = -deadband(IO.mainController.GetRightX());
 
     // Sniper Mode
     if (IO.mainController.GetR3Button())
@@ -174,7 +186,7 @@ void Robot::TeleopPeriodic()
       rot *= 0.3;
     }
 
-    IO.drivetrain.Arcade(fwd, rot);
+    // IO.drivetrain.Arcade(fwd, rot);
   }
 
   //
@@ -222,7 +234,7 @@ void Robot::TeleopPeriodic()
 
   case 270:
     // TARMAC
-    IO.shooter.SetShooterRPM(2600_rpm);
+    IO.shooter.SetShooterRPM(2700_rpm);
     m_csmode = ClimberShooterMode::Shooter;
     if (!hoodOS)
     {
@@ -256,7 +268,7 @@ void Robot::TeleopPeriodic()
   double opL2 = IO.secondaryController.IsConnected() ? deadband((IO.secondaryController.GetL2Axis() + 1.0) / 2.0) : 0.0;
   double opR2 = IO.secondaryController.IsConnected() ? deadband((IO.secondaryController.GetR2Axis() + 1.0) / 2.0) : 0.0;
 
-  auto intakeCmd = (opR2 - opL2 + drR2 - drL2) * 13.0_V;
+  auto intakeCmd = ((opR2 - opL2 + drR2 - drL2) + (double)IO.mainController.GetR1Button()) * 13.0_V;
   IO.shooter.SetIntake(intakeCmd);
 
   // Deploy Intake
@@ -353,8 +365,14 @@ void Robot::SimulationPeriodic()
   IO.drivetrain.SimulationPeriodic();
 }
 
-void Robot::TestInit() {}
-void Robot::TestPeriodic() {}
+void Robot::TestInit()
+{
+  IO.pdp.ClearStickyFaults();
+}
+void Robot::TestPeriodic()
+{
+  IO.rjVision.SetLED(true);
+}
 
 double Robot::deadband(double val, double min, double max)
 {

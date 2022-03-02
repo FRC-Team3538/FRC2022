@@ -64,16 +64,19 @@ private:
   // Smartdash
   nt::NetworkTableEntry ntRobotName = frc::SmartDashboard::GetEntry("robot/RobotName");
 
-  static constexpr double kVisionAngleTolDefault = 0.75;
+  static constexpr double kVisionAngleTolDefault = 0.5;
   nt::NetworkTableEntry ntVisionAngleTol = frc::SmartDashboard::GetEntry("robot/visionAngleTol");
   
   static constexpr double kShooterRPMDefault = 3500;
   nt::NetworkTableEntry ntShooterRPM = frc::SmartDashboard::GetEntry("robot/shooterRPM");
 
-  static constexpr double kFeederVoltageDefault = 8.0;
+  static constexpr double kFeederVoltageDefault = 2.0;
   nt::NetworkTableEntry ntFeederVoltage = frc::SmartDashboard::GetEntry("robot/feederVoltage");
 
-  static constexpr double kIndexerVoltageDefault = 8.0;
+  static constexpr double kIndexerVoltageDefault = 3.0;
   nt::NetworkTableEntry ntIndexerVoltage = frc::SmartDashboard::GetEntry("robot/indexerVoltage");
+
+  static constexpr double kTurretTargetAngDefault = 0.0;
+  nt::NetworkTableEntry ntTurretTargetAng = frc::SmartDashboard::GetEntry("robot/turretTargetAng");
 
 };
