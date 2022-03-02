@@ -272,7 +272,7 @@ bool Shooter::Shoot()
 
 Shooter::State Shooter::CalculateShot(units::inch_t distance)
 {
-    double mainWheel = 1029.7 + (-0.00108 * std::pow(distance.value(), 3)) + (-0.350649 * std::pow(distance.value(), 2)) + (41.70178 * std::pow(distance.value(), 1));
+    double mainWheel = 1029.7 + (0.00108 * std::pow(distance.value(), 3)) + (-0.350649 * std::pow(distance.value(), 2)) + (41.70178 * std::pow(distance.value(), 1));
 
     State shotStates;
     shotStates.hoodAngle = HoodPosition::Middle;
