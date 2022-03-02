@@ -32,20 +32,38 @@ namespace vision
 
         if (tv != 0.0)
         {
-            if (emaList.size() >= N)
+            if (spinupInterval)
             {
-                emaList.pop_front();
+                if (emaList.size() >= N)
+                {
+                    emaList.pop_front();
+                    emaList.push_back(dx);
+
+                    telemetry.angle = units::degree_t{CalculateEMA()};
+                    telemetry.distance = DistEstimation();
+
+                    telemetry.filled = true;
+                }
+                else
+                {
+                    emaList.push_back(dx);
+                    telemetry.filled = false;
+                }
+            }
+            else
+            {
+                if (emaList.size() >= N)
+                    emaList.pop_front();
+
                 emaList.push_back(dx);
 
                 telemetry.angle = units::degree_t{CalculateEMA()};
                 telemetry.distance = DistEstimation();
 
+                // Maybe put back spinup interval for accuracy and smoothness on start?
+                // Will cause about a 160ms delay currently tho
+
                 telemetry.filled = true;
-            }
-            else
-            {
-                emaList.push_back(dx);
-                telemetry.filled = false;
             }
         }
         else
@@ -61,6 +79,7 @@ namespace vision
     double RJVisionPipeline::CalculateEMA()
     {
         // EXPONENTIAL MOVING AVERAGE. Maybe add an IQR Filter? Also maybe use an actual circular buffer?
+        // Could also try using a Butterworth
 
         double value = 0.0;
 

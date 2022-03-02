@@ -68,6 +68,8 @@ void Robot::RobotPeriodic()
   IO.drivetrain.Periodic();
   autoprograms.SmartDash();
   IO.rjVision.Periodic();
+
+  frc::SmartDashboard::PutNumber("SHOOT TIMER?!?", shootTestTimer.Get().value());
 }
 
 void Robot::AutonomousInit()
@@ -114,12 +116,16 @@ void Robot::TeleopPeriodic()
       units::degree_t tol{ntVisionAngleTol.GetDouble(kVisionAngleTolDefault)};
 
       //  bool turretAtAngle = IO.shooter.SetTurretAngle(adjustedShotVector.GetTheta(), tol);
-      bool turretAtAngle = IO.shooter.SetTurretAngle((IO.shooter.GetTurretAngle() + data.angle), tol);
+      bool turretAtAngle = IO.shooter.SetTurretAngle((IO.shooter.GetTurretAngle() + data.angle), 0.5_deg);
+
+      std::cout << "A" << std::endl;
 
       // Start Shooter
-      Shooter::State shotStat = IO.shooter.CalculateShot(adjustedShotVector.GetMagnitude()); // Magnitude from adjusted vector gets us distance
-      // IO.shooter.SetShooterRPM(shotStat.shooterRPM);
-      IO.shooter.SetShooterRPM(2750_rpm);
+      Shooter::State shotStat = IO.shooter.CalculateShot(data.distance);//adjustedShotVector.GetMagnitude()); // Magnitude from adjusted vector gets us distance
+      IO.shooter.SetShooterRPM(shotStat.shooterRPM);
+      //IO.shooter.SetShooterRPM(2750_rpm);
+
+      std::cout << "B" << std::endl;
 
       // Set Hood
 
@@ -128,6 +134,9 @@ void Robot::TeleopPeriodic()
         // IO.shooter.SetHoodAngle(shotStat.hoodAngle);
         IO.shooter.SetHoodAngle(Shooter::HoodPosition::Middle);
         hoodOS2 = true;
+
+        shootTestTimer.Reset();
+        shootTestTimer.Start();
       }
 
       // Shoot Maybe
@@ -140,6 +149,8 @@ void Robot::TeleopPeriodic()
   }
   else
   {
+    shootTestTimer.Stop();
+
     IO.rjVision.SetLED(false);
     IO.rjVision.Reset();
 
