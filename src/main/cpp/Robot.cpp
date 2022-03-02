@@ -141,6 +141,10 @@ void Robot::TeleopPeriodic()
   else
   {
     IO.rjVision.SetLED(false);
+    IO.rjVision.Reset();
+
+    // Hub tracking is based off odometry throughout the match, so might need to make it able to zero
+    // Or make sure the auto is started where the robot thinks it is
 
     VectorMath hubLocation = VectorMath{324.5_in, 159.5_in};
     VectorMath robotLocation = VectorMath{IO.drivetrain.GetPose().Translation()};

@@ -32,13 +32,21 @@ namespace vision
 
         if (tv != 0.0)
         {
-            telemetry.angle = units::degree_t{dx};
-            telemetry.distance = DistEstimation();
+            if (emaList.size() >= N)
+            {
+                emaList.pop_front();
+                emaList.push_back(dx);
 
-            // if(emaList.size() >= (N - 1))
-            //     emaList.pop_front();
+                telemetry.angle = units::degree_t{CalculateEMA()};
+                telemetry.distance = DistEstimation();
 
-            telemetry.filled = true;
+                telemetry.filled = true;
+            }
+            else
+            {
+                emaList.push_back(dx);
+                telemetry.filled = false;
+            }
         }
         else
         {
@@ -52,14 +60,14 @@ namespace vision
 
     double RJVisionPipeline::CalculateEMA()
     {
-        // double value = emaList[N - 1];
-
-        // for(int i = (N - 2); i > -1; --i)
-        // {
-        //     value = (alpha * emaList[i]) + ((1 - alpha) * value);
-        // }
+        // EXPONENTIAL MOVING AVERAGE. Maybe add an IQR Filter? Also maybe use an actual circular buffer?
 
         double value = 0.0;
+
+        for (auto i = emaList.begin(); i != emaList.end(); ++i)
+        {
+            value = (alpha * (*i)) + ((1 - alpha) * value);
+        }
 
         return value;
     }
@@ -72,11 +80,14 @@ namespace vision
 
     void RJVisionPipeline::Reset()
     {
-        emaVector.clear();
+        emaList.clear();
     }
 
     units::inch_t RJVisionPipeline::DistEstimation()
     {
+        // For now, the assumption is that the dy remains accurate despite the dx changing
+        // Might need to change that for rootin, tootin, scootin, n shootin
+
         units::inch_t dist = deltaH / (tan((dy + cameraAngle.value()) * (3.1415 / 180.0)));
         estDist = dist;
         return estDist;
