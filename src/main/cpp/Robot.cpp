@@ -112,12 +112,12 @@ void Robot::TeleopPeriodic()
       units::degree_t tol{ntVisionAngleTol.GetDouble(kVisionAngleTolDefault)};
 
       //  bool turretAtAngle = IO.shooter.SetTurretAngle(adjustedShotVector.GetTheta(), tol);
-      bool turretAtAngle = IO.shooter.SetTurretAngle((IO.shooter.GetTurretAngle() + data.angle), tol);
+      bool turretAtAngle = IO.shooter.SetTurretAngle((IO.shooter.GetTurretAngle() + data.angle), 0.5_deg);
 
       // Start Shooter
-      Shooter::State shotStat = IO.shooter.CalculateShot(adjustedShotVector.GetMagnitude()); // Magnitude from adjusted vector gets us distance
-      // IO.shooter.SetShooterRPM(shotStat.shooterRPM);
-      IO.shooter.SetShooterRPM(2750_rpm);
+      Shooter::State shotStat = IO.shooter.CalculateShot(data.distance);//adjustedShotVector.GetMagnitude()); // Magnitude from adjusted vector gets us distance
+      IO.shooter.SetShooterRPM(shotStat.shooterRPM);
+      //IO.shooter.SetShooterRPM(2750_rpm);
 
       // Set Hood
 
@@ -126,6 +126,7 @@ void Robot::TeleopPeriodic()
         // IO.shooter.SetHoodAngle(shotStat.hoodAngle);
         IO.shooter.SetHoodAngle(Shooter::HoodPosition::Middle);
         hoodOS2 = true;
+
       }
 
       // Shoot Maybe
@@ -138,6 +139,7 @@ void Robot::TeleopPeriodic()
   }
   else
   {
+
     IO.rjVision.SetLED(false);
     IO.rjVision.Reset();
 

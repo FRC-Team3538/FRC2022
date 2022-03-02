@@ -52,7 +52,7 @@ Shooter::Shooter()
     shooterA.SetStatusFramePeriod(ctre::phoenix::motorcontrol::StatusFrameEnhanced::Status_3_Quadrature, 18);
     shooterB.SetStatusFramePeriod(ctre::phoenix::motorcontrol::StatusFrameEnhanced::Status_3_Quadrature, 18);
 
-    //turret.SetStatusFramePeriod(StatusFrameEnhanced::Status_1_General, 10, 50);
+    // turret.SetStatusFramePeriod(StatusFrameEnhanced::Status_1_General, 10, 50);
     turret.SetStatusFramePeriod(StatusFrameEnhanced::Status_13_Base_PIDF0, 18, 50);
     turret.SetStatusFramePeriod(ctre::phoenix::motorcontrol::StatusFrameEnhanced::Status_3_Quadrature, 18);
 
@@ -64,9 +64,11 @@ Shooter::Shooter()
     turret.ConfigForwardSoftLimitThreshold(kTurretMax / kScaleFactorTurret);
     turret.ConfigReverseSoftLimitThreshold(kTurretMin / kScaleFactorTurret);
     turret.Config_IntegralZone(0, 2.0 / kScaleFactorTurret);
-    turret.ConfigAllowableClosedloopError(0, 0.3 / kScaleFactorTurret);
+    turret.ConfigAllowableClosedloopError(0, 0.5 / kScaleFactorTurret);
     turret.ConfigForwardSoftLimitEnable(true);
     turret.ConfigReverseSoftLimitEnable(true);
+
+    turret.ConfigNeutralDeadband(0.05);
 
     frc::SmartDashboard::PutNumber("TURRET P", 0.4);
     frc::SmartDashboard::PutNumber("TURRET I", 0.0001);
@@ -165,12 +167,12 @@ void Shooter::SetHoodAngle(Shooter::HoodPosition pos)
 
 void Shooter::SetHoodAngle()
 {
-    auto pos = cmd_hoodPosition;
+    //std::cout << (int)cmd_hoodPosition << std::endl;
 
-    if (pos == HoodPosition::Top)
+    if (cmd_hoodPosition == HoodPosition::Top)
         return;
 
-    switch (pos)
+    switch (cmd_hoodPosition)
     {
     case HoodPosition::Top:
     {
@@ -181,16 +183,16 @@ void Shooter::SetHoodAngle()
 
     case HoodPosition::Middle:
     {
+        hoodStop.Set(true);
         if (!hoodPosOS)
         {
-            hoodStop.Set(true);
             hoodPosTimer.Reset();
             hoodPosTimer.Start();
             hood.Set(true);
             hoodPosOS = true;
         }
 
-        if ((hoodPosTimer.Get() > 0.3_s) && (hoodPosOS))
+        if ((hoodPosTimer.Get() > 0.4_s) && (hoodPosOS))
             hood.Set(false);
     }
     break;
@@ -270,10 +272,13 @@ bool Shooter::Shoot()
 
 Shooter::State Shooter::CalculateShot(units::inch_t distance)
 {
-    double mainWheel = 8073 + (-0.00325 * std::pow(distance.value(), 3)) + (1.2191 * std::pow(distance.value(), 2)) + (-139.806 * std::pow(distance.value(), 1));
+    double mainWheel = 1029.7 + (-0.00108 * std::pow(distance.value(), 3)) + (-0.350649 * std::pow(distance.value(), 2)) + (41.70178 * std::pow(distance.value(), 1));
 
-    return {
-        units::revolutions_per_minute_t{mainWheel}, HoodPosition::Top};
+    State shotStates;
+    shotStates.hoodAngle = HoodPosition::Middle;
+    shotStates.shooterRPM = units::revolutions_per_minute_t{mainWheel};
+
+    return shotStates;
 }
 
 void Shooter::FalconSlotConfig(WPI_TalonFX &motor, int slot, SlotConfiguration &config)
