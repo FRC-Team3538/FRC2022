@@ -13,8 +13,9 @@
 #include <frc/smartdashboard/SmartDashboard.h>
 
 #include "lib/Logging.h"
-#include "lib/DataLogUtils.h"
 #include "lib/VectorMath.hpp"
+
+#include <frc/DataLogManager.h>
 
 class Robot : public frc::TimedRobot
 {
@@ -45,7 +46,7 @@ private:
   AutoPrograms autoprograms{IO};
 
 #ifdef LOGGER
-  rj::DataLogUtils dataLogUtils{};
+  wpi::log::DataLog &log = frc::DataLogManager::GetLog();
 #endif
 
   frc::Timer shotTimer;

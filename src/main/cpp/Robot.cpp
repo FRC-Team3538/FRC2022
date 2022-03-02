@@ -7,6 +7,8 @@
 #include <frc/livewindow/LiveWindow.h>
 #include <cmath>
 
+#include <frc/DriverStation.h>
+
 using namespace pathplanner;
 
 void Robot::RobotInit()
@@ -52,18 +54,14 @@ void Robot::RobotInit()
 
   // Logging Stuff
 #ifdef LOGGER
-  dataLogUtils.EnableNTConnectionLogging();
-  dataLogUtils.EnableNTEntryLogging();
+  frc::DataLogManager::LogNetworkTables(true);
   // arg bool - log joystick data if true
-  dataLogUtils.InitDSLogging(true);
+  frc::DriverStation::StartDataLog(log, true);
 #endif // LOGGER
 }
 
 void Robot::RobotPeriodic()
 {
-#ifdef LOGGER
-  dataLogUtils.LogDSState();
-#endif // LOGGER
   IO.UpdateSmartDash();
   IO.drivetrain.Periodic();
   autoprograms.SmartDash();
