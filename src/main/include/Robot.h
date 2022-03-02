@@ -52,8 +52,6 @@ private:
   frc::Timer brakeTimer;
   frc::Timer intakeTimer;
 
-  frc::Timer shootTestTimer;
-
   bool hoodOS = false;
   bool hoodOS2 = false;
 
