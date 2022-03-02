@@ -10,6 +10,7 @@
 #include <units/length.h>
 #include <units/angle.h>
 #include "Subsystem.hpp"
+#include <list>
 
 namespace vision
 {
@@ -36,6 +37,14 @@ namespace vision
 
         // Distance between camera lens and vision target midpoint
         const units::inch_t deltaH = 59.0_in;
+
+        // EMA Stuff
+        std::list<double> emaList;
+
+        const double alpha = 0.25; // Weight
+        const uint8_t N = 6; // Note, EMA will have a spinup interval of 20ms * N
+
+        double CalculateEMA();
 
     public:
         struct visionData

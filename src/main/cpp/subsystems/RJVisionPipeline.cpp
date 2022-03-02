@@ -34,6 +34,10 @@ namespace vision
         {
             telemetry.angle = units::degree_t{dx};
             telemetry.distance = DistEstimation();
+
+            // if(emaList.size() >= (N - 1))
+            //     emaList.pop_front();
+
             telemetry.filled = true;
         }
         else
@@ -46,6 +50,20 @@ namespace vision
         return telemetry;
     }
 
+    double RJVisionPipeline::CalculateEMA()
+    {
+        // double value = emaList[N - 1];
+
+        // for(int i = (N - 2); i > -1; --i)
+        // {
+        //     value = (alpha * emaList[i]) + ((1 - alpha) * value);
+        // }
+
+        double value = 0.0;
+
+        return value;
+    }
+
     void RJVisionPipeline::UpdateTelemetry()
     {
         frc::SmartDashboard::PutNumber("dx", dx);
@@ -54,9 +72,7 @@ namespace vision
 
     void RJVisionPipeline::Reset()
     {
-        // table->PutNumber("ledMode", 1.0);
-        pipeSwitchOS = false;
-        pipeSwitchCt = 0;
+        emaVector.clear();
     }
 
     units::inch_t RJVisionPipeline::DistEstimation()

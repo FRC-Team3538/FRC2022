@@ -167,7 +167,7 @@ void Robot::TeleopPeriodic()
       turretAngle = units::degree_t{Shooter::kTurretMin};
     }
 
-    IO.shooter.SetTurret(units::volt_t{-13.0 * deadband(IO.mainController.GetRightX())});
+    //IO.shooter.SetTurret(units::volt_t{-13.0 * deadband(IO.mainController.GetRightX())});
 
     // IO.shooter.SetTurretAngle(turretAngle, 0.25_deg);
 
@@ -176,8 +176,8 @@ void Robot::TeleopPeriodic()
     hoodOS2 = false;
 
     double fwd = -deadband(IO.mainController.GetLeftY());
-    double rot = 0.0;
-    // double rot = -deadband(IO.mainController.GetRightX());
+    //double rot = 0.0;
+    double rot = -deadband(IO.mainController.GetRightX());
 
     // Sniper Mode
     if (IO.mainController.GetR3Button())
@@ -186,7 +186,7 @@ void Robot::TeleopPeriodic()
       rot *= 0.3;
     }
 
-    // IO.drivetrain.Arcade(fwd, rot);
+    IO.drivetrain.Arcade(fwd, rot);
   }
 
   //
