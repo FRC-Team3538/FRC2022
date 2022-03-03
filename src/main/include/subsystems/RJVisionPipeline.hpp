@@ -21,6 +21,37 @@ namespace vision
 
     class RJVisionPipeline : public Subsystem
     {
+    public:
+        enum class FilterType : uint8_t
+        {
+            SampleAverage = 0, // Test to reduce jitter in steady state. Samples N times and returns values. Doesn't update after that
+            EMANoSpinup,
+            EMAWithSpinup,
+            NoFilter
+        };
+
+        struct visionData
+        {
+            units::inch_t distance;
+            units::degree_t angle;
+            bool filled = false;
+        };
+
+        // Init Stuff
+        RJVisionPipeline() = delete;
+        RJVisionPipeline(FilterType filter = FilterType::NoFilter);
+        void ConfigureSystem();
+
+        // Periodic
+        void Periodic();
+        void UpdateTelemetry();
+
+        // Setter
+        RJVisionPipeline::visionData Run();
+        units::inch_t DistEstimation(units::degree_t deltaY, units::degree_t deltaX);
+        void Reset();
+        void SetLED(bool enable);
+
     private:
         units::inch_t estDist = 0.0_in;
 
@@ -33,41 +64,25 @@ namespace vision
         frc::Timer pipeSwitch;
 
         // Angle of elevation of camera
-        const units::degree_t cameraAngle = 26.0_deg;
+        const units::degree_t cameraAngle = 33.0_deg;
 
         // Distance between camera lens and vision target midpoint
         const units::inch_t deltaH = 68.0_in;
 
-        // EMA Stuff
-        std::list<double> emaList;
+        // Filter Stuff
+        std::list<double> xList;
+        std::list<double> yList;
 
         const double alpha = 0.125; // Weight
-        const uint8_t N = 10; // Note, EMA will have a spinup interval of about 20ms * N
+        const uint8_t N = 14;       // Note, EMA will have a spinup interval of about 20ms * N
+        //units::second_t sampleSpinUpDelay = 0.15_s;
 
-        double CalculateEMA();
+        double CalculateEMA(const std::list<double> &list);
+        double CalculateAverage(const std::list<double> &list);
 
-        bool spinupInterval = true;
+        FilterType filter;
 
-    public:
-        struct visionData
-        {
-            units::inch_t distance;
-            units::degree_t angle;
-            bool filled = false;
-        };
-
-        // Init Stuff
-        RJVisionPipeline();
-        void ConfigureSystem();
-
-        // Periodic
-        void Periodic();
-        void UpdateTelemetry();
-
-        // Setter
-        RJVisionPipeline::visionData Run();
-        units::inch_t DistEstimation();
-        void Reset();
-        void SetLED(bool enable);
+        frc::Timer spinUpTimer;
+        bool spinUpOS = false;
     };
 } // namespace vision

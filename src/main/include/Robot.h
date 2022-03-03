@@ -55,6 +55,9 @@ private:
 
   bool hoodOS = false;
   bool hoodOS2 = false;
+  bool sampleTest = false;
+  units::degree_t turretTest = 0.0_deg;
+  units::revolutions_per_minute_t shooterTest = 0.0_rpm;
 
   enum class ClimberShooterMode:uint8_t
   {

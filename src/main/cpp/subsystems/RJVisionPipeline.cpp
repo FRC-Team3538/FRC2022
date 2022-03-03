@@ -5,7 +5,7 @@ using namespace nt;
 namespace vision
 {
 
-    RJVisionPipeline::RJVisionPipeline()
+    RJVisionPipeline::RJVisionPipeline(FilterType filter) : filter(filter)
     {
     }
 
@@ -32,61 +32,122 @@ namespace vision
 
         if (tv != 0.0)
         {
-            if (spinupInterval)
+            switch (filter)
             {
-                if (emaList.size() >= N)
-                {
-                    emaList.pop_front();
-                    emaList.push_back(dx);
 
-                    telemetry.angle = units::degree_t{CalculateEMA()};
-                    telemetry.distance = DistEstimation();
+            case FilterType::EMANoSpinup:
+            {
+                if (xList.size() >= N)
+                {
+                    xList.pop_front();
+                    xList.push_back(dx);
+
+                    yList.pop_front();
+                    yList.push_back(dy);
+
+                    telemetry.angle = units::degree_t{CalculateEMA(xList)};
+                    telemetry.distance = DistEstimation(units::degree_t{CalculateEMA(yList)}, telemetry.angle);
 
                     telemetry.filled = true;
                 }
                 else
                 {
-                    emaList.push_back(dx);
+                    xList.push_back(dx);
+                    yList.push_back(dy);
                     telemetry.filled = false;
                 }
             }
-            else
+            break;
+
+            case FilterType::EMAWithSpinup:
             {
-                if (emaList.size() >= N)
-                    emaList.pop_front();
+                if (xList.size() >= N)
+                {
+                    xList.pop_front();
+                    yList.pop_front();
+                }
 
-                emaList.push_back(dx);
+                xList.push_back(dx);
+                yList.push_back(dy);
 
-                telemetry.angle = units::degree_t{CalculateEMA()};
-                telemetry.distance = DistEstimation();
-
-                // Maybe put back spinup interval for accuracy and smoothness on start?
-                // Will cause about a 160ms delay currently tho
+                telemetry.angle = units::degree_t{CalculateEMA(xList)};
+                telemetry.distance = DistEstimation(units::degree_t{CalculateEMA(yList)}, telemetry.angle);
 
                 telemetry.filled = true;
             }
+            break;
+
+            case FilterType::SampleAverage:
+            {
+                if (xList.size() >= N)
+                {
+                    telemetry.angle = units::degree_t{CalculateAverage(xList)};
+                    telemetry.distance = DistEstimation(units::degree_t{CalculateAverage(yList)}, telemetry.angle);
+
+                    telemetry.filled = true;
+                }
+                else
+                {
+
+                    if (!spinUpOS)
+                    {
+                        spinUpTimer.Reset();
+                        spinUpTimer.Start();
+                        spinUpOS = true;
+                    }
+
+                    if (spinUpTimer.Get() > 0.3_s)
+                    {
+                        xList.push_back(dx);
+                        yList.push_back(dy);
+                        telemetry.filled = false;
+                    }
+                }
+            }
+            break;
+
+            case FilterType::NoFilter:
+            {
+                telemetry.angle = units::degree_t{dx};
+                telemetry.distance = DistEstimation(units::degree_t{dy}, telemetry.angle);
+                telemetry.filled = true;
+            }
+            break;
+            }
+            return telemetry;
         }
         else
         {
-            // telemetry.angle = 420.0;
-            // telemetry.distance = -1.0;
             telemetry.filled = false;
+            return telemetry;
         }
-
-        return telemetry;
     }
 
-    double RJVisionPipeline::CalculateEMA()
+    double RJVisionPipeline::CalculateEMA(const std::list<double> &list)
     {
         // EXPONENTIAL MOVING AVERAGE. Maybe add an IQR Filter? Also maybe use an actual circular buffer?
         // Could also try using a Butterworth
 
         double value = 0.0;
 
-        for (auto i = emaList.begin(); i != emaList.end(); ++i)
+        for (auto i = list.begin(); i != list.end(); ++i)
         {
             value = (alpha * (*i)) + ((1 - alpha) * value);
         }
+
+        return value;
+    }
+
+    double RJVisionPipeline::CalculateAverage(const std::list<double> &list)
+    {
+        double value = 0.0;
+
+        for (auto i = list.begin(); i != list.end(); ++i)
+        {
+            value += *i;
+        }
+
+        value /= list.size();
 
         return value;
     }
@@ -99,15 +160,21 @@ namespace vision
 
     void RJVisionPipeline::Reset()
     {
-        emaList.clear();
+        xList.clear();
+        yList.clear();
+        spinUpOS = false;
     }
 
-    units::inch_t RJVisionPipeline::DistEstimation()
+    units::inch_t RJVisionPipeline::DistEstimation(units::degree_t deltaY, units::degree_t deltaX)
     {
         // For now, the assumption is that the dy remains accurate despite the dx changing
         // Might need to change that for rootin, tootin, scootin, n shootin
 
-        units::inch_t dist = deltaH / (tan((dy + cameraAngle.value()) * (3.1415 / 180.0)));
+        deltaX *= deltaX < 0.0_deg ? -1.0 : 1.0;
+
+        deltaY += units::degree_t{-0.007 + (0.0564 * pow(deltaX.value(), 1)) + (-0.01538 * pow(deltaX.value(), 2)) + (0.0003375 * pow(deltaX.value(), 3))};
+
+        units::inch_t dist = deltaH / (tan((deltaY.value() + cameraAngle.value()) * (3.1415 / 180.0)));
         estDist = dist;
         return estDist;
     }

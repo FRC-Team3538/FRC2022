@@ -32,7 +32,7 @@ public:
     // *** PUT SUBSYSTEMS HERE ***
     Drivetrain drivetrain;
     Shooter shooter;
-    vision::RJVisionPipeline rjVision;
+    vision::RJVisionPipeline rjVision {vision::RJVisionPipeline::FilterType::SampleAverage};
     Climber climber;
   
     Robotmap();

@@ -62,6 +62,7 @@ public:
     frc::Pose2d GetPose() const;
     frc::DifferentialDriveKinematics GetKinematics() { return m_kinematics; }
     frc::SimpleMotorFeedforward<units::meter> GetFeedForward() { return m_feedforward; }
+    units::meters_per_second_t GetVelocity();
 
     void SimulationPeriodic();
     void Periodic();
