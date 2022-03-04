@@ -9,7 +9,7 @@
 // Name for Smart Dash Chooser
 std::string NinetyDegreeAngle::GetName()
 {
-    return "93 - NinetyDegAngle";
+    return "91 - NinetyDegAngle";
 }
 
 // Initialization
@@ -31,19 +31,18 @@ void NinetyDegreeAngle::NextState()
 
 void NinetyDegreeAngle::Init()
 {
-
-    units::feet_per_second_t maxLinearVel = 2_fps;
+    units::feet_per_second_t maxLinearVel = 5_fps;
     // units::standard_gravity_t maxCentripetalAcc = 0.5_SG;
-    units::feet_per_second_squared_t maxLinearAcc = 2_fps_sq;
+    units::feet_per_second_squared_t maxLinearAcc = 1_mps_sq;
 
     // frc::TrajectoryConfig config(Drivetrain::kMaxSpeedLinear, Drivetrain::kMaxAccelerationLinear);
     frc::TrajectoryConfig config(maxLinearVel, maxLinearAcc);
-    config.AddConstraint(frc::CentripetalAccelerationConstraint{3_mps_sq});
-    config.AddConstraint(frc::DifferentialDriveVoltageConstraint{IO.drivetrain.GetFeedForward(), IO.drivetrain.GetKinematics(), 4_V});
-    config.AddConstraint(frc::DifferentialDriveKinematicsConstraint{IO.drivetrain.GetKinematics(), 2_fps});
-    config.SetReversed(true);
+    config.AddConstraint(frc::CentripetalAccelerationConstraint{maxLinearAcc});
+    config.AddConstraint(frc::DifferentialDriveVoltageConstraint{IO.drivetrain.GetFeedForward(), IO.drivetrain.GetKinematics(), 12_V});
+    config.AddConstraint(frc::DifferentialDriveKinematicsConstraint{IO.drivetrain.GetKinematics(), maxLinearVel});
+    config.SetReversed(false);
 
-    m_trajectory = rj::AutoHelper::LoadTrajectory("93 - 90 Degree Angle", &config); 
+    m_trajectory = rj::AutoHelper::LoadTrajectory("91 - 90 Degree Angle", &config); 
 
     m_autoTimer.Reset();
     m_autoTimer.Start();

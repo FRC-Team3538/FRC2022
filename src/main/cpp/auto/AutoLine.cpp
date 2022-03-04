@@ -33,16 +33,15 @@ void AutoLine::NextState()
 
 void AutoLine::Init()
 {
-
-    units::feet_per_second_t maxLinearVel = 4_fps;
+    units::feet_per_second_t maxLinearVel = 5_fps;
     // units::standard_gravity_t maxCentripetalAcc = 0.5_SG;
-    units::feet_per_second_squared_t maxLinearAcc = 4_fps_sq;
+    units::feet_per_second_squared_t maxLinearAcc = 1_mps_sq;
 
     // frc::TrajectoryConfig config(Drivetrain::kMaxSpeedLinear, Drivetrain::kMaxAccelerationLinear);
     frc::TrajectoryConfig config(maxLinearVel, maxLinearAcc);
-    // config.AddConstraint(frc::CentripetalAccelerationConstraint{5_mps_sq});
-    // config.AddConstraint(frc::DifferentialDriveVoltageConstraint{IO.drivetrain.GetFeedForward(), IO.drivetrain.GetKinematics(), 5_V});
-    // config.AddConstraint(frc::DifferentialDriveKinematicsConstraint{IO.drivetrain.GetKinematics(), 4_fps});
+    config.AddConstraint(frc::CentripetalAccelerationConstraint{maxLinearAcc});
+    config.AddConstraint(frc::DifferentialDriveVoltageConstraint{IO.drivetrain.GetFeedForward(), IO.drivetrain.GetKinematics(), 12_V});
+    config.AddConstraint(frc::DifferentialDriveKinematicsConstraint{IO.drivetrain.GetKinematics(), maxLinearVel});
     config.SetReversed(false);
 
     m_trajectory = rj::AutoHelper::LoadTrajectory("01 - Line", &config);
