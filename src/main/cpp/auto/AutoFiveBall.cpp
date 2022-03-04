@@ -36,70 +36,45 @@ void AutoFiveBall::NextState()
         }
         case 1:
         {
-            IO.shooter.SetIntakeState(Shooter::Position::Deployed);
-            IO.shooter.SetIntake(8_V);
-            IO.shooter.SetShooterRPM(4000_rpm);
-            IO.shooter.SetIndexer(8_V);
-            IO.shooter.SetFeeder(-2_V);
+            IO.drivetrain.Arcade(0.0, 0.0);
+            IO.shooter.SetFeeder(8_V);
 
             break;
         }
         case 2:
         {
-            IO.drivetrain.Arcade(0.0, 0.0);
-            IO.shooter.SetFeeder(8_V);
+            IO.shooter.SetIntakeState(Shooter::Position::Deployed);
+            IO.shooter.SetIntake(8_V);
+            IO.shooter.SetShooterRPM(4000_rpm);
+            IO.shooter.SetIndexer(8_V);
+            IO.shooter.SetFeeder(-2_V);
 
             break;
         }
         case 3:
         {
-            IO.shooter.SetIntakeState(Shooter::Position::Deployed);
-            IO.shooter.SetIntake(8_V);
-            IO.shooter.SetShooterRPM(4000_rpm);
-            IO.shooter.SetIndexer(8_V);
-            IO.shooter.SetFeeder(-2_V);
-
-            IO.drivetrain.ResetOdometry(m_trajectory_second.InitialPose());
+            IO.drivetrain.Arcade(0.0, 0.0);
+            IO.shooter.SetFeeder(8_V);
 
             break;
         }
         case 4:
         {
-            IO.drivetrain.Arcade(0.0, 0.0);
-            IO.shooter.SetFeeder(8_V);
+            IO.shooter.SetFeeder(-2_V);
 
             break;
         }
         case 5:
         {
-            IO.shooter.SetIntakeState(Shooter::Position::Deployed);
-            IO.shooter.SetIntake(8_V);
-            IO.shooter.SetShooterRPM(4000_rpm);
-            IO.shooter.SetIndexer(8_V);
-            IO.shooter.SetFeeder(-2_V);
-            break;
-        }
-        case 6:
-        {
-            IO.drivetrain.Arcade(0.0, 0.0);
             IO.shooter.SetFeeder(8_V);
-
-            break;
         }
-        case 7:
+        default:
         {
-            IO.drivetrain.Arcade(0.0, 0.0);
             IO.shooter.SetIntakeState(Shooter::Position::Stowed);
             IO.shooter.SetIntake(0_V);
             IO.shooter.SetShooterRPM(0_rpm);
             IO.shooter.SetIndexer(0_V);
             IO.shooter.SetFeeder(0_V);
-
-            break;
-        }
-        default:
-        {
-            IO.drivetrain.Arcade(0.0, 0.0);
             break;
         }
     }
@@ -110,21 +85,19 @@ void AutoFiveBall::NextState()
 
 void AutoFiveBall::Init()
 {
-    units::feet_per_second_t maxLinearVel = 2_mps;
+    units::feet_per_second_t maxLinearVel = 5_fps;
     // units::standard_gravity_t maxCentripetalAcc = 0.5_SG;
-    units::feet_per_second_squared_t maxLinearAcc = 2_mps_sq;
+    units::feet_per_second_squared_t maxLinearAcc = 1_mps_sq;
 
     // frc::TrajectoryConfig config(Drivetrain::kMaxSpeedLinear, Drivetrain::kMaxAccelerationLinear);
     frc::TrajectoryConfig config(maxLinearVel, maxLinearAcc);
-    config.AddConstraint(frc::CentripetalAccelerationConstraint{5_mps_sq});
-    config.AddConstraint(frc::DifferentialDriveVoltageConstraint{IO.drivetrain.GetFeedForward(), IO.drivetrain.GetKinematics(), 10_V});
-    config.AddConstraint(frc::DifferentialDriveKinematicsConstraint{IO.drivetrain.GetKinematics(), 2_mps});
+    config.AddConstraint(frc::CentripetalAccelerationConstraint{maxLinearAcc});
+    config.AddConstraint(frc::DifferentialDriveVoltageConstraint{IO.drivetrain.GetFeedForward(), IO.drivetrain.GetKinematics(), 12_V});
+    config.AddConstraint(frc::DifferentialDriveKinematicsConstraint{IO.drivetrain.GetKinematics(), maxLinearVel});
     config.SetReversed(false);
 
-    m_trajectory_first = rj::AutoHelper::LoadTrajectory("5 Ball Wall Ball 1", &config);
-
-    config.SetReversed(true);
-    m_trajectory_second = rj::AutoHelper::LoadTrajectory("5 Ball Wall Ball 2", &config);
+    m_trajectory_first = rj::AutoHelper::LoadTrajectory("05 - 5 Ball Wall Ball 1", &config);
+    m_trajectory_second = rj::AutoHelper::LoadTrajectory("05 - 5 Ball Wall Ball 2", &config);
 
     IO.drivetrain.ResetOdometry(m_trajectory_first.InitialPose());
 
@@ -154,16 +127,6 @@ void AutoFiveBall::Run()
         }
         case 2:
         {
-            if (m_autoTimer.Get() > units::time::second_t(2.0))
-            {
-                NextState();
-            }
-
-            break;
-        }
-        case 3:
-        {
-            
             auto reference = m_trajectory_first.Sample(m_autoTimer.Get());
 
             frc::SmartDashboard::PutNumber("traj/t", reference.t.value());
@@ -176,7 +139,16 @@ void AutoFiveBall::Run()
 
             IO.drivetrain.Drive(reference);
 
-            if ((m_autoTimer.Get() > m_trajectory_first.TotalTime() && IO.shooter.Shoot()))
+            if (m_autoTimer.Get() > m_trajectory_first.TotalTime())
+            {
+                NextState();
+            }
+
+            break;
+        }
+        case 3:
+        {
+            if (IO.shooter.Shoot())
             {
                 NextState();
             }
@@ -184,17 +156,6 @@ void AutoFiveBall::Run()
             break;
         }
         case 4:
-        {
-            m_autoTimer.Reset();
-            m_autoTimer.Start();
-            if (m_autoTimer.Get() > units::time::second_t(2.0))
-            {
-                NextState();
-            }
-
-            break;
-        }
-        case 5:
         {
             auto reference = m_trajectory_second.Sample(m_autoTimer.Get());
 
@@ -208,16 +169,16 @@ void AutoFiveBall::Run()
 
             IO.drivetrain.Drive(reference);
 
-            if ((m_autoTimer.Get() > m_trajectory_second.TotalTime() && IO.shooter.Shoot()))
+            if (m_autoTimer.Get() > m_trajectory_second.TotalTime())
             {
                 NextState();
             }
 
             break;
         }
-        case 6:
+        case 5:
         {
-            if (m_autoTimer.Get() > units::time::second_t(2.0))
+            if (IO.shooter.Shoot())
             {
                 NextState();
             }
