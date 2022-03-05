@@ -83,8 +83,8 @@ public:
     void InitSendable(wpi::SendableBuilder &builder) override;
     void FalconSendableHelper(wpi::SendableBuilder &builder, WPI_TalonFX &motor, std::string name);
 
-    static constexpr double kTurretMax = 20.0; // Degrees
-    static constexpr double kTurretMin = -20.0;
+    static constexpr double kTurretMax = 90.0; // Degrees
+    static constexpr double kTurretMin = -90.0;
 
 private:
     // Hardware

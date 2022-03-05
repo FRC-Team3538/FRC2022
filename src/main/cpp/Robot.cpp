@@ -93,9 +93,9 @@ void Robot::TeleopPeriodic()
   //
   // *** VISION AND DRIVING ***
   //
-  if (IO.mainController.GetR1Button()) // || IO.secondaryController.GetTriangleButton())
+  if (IO.mainController.GetR1Button() || IO.secondaryController.GetCircleButton()) // || IO.secondaryController.GetTriangleButton())
   {
-
+    manualJog = false;
     IO.shooter.SetIntakeState(Shooter::Position::Deployed);
     intakeTimer.Start();
     intakeTimer.Reset();
@@ -136,9 +136,9 @@ void Robot::TeleopPeriodic()
       // std::cout << (IO.shooter.GetTurretAngle() + data.angle).value() << std::endl;
 
       // IO.shooter.SetShooterRPM(shotStat.shooterRPM);
-      //IO.shooter.SetShooterRPM(shooterTest);
+      // IO.shooter.SetShooterRPM(shooterTest);
 
-      IO.shooter.SetShooterRPM(2750_rpm);
+      IO.shooter.SetShooterRPM(2800_rpm);
 
       // Set Hood
 
@@ -151,11 +151,27 @@ void Robot::TeleopPeriodic()
 
       // Shoot Maybe
       shoot = turretAtAngle;
-
-      double fwd = -0.5 * deadband(IO.mainController.GetLeftY());
-
-      IO.drivetrain.Arcade(fwd, 0.0);
     }
+    double fwd = -0.5 * deadband(IO.mainController.GetLeftY());
+    double rot = -0.5 * deadband(IO.mainController.GetRightX());
+
+    IO.drivetrain.Arcade(fwd, rot);
+  }
+  else if (IO.secondaryController.GetSquareButton())
+  {
+    manualJog = false;
+    vision::RJVisionPipeline::visionData data = IO.rjVision.Run();
+    if (data.filled)
+    {
+      // Set Turret
+      units::degree_t tol{ntVisionAngleTol.GetDouble(kVisionAngleTolDefault)};
+
+      bool turretAtAngle = IO.shooter.SetTurretAngle(turretTest, 0.75_deg);
+    }
+    double fwd = -0.5 * deadband(IO.mainController.GetLeftY());
+    double rot = -0.5 * deadband(IO.mainController.GetRightX());
+
+    IO.drivetrain.Arcade(fwd, rot);
   }
   else
   {
@@ -194,6 +210,20 @@ void Robot::TeleopPeriodic()
     // IO.shooter.SetTurret(units::volt_t{-13.0 * deadband(IO.mainController.GetRightX())});
 
     // IO.shooter.SetTurretAngle(turretAngle, 0.25_deg);
+    if (IO.secondaryController.GetPSButton())
+    {
+      IO.shooter.SetTurretAngle(0.0_deg, 1_deg);
+      m_csmode = ClimberShooterMode::Shooter;
+    }
+    else if (std::abs(deadband(IO.secondaryController.GetRightX())) > 0.0 || manualJog)
+    {
+      manualJog = true;
+      IO.shooter.SetTurret(units::volt_t{3.0 * deadband(IO.secondaryController.GetRightX())});
+    }
+    else if (m_csmode == ClimberShooterMode::Climber)
+      IO.shooter.SetTurretAngle(90.0_deg, 1_deg);
+    else
+      IO.shooter.SetTurretAngle(0.0_deg, 1_deg);
 
     // IO.shooter.SetTurretAngle(units::degree_t{ntTurretTargetAng.GetDouble(kTurretTargetAngDefault)}, units::degree_t{0.5});
 
@@ -237,7 +267,7 @@ void Robot::TeleopPeriodic()
 
   case 90:
     // MIDFIELD
-    IO.shooter.SetShooterRPM(s);
+    IO.shooter.SetShooterRPM(2750_rpm);
     m_csmode = ClimberShooterMode::Shooter;
     if (!hoodOS)
     {
@@ -259,7 +289,7 @@ void Robot::TeleopPeriodic()
 
   case 270:
     // TARMAC
-    IO.shooter.SetShooterRPM(2700_rpm);
+    IO.shooter.SetShooterRPM(2800_rpm);
     m_csmode = ClimberShooterMode::Shooter;
     if (!hoodOS)
     {
@@ -269,10 +299,16 @@ void Robot::TeleopPeriodic()
     break;
   }
 
+  if (IO.secondaryController.GetOptionsButtonPressed())
+  {
+    IO.shooter.SetShooterRPM(1500_rpm);
+    m_csmode = ClimberShooterMode::Shooter;
+  }
+
   IO.shooter.SetHoodAngle();
 
   // Shoot
-  if (shoot || IO.secondaryController.GetSquareButton() || IO.mainController.GetSquareButton())
+  if (shoot || IO.secondaryController.GetTriangleButton() || IO.mainController.GetL1Button())
   {
     m_csmode = ClimberShooterMode::Shooter;
     IO.shooter.Shoot();
@@ -398,6 +434,18 @@ void Robot::TestPeriodic()
 {
   IO.shooter.SetTurret(0_V);
   IO.rjVision.SetLED(true);
+
+  if (IO.mainController.GetPSButton())
+  {
+    IO.rjVision.TakeSnapshot(1);
+  }
+  else
+    IO.rjVision.TakeSnapshot(0);
+
+  double fwd = -0.5 * deadband(IO.mainController.GetLeftY());
+  double rot = -0.5 * deadband(IO.mainController.GetRightX());
+
+  IO.drivetrain.Arcade(fwd, rot);
 }
 
 double Robot::deadband(double val, double min, double max)
