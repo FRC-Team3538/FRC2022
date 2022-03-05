@@ -269,7 +269,13 @@ bool Shooter::Shoot()
     // }
 
     // Wait for balls to exit robot in auto
-    return (settleTimer.Get() > 2.0_s); // TODO: Move to NT Parameter / Class Constant?
+    if (settleTimer.Get() > 2.0_s) {
+        settleTimer.Reset();
+        settleTimer.Stop();
+
+        return true;
+    }
+    return false; // TODO: Move to NT Parameter / Class Constant?
 }
 
 Shooter::State Shooter::CalculateShot(units::inch_t distance)
