@@ -51,6 +51,8 @@ namespace vision
         units::inch_t DistEstimation(units::degree_t deltaY, units::degree_t deltaX);
         void Reset();
         void SetLED(bool enable);
+        void TakeSnapshot(uint8_t numberOfSnaps);
+        void SetFilterType(FilterType setFilter);
 
     private:
         units::inch_t estDist = 0.0_in;
@@ -62,6 +64,9 @@ namespace vision
         bool pipeSwitchOS = false;
         int pipeSwitchCt = 0;
         frc::Timer pipeSwitch;
+
+        frc::Timer snapShotTimer;
+        units::second_t snapTime;
 
         // Angle of elevation of camera
         const units::degree_t cameraAngle = 33.0_deg;

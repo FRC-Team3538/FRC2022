@@ -53,7 +53,7 @@ public:
 
 
 private:
-    bool sensorOverrode = false;
+    bool sensorOverrode = true;
 
     WPI_TalonFX climberA{20};
     WPI_TalonFX climberB{21};

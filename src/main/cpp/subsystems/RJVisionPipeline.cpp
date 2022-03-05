@@ -22,6 +22,11 @@ namespace vision
         dx = -(table->GetNumber("tx", 0.0));
         dy = table->GetNumber("ty", 0.0);
         tv = table->GetNumber("tv", 0.0);
+
+        // if (snapShotTimer.Get() > snapTime)
+        // {
+        //     table->PutNumber("snapshot", 0.0);
+        // }
     }
 
     RJVisionPipeline::visionData RJVisionPipeline::Run()
@@ -123,6 +128,11 @@ namespace vision
         }
     }
 
+    void RJVisionPipeline::SetFilterType(FilterType setFilter)
+    {
+        filter = setFilter;
+    }
+
     double RJVisionPipeline::CalculateEMA(const std::list<double> &list)
     {
         // EXPONENTIAL MOVING AVERAGE. Maybe add an IQR Filter? Also maybe use an actual circular buffer?
@@ -175,7 +185,7 @@ namespace vision
         deltaY += units::degree_t{-0.007 + (0.0564 * pow(deltaX.value(), 1)) + (-0.01538 * pow(deltaX.value(), 2)) + (0.0003375 * pow(deltaX.value(), 3))};
 
         units::inch_t dist = deltaH / (tan((deltaY.value() + cameraAngle.value()) * (3.1415 / 180.0)));
-        estDist = dist;
+        estDist = dist + 17.0_in;
         return estDist;
     }
 
@@ -189,5 +199,13 @@ namespace vision
         {
             table->PutNumber("ledMode", 1.0); // Force Off
         }
+    }
+
+    void RJVisionPipeline::TakeSnapshot(uint8_t numberOfSnaps)
+    {
+        table->PutNumber("snapshot", (double)numberOfSnaps);
+        // snapTime = units::second_t{(double)numberOfSnaps / 2.0};
+        // snapShotTimer.Reset();
+        // snapShotTimer.Start();
     }
 } // namespace vision
