@@ -16,7 +16,7 @@
 #include <memory>
 #include "lib/csv.h"
 
-class NinetyDegreeAngle : public AutoInterface
+class AutoFiveBallSafe : public AutoInterface
 {
 public:
     // Name of this program, used by SmartDash
@@ -32,13 +32,15 @@ private:
 
     void NextState();
 
-    frc::Trajectory m_trajectory;
+    frc::Trajectory m_trajectory_first;
+    frc::Trajectory m_trajectory_second;
+    frc::Trajectory m_trajectory_third;
 
 public:
     // Constructor requires a reference to the RobotMap
-    NinetyDegreeAngle() = delete;
-    NinetyDegreeAngle(Robotmap &);
-    ~NinetyDegreeAngle();
+    AutoFiveBallSafe() = delete;
+    AutoFiveBallSafe(Robotmap &);
+    ~AutoFiveBallSafe();
 
     // Auto Program Logic
     void Init();
