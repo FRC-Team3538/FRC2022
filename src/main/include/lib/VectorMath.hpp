@@ -5,6 +5,11 @@
 #include <cmath>
 #include <frc/geometry/Pose2d.h>
 
+// leave this for wandows
+#ifndef M_PI
+    #define M_PI    3.14159265358979323846
+#endif
+
 class VectorMath
 {
 public:

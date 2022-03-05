@@ -55,8 +55,6 @@ void AutoFourBall::NextState()
         {
             IO.shooter.SetFeeder(-2_V);
 
-            //IO.drivetrain.ResetOdometry(m_trajectory_second.InitialPose());
-            startPathTime = m_autoTimer.Get();
             break;
         }
         case 4:
@@ -148,7 +146,7 @@ void AutoFourBall::Run()
         }
         case 3:
         {
-            auto reference = m_trajectory_second.Sample(m_autoTimer.Get() - startPathTime);
+            auto reference = m_trajectory_second.Sample(m_autoTimer.Get());
 
             frc::SmartDashboard::PutNumber("traj/t", reference.t.value());
             frc::SmartDashboard::PutNumber("traj/x", reference.pose.Translation().X().value());
@@ -160,7 +158,7 @@ void AutoFourBall::Run()
 
             IO.drivetrain.Drive(reference);
 
-            if (((m_autoTimer.Get() - startPathTime) > m_trajectory_second.TotalTime()))
+            if (m_autoTimer.Get() > m_trajectory_second.TotalTime())
             {
                 NextState();
             }
