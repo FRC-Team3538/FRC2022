@@ -173,4 +173,6 @@ private:
     frc::Field2d m_fieldSim;
 
     frc::PIDController m_yawPID{0.25, 0.0, 0.05};
+
+    frc::Trajectory::State reference;
 };

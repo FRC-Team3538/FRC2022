@@ -132,17 +132,9 @@ void AutoFiveBall::Run()
         {
             auto reference = m_trajectory_first.Sample(m_autoTimer.Get());
 
-            frc::SmartDashboard::PutNumber("traj/t", reference.t.value());
-            frc::SmartDashboard::PutNumber("traj/x", reference.pose.Translation().X().value());
-            frc::SmartDashboard::PutNumber("traj/y", reference.pose.Translation().Y().value());
-            frc::SmartDashboard::PutNumber("traj/theta", reference.pose.Rotation().Radians().value());
-            frc::SmartDashboard::PutNumber("traj/k", reference.curvature.value());
-            frc::SmartDashboard::PutNumber("traj/v", reference.velocity.value());
-            frc::SmartDashboard::PutNumber("traj/a", reference.acceleration.value());
-
             IO.drivetrain.Drive(reference);
 
-            if (m_autoTimer.Get() > m_trajectory_first.TotalTime() + 1.5_s)
+            if (m_autoTimer.Get() > m_trajectory_first.TotalTime())
             {
                 NextState();
             }
@@ -162,17 +154,9 @@ void AutoFiveBall::Run()
         {
             auto reference = m_trajectory_second.Sample(m_autoTimer.Get());
 
-            frc::SmartDashboard::PutNumber("traj/t", reference.t.value());
-            frc::SmartDashboard::PutNumber("traj/x", reference.pose.Translation().X().value());
-            frc::SmartDashboard::PutNumber("traj/y", reference.pose.Translation().Y().value());
-            frc::SmartDashboard::PutNumber("traj/theta", reference.pose.Rotation().Radians().value());
-            frc::SmartDashboard::PutNumber("traj/k", reference.curvature.value());
-            frc::SmartDashboard::PutNumber("traj/v", reference.velocity.value());
-            frc::SmartDashboard::PutNumber("traj/a", reference.acceleration.value());
-
             IO.drivetrain.Drive(reference);
 
-            if (m_autoTimer.Get() > m_trajectory_second.TotalTime() + 1.5_s)
+            if (m_autoTimer.Get() > m_trajectory_second.TotalTime())
             {
                 NextState();
             }

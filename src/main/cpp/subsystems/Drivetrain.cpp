@@ -113,6 +113,8 @@ void Drivetrain::Drive(units::meters_per_second_t xSpeed,
 
 void Drivetrain::Drive(const frc::Trajectory::State &target)
 {
+    reference = target;
+
     auto pose = GetPose();
     // std::cout << "Heading @ " << target.t.value() << "s: " << pose.Rotation().Radians().value() << std::endl;
     auto speeds = m_ramsete.Calculate(pose, target);
@@ -416,4 +418,13 @@ void Drivetrain::InitSendable(wpi::SendableBuilder &builder)
         [this](double value)
         { m_leftPIDController.SetD(value);
           m_rightPIDController.SetD(value); });
+
+    builder.AddDoubleProperty("traj/t", [this] { return reference.t.value(); }, nullptr);
+    builder.AddDoubleProperty("traj/x", [this] { return reference.pose.Translation().X().value(); }, nullptr);
+    builder.AddDoubleProperty("traj/y", [this] { return reference.pose.Translation().Y().value(); }, nullptr);
+    builder.AddDoubleProperty("traj/theta", [this] { return reference.pose.Rotation().Radians().value(); }, nullptr);
+    builder.AddDoubleProperty("traj/k", [this] { return reference.curvature.value(); }, nullptr);
+    builder.AddDoubleProperty("traj/v", [this] { return reference.velocity.value(); }, nullptr);
+    builder.AddDoubleProperty("traj/a", [this] { return reference.acceleration.value(); }, nullptr);
+
 }
