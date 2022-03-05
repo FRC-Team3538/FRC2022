@@ -52,7 +52,33 @@ namespace rj
             path.push_back(frc::TrajectoryGenerator::PoseWithCurvature{pp_state->pose, pp_state->curvature * curv_sign});
         }
 
-        return frc::TrajectoryParameterizer::TimeParameterizeTrajectory(path, config->Constraints(), config->StartVelocity(), config->EndVelocity(), config->MaxVelocity(), config->MaxAcceleration(), config->IsReversed());
+        frc::Trajectory final_trajectory;
+
+        std::size_t segments = path.size() / 250;
+        for (size_t segment = 0; segment < segments; segment++) {
+            std::vector<frc::TrajectoryGenerator::PoseWithCurvature> current_path;
+            current_path.reserve(250);
+
+            bool invert = segment % 2 == 1;
+
+            for (int i = 0; i < 250; i++) {
+                current_path.push_back(path[i + segment * 250]);
+            }
+
+            auto current_traj = frc::TrajectoryParameterizer::TimeParameterizeTrajectory(current_path, config->Constraints(), config->StartVelocity(), config->EndVelocity(), config->MaxVelocity(), config->MaxAcceleration(), config->IsReversed() ^ invert);
+
+            std::cout << "time for segment " << segment << ": " << current_traj.TotalTime().value() << std::endl;
+
+            final_trajectory = final_trajectory + current_traj;
+        }
+
+        std::cout << "total time: " << final_trajectory.TotalTime().value() << std::endl;
+        // for (units::second_t time = 0_s; time < final_trajectory.TotalTime(); time = time + 0.02_s) {
+        //     auto reference = final_trajectory.Sample(time);
+        //     std::cout << reference.t.value() << ", " << reference.pose.Translation().X().value() << ", " << reference.pose.Translation().Y().value() << ", " << reference.pose.Rotation().Radians().value() << ", " << reference.curvature.value() << ", " << reference.velocity.value() << ", " << reference.acceleration.value() << std::endl;
+        // }
+
+        return final_trajectory;
     }
 
 }

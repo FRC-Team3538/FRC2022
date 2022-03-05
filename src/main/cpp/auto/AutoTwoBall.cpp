@@ -114,7 +114,7 @@ void AutoTwoBall::Run()
 
         IO.drivetrain.Drive(reference);
 
-        if ((m_autoTimer.Get() > m_trajectory.TotalTime() + 1.5_s))
+        if (m_autoTimer.Get() > m_trajectory.TotalTime() + 1.5_s)
         {
             NextState();
         }

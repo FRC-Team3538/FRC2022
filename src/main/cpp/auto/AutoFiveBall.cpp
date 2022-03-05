@@ -142,7 +142,7 @@ void AutoFiveBall::Run()
 
             IO.drivetrain.Drive(reference);
 
-            if (m_autoTimer.Get() > m_trajectory_first.TotalTime())
+            if (m_autoTimer.Get() > m_trajectory_first.TotalTime() + 1.5_s)
             {
                 NextState();
             }
@@ -172,7 +172,7 @@ void AutoFiveBall::Run()
 
             IO.drivetrain.Drive(reference);
 
-            if (m_autoTimer.Get() > m_trajectory_second.TotalTime())
+            if (m_autoTimer.Get() > m_trajectory_second.TotalTime() + 1.5_s)
             {
                 NextState();
             }

@@ -397,4 +397,23 @@ void Drivetrain::InitSendable(wpi::SendableBuilder &builder)
         [this]
         { return units::degree_t(m_yawPID.GetSetpoint()).value(); },
         nullptr);
+
+    builder.AddDoubleProperty(
+        "DrivePID/kP", [this]
+        { return m_leftPIDController.GetP(); },
+        [this](double value)
+        { m_leftPIDController.SetP(value);
+          m_rightPIDController.SetP(value); });
+    builder.AddDoubleProperty(
+        "DrivePID/kI", [this]
+        { return m_leftPIDController.GetI(); },
+        [this](double value)
+        { m_leftPIDController.SetI(value);
+          m_rightPIDController.SetI(value); });
+    builder.AddDoubleProperty(
+        "DrivePID/kD", [this]
+        { return m_leftPIDController.GetD(); },
+        [this](double value)
+        { m_leftPIDController.SetD(value);
+          m_rightPIDController.SetD(value); });
 }

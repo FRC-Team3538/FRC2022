@@ -46,7 +46,7 @@ void AutoFiveBallSafe::NextState()
         {
             IO.shooter.SetIntakeState(Shooter::Position::Deployed);
             IO.shooter.SetIntake(8_V);
-            IO.shooter.SetShooterRPM(4000_rpm);
+            IO.shooter.SetShooterRPM(2750_rpm);
             IO.shooter.SetIndexer(8_V);
             IO.shooter.SetFeeder(-2_V);
 
@@ -55,7 +55,7 @@ void AutoFiveBallSafe::NextState()
         case 2:
         {
             IO.drivetrain.Arcade(0.0, 0.0);
-            IO.shooter.SetFeeder(8_V);
+            hasLimelightData = false;
 
             break;
         }
@@ -68,7 +68,7 @@ void AutoFiveBallSafe::NextState()
         case 4:
         {
             IO.drivetrain.Arcade(0.0, 0.0);
-            IO.shooter.SetFeeder(8_V);
+            hasLimelightData = false;
 
             break;
         }
@@ -81,7 +81,7 @@ void AutoFiveBallSafe::NextState()
         case 6:
         {
             IO.drivetrain.Arcade(0.0, 0.0);
-            IO.shooter.SetFeeder(8_V);
+            hasLimelightData = false;
 
             break;
         }
@@ -92,6 +92,7 @@ void AutoFiveBallSafe::NextState()
             IO.shooter.SetShooterRPM(0_rpm);
             IO.shooter.SetIndexer(0_V);
             IO.shooter.SetFeeder(0_V);
+            std::cout << "Auton completed in " << m_totalTimer.Get().value() << "s" << std::endl;
             break;
         }
     }
@@ -102,9 +103,9 @@ void AutoFiveBallSafe::NextState()
 
 void AutoFiveBallSafe::Init()
 {
-    units::feet_per_second_t maxLinearVel = 5_fps;
+    units::feet_per_second_t maxLinearVel = 8_fps;
     // units::standard_gravity_t maxCentripetalAcc = 0.5_SG;
-    units::feet_per_second_squared_t maxLinearAcc = 1_mps_sq;
+    units::feet_per_second_squared_t maxLinearAcc = 1.5_mps_sq;
 
     // frc::TrajectoryConfig config(Drivetrain::kMaxSpeedLinear, Drivetrain::kMaxAccelerationLinear);
     frc::TrajectoryConfig config(maxLinearVel, maxLinearAcc);
@@ -121,6 +122,8 @@ void AutoFiveBallSafe::Init()
 
     m_autoTimer.Reset();
     m_autoTimer.Start();
+    m_totalTimer.Reset();
+    m_totalTimer.Start();
 }
 
 // Execute the program
@@ -146,6 +149,8 @@ void AutoFiveBallSafe::Run()
             frc::SmartDashboard::PutNumber("traj/v", reference.velocity.value());
             frc::SmartDashboard::PutNumber("traj/a", reference.acceleration.value());
 
+            // std::cout << reference.t.value() << ", " << reference.pose.Translation().X().value() << ", " << reference.pose.Translation().Y().value() << ", " << reference.pose.Rotation().Radians().value() << ", " << reference.curvature.value() << ", " << reference.velocity.value() << ", " << reference.acceleration.value() << std::endl;
+
             IO.drivetrain.Drive(reference);
 
             if (m_autoTimer.Get() > m_trajectory_first.TotalTime())
@@ -157,9 +162,36 @@ void AutoFiveBallSafe::Run()
         }
         case 2:
         {
-            if (IO.shooter.Shoot())
+            vision::RJVisionPipeline::visionData data = IO.rjVision.Run();
+            if (data.filled && !hasLimelightData)
             {
-                NextState();
+                // Set Turret
+                units::degree_t tol{ntVisionAngleTol.GetDouble(kVisionAngleTolDefault)};
+
+                turretTarget = IO.shooter.GetTurretAngle() + data.angle;
+
+
+                bool turretAtAngle = IO.shooter.SetTurretAngle(turretTarget, tol);
+
+                Shooter::State shotStat = IO.shooter.CalculateShot(data.distance);
+
+                IO.shooter.SetShooterRPM(3000_rpm);
+
+                hasLimelightData = true;
+            } else if (hasLimelightData) {
+                // Set Turret
+                units::degree_t tol{ntVisionAngleTol.GetDouble(kVisionAngleTolDefault)};
+
+                bool turretAtAngle = IO.shooter.SetTurretAngle(turretTarget, tol);
+
+                // Shoot Maybe
+                if (turretAtAngle)
+                {
+                    IO.shooter.SetFeeder(8_V);
+                    if (IO.shooter.Shoot()) {
+                        NextState();
+                    }
+                }
             }
 
             break;
@@ -176,6 +208,9 @@ void AutoFiveBallSafe::Run()
             frc::SmartDashboard::PutNumber("traj/v", reference.velocity.value());
             frc::SmartDashboard::PutNumber("traj/a", reference.acceleration.value());
 
+            // std::cout << reference.t.value() << ", " << reference.pose.Translation().X().value() << ", " << reference.pose.Translation().Y().value() << ", " << reference.pose.Rotation().Radians().value() << ", " << reference.curvature.value() << ", " << reference.velocity.value() << ", " << reference.acceleration.value() << std::endl;
+
+
             IO.drivetrain.Drive(reference);
 
             if (m_autoTimer.Get() > m_trajectory_second.TotalTime())
@@ -187,9 +222,36 @@ void AutoFiveBallSafe::Run()
         }
         case 4:
         {
-            if (IO.shooter.Shoot())
+            vision::RJVisionPipeline::visionData data = IO.rjVision.Run();
+            if (data.filled && !hasLimelightData)
             {
-                NextState();
+                // Set Turret
+                units::degree_t tol{ntVisionAngleTol.GetDouble(kVisionAngleTolDefault)};
+
+                turretTarget = IO.shooter.GetTurretAngle() + data.angle;
+
+
+                bool turretAtAngle = IO.shooter.SetTurretAngle(turretTarget, tol);
+
+                Shooter::State shotStat = IO.shooter.CalculateShot(data.distance);
+
+                IO.shooter.SetShooterRPM(3000_rpm);
+
+                hasLimelightData = true;
+            } else if (hasLimelightData) {
+                // Set Turret
+                units::degree_t tol{ntVisionAngleTol.GetDouble(kVisionAngleTolDefault)};
+
+                bool turretAtAngle = IO.shooter.SetTurretAngle(turretTarget, tol);
+
+                // Shoot Maybe
+                if (turretAtAngle)
+                {
+                    IO.shooter.SetFeeder(8_V);
+                    if (IO.shooter.Shoot()) {
+                        NextState();
+                    }
+                }
             }
 
             break;
@@ -205,6 +267,8 @@ void AutoFiveBallSafe::Run()
             frc::SmartDashboard::PutNumber("traj/k", reference.curvature.value());
             frc::SmartDashboard::PutNumber("traj/v", reference.velocity.value());
             frc::SmartDashboard::PutNumber("traj/a", reference.acceleration.value());
+            
+            // std::cout << reference.t.value() << ", " << reference.pose.Translation().X().value() << ", " << reference.pose.Translation().Y().value() << ", " << reference.pose.Rotation().Radians().value() << ", " << reference.curvature.value() << ", " << reference.velocity.value() << ", " << reference.acceleration.value() << std::endl;
 
             IO.drivetrain.Drive(reference);
 
@@ -217,9 +281,36 @@ void AutoFiveBallSafe::Run()
         }
         case 6:
         {
-            if (IO.shooter.Shoot())
+            vision::RJVisionPipeline::visionData data = IO.rjVision.Run();
+            if (data.filled && !hasLimelightData)
             {
-                NextState();
+                // Set Turret
+                units::degree_t tol{ntVisionAngleTol.GetDouble(kVisionAngleTolDefault)};
+
+                turretTarget = IO.shooter.GetTurretAngle() + data.angle;
+
+
+                bool turretAtAngle = IO.shooter.SetTurretAngle(turretTarget, tol);
+
+                Shooter::State shotStat = IO.shooter.CalculateShot(data.distance);
+
+                IO.shooter.SetShooterRPM(3000_rpm);
+
+                hasLimelightData = true;
+            } else if (hasLimelightData) {
+                // Set Turret
+                units::degree_t tol{ntVisionAngleTol.GetDouble(kVisionAngleTolDefault)};
+
+                bool turretAtAngle = IO.shooter.SetTurretAngle(turretTarget, tol);
+
+                // Shoot Maybe
+                if (turretAtAngle)
+                {
+                    IO.shooter.SetFeeder(8_V);
+                    if (IO.shooter.Shoot()) {
+                        NextState();
+                    }
+                }
             }
 
             break;

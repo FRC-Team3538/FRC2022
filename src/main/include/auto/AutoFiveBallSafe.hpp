@@ -29,12 +29,19 @@ private:
     // State Variables
     int m_state;
     frc::Timer m_autoTimer;
+    frc::Timer m_totalTimer;
 
     void NextState();
 
     frc::Trajectory m_trajectory_first;
     frc::Trajectory m_trajectory_second;
     frc::Trajectory m_trajectory_third;
+
+    double kVisionAngleTolDefault = 0.5;
+    nt::NetworkTableEntry ntVisionAngleTol = frc::SmartDashboard::GetEntry("robot/visionAngleTol");
+
+    bool hasLimelightData;
+    units::radian_t turretTarget;
 
 public:
     // Constructor requires a reference to the RobotMap
