@@ -34,6 +34,7 @@ AutoFiveBallSafe::~AutoFiveBallSafe() {}
 // State Machine
 void AutoFiveBallSafe::NextState()
 {
+    units::degree_t tol{ntVisionAngleTol.GetDouble(kVisionAngleTolDefault)};
     m_state++;
 
     switch(m_state)
@@ -50,6 +51,10 @@ void AutoFiveBallSafe::NextState()
             IO.shooter.SetIndexer(8_V);
             IO.shooter.SetFeeder(-2_V);
 
+            IO.shooter.SetTurretAngle(0_deg, tol);
+
+            IO.rjVision.SetLED(true);
+
             break;
         }
         case 2:
@@ -63,6 +68,8 @@ void AutoFiveBallSafe::NextState()
         {
             IO.shooter.SetFeeder(-2_V);
 
+            IO.shooter.SetTurretAngle(0_deg, tol);
+
             break;
         }
         case 4:
@@ -75,6 +82,8 @@ void AutoFiveBallSafe::NextState()
         case 5:
         {
             IO.shooter.SetFeeder(-2_V);
+
+            IO.shooter.SetTurretAngle(-45_deg, tol);
 
             break;
         }
@@ -129,6 +138,8 @@ void AutoFiveBallSafe::Init()
 // Execute the program
 void AutoFiveBallSafe::Run()
 {
+    units::degree_t tol{ntVisionAngleTol.GetDouble(kVisionAngleTolDefault)};
+
     switch (m_state)
     {
         case 0:
@@ -156,8 +167,6 @@ void AutoFiveBallSafe::Run()
             if (data.filled && !hasLimelightData)
             {
                 // Set Turret
-                units::degree_t tol{ntVisionAngleTol.GetDouble(kVisionAngleTolDefault)};
-
                 turretTarget = IO.shooter.GetTurretAngle() + data.angle;
 
 
@@ -170,8 +179,6 @@ void AutoFiveBallSafe::Run()
                 hasLimelightData = true;
             } else if (hasLimelightData) {
                 // Set Turret
-                units::degree_t tol{ntVisionAngleTol.GetDouble(kVisionAngleTolDefault)};
-
                 bool turretAtAngle = IO.shooter.SetTurretAngle(turretTarget, tol);
 
                 // Shoot Maybe
@@ -205,8 +212,6 @@ void AutoFiveBallSafe::Run()
             if (data.filled && !hasLimelightData)
             {
                 // Set Turret
-                units::degree_t tol{ntVisionAngleTol.GetDouble(kVisionAngleTolDefault)};
-
                 turretTarget = IO.shooter.GetTurretAngle() + data.angle;
 
 
@@ -219,8 +224,6 @@ void AutoFiveBallSafe::Run()
                 hasLimelightData = true;
             } else if (hasLimelightData) {
                 // Set Turret
-                units::degree_t tol{ntVisionAngleTol.GetDouble(kVisionAngleTolDefault)};
-
                 bool turretAtAngle = IO.shooter.SetTurretAngle(turretTarget, tol);
 
                 // Shoot Maybe
@@ -254,8 +257,6 @@ void AutoFiveBallSafe::Run()
             if (data.filled && !hasLimelightData)
             {
                 // Set Turret
-                units::degree_t tol{ntVisionAngleTol.GetDouble(kVisionAngleTolDefault)};
-
                 turretTarget = IO.shooter.GetTurretAngle() + data.angle;
 
 
@@ -268,8 +269,6 @@ void AutoFiveBallSafe::Run()
                 hasLimelightData = true;
             } else if (hasLimelightData) {
                 // Set Turret
-                units::degree_t tol{ntVisionAngleTol.GetDouble(kVisionAngleTolDefault)};
-
                 bool turretAtAngle = IO.shooter.SetTurretAngle(turretTarget, tol);
 
                 // Shoot Maybe
