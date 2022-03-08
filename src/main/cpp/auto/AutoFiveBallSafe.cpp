@@ -37,73 +37,71 @@ void AutoFiveBallSafe::NextState()
     units::degree_t tol{ntVisionAngleTol.GetDouble(kVisionAngleTolDefault)};
     m_state++;
 
-    switch(m_state)
+    switch (m_state)
     {
-        case 0:
-        {
-            break;
-        }
-        case 1:
-        {
-            IO.shooter.SetIntakeState(Shooter::Position::Deployed);
-            IO.shooter.SetIntake(8_V);
-            IO.shooter.SetShooterRPM(2750_rpm);
-            IO.shooter.SetIndexer(8_V);
-            IO.shooter.SetFeeder(-2_V);
+    case 0:
+    {
+        break;
+    }
+    case 1:
+    {
+        IO.shooter.SetIntakeState(Shooter::Position::Deployed);
+        IO.shooter.SetIntake(8_V);
+        IO.shooter.SetShooterRPM(2750_rpm);
+        IO.shooter.SetIndexer(8_V);
+        IO.shooter.SetFeeder(-2_V);
 
-            IO.shooter.SetTurretAngle(0_deg, tol);
+        IO.shooter.SetTurretAngle(0_deg, tol);
 
-            IO.rjVision.SetLED(true);
+        IO.rjVision.SetLED(true);
 
-            break;
-        }
-        case 2:
-        {
-            IO.drivetrain.Arcade(0.0, 0.0);
-            hasLimelightData = false;
+        break;
+    }
+    case 2:
+    {
+        IO.drivetrain.Arcade(0.0, 0.0);
+        //hasLimelightData = false;
 
-            break;
-        }
-        case 3:
-        {
-            IO.shooter.SetFeeder(-2_V);
+        break;
+    }
+    case 3:
+    {
+        IO.shooter.SetFeeder(-2_V);
 
-            IO.shooter.SetTurretAngle(0_deg, tol);
+        IO.shooter.SetTurretAngle(0_deg, tol);
 
-            break;
-        }
-        case 4:
-        {
-            IO.drivetrain.Arcade(0.0, 0.0);
-            hasLimelightData = false;
+        break;
+    }
+    case 4:
+    {
+        IO.drivetrain.Arcade(0.0, 0.0);
 
-            break;
-        }
-        case 5:
-        {
-            IO.shooter.SetFeeder(-2_V);
+        break;
+    }
+    case 5:
+    {
+        IO.shooter.SetFeeder(-2_V);
 
-            IO.shooter.SetTurretAngle(-45_deg, tol);
+        IO.shooter.SetTurretAngle(-45_deg, tol);
 
-            break;
-        }
-        case 6:
-        {
-            IO.drivetrain.Arcade(0.0, 0.0);
-            hasLimelightData = false;
+        break;
+    }
+    case 6:
+    {
+        IO.drivetrain.Arcade(0.0, 0.0);
 
-            break;
-        }
-        default:
-        {
-            IO.shooter.SetIntakeState(Shooter::Position::Stowed);
-            IO.shooter.SetIntake(0_V);
-            IO.shooter.SetShooterRPM(0_rpm);
-            IO.shooter.SetIndexer(0_V);
-            IO.shooter.SetFeeder(0_V);
-            std::cout << "Auton completed in " << m_totalTimer.Get().value() << "s" << std::endl;
-            break;
-        }
+        break;
+    }
+    default:
+    {
+        IO.shooter.SetIntakeState(Shooter::Position::Stowed);
+        IO.shooter.SetIntake(0_V);
+        IO.shooter.SetShooterRPM(0_rpm);
+        IO.shooter.SetIndexer(0_V);
+        IO.shooter.SetFeeder(0_V);
+        std::cout << "Auton completed in " << m_totalTimer.Get().value() << "s" << std::endl;
+        break;
+    }
     }
 
     m_autoTimer.Reset();
@@ -123,9 +121,9 @@ void AutoFiveBallSafe::Init()
     config.AddConstraint(frc::DifferentialDriveKinematicsConstraint{IO.drivetrain.GetKinematics(), maxLinearVel});
     config.SetReversed(false);
 
-    m_trajectory_first = rj::AutoHelper::LoadTrajectory ("06 - 5 Ball Safe 1", &config);
+    m_trajectory_first = rj::AutoHelper::LoadTrajectory("06 - 5 Ball Safe 1", &config);
     m_trajectory_second = rj::AutoHelper::LoadTrajectory("06 - 5 Ball Safe 2 HOME", &config);
-    m_trajectory_third = rj::AutoHelper::LoadTrajectory ("06 - 5 Ball Safe 3", &config);
+    m_trajectory_third = rj::AutoHelper::LoadTrajectory("06 - 5 Ball Safe 3", &config);
 
     IO.drivetrain.ResetOdometry(m_trajectory_first.InitialPose());
 
@@ -142,152 +140,122 @@ void AutoFiveBallSafe::Run()
 
     switch (m_state)
     {
-        case 0:
-        {        
+    case 0:
+    {
+        NextState();
+
+        break;
+    }
+    case 1:
+    {
+        auto reference = m_trajectory_first.Sample(m_autoTimer.Get());
+
+        IO.drivetrain.Drive(reference);
+
+        if (m_autoTimer.Get() > m_trajectory_first.TotalTime())
+        {
             NextState();
-
-            break;
         }
-        case 1:
+
+        break;
+    }
+    case 2:
+    {
+        vision::RJVisionPipeline::visionData data = IO.rjVision.Run();
+        if (data.filled)
         {
-            auto reference = m_trajectory_first.Sample(m_autoTimer.Get());
+            IO.shooter.SetShooterRPM(3000_rpm);
 
-            IO.drivetrain.Drive(reference);
+            bool turretAtAngle = IO.shooter.SetTurretAngle(data.turretAngle, 0.5_deg);
+            // Shoot Maybe
 
-            if (m_autoTimer.Get() > m_trajectory_first.TotalTime())
+            if (turretAtAngle)
             {
-                NextState();
-            }
-
-            break;
-        }
-        case 2:
-        {
-            vision::RJVisionPipeline::visionData data = IO.rjVision.Run();
-            if (data.filled && !hasLimelightData)
-            {
-                // Set Turret
-                turretTarget = IO.shooter.GetTurretAngle() + data.angle;
-
-
-                bool turretAtAngle = IO.shooter.SetTurretAngle(turretTarget, tol);
-
-                Shooter::State shotStat = IO.shooter.CalculateShot(data.distance);
-
-                IO.shooter.SetShooterRPM(3000_rpm);
-
-                hasLimelightData = true;
-            } else if (hasLimelightData) {
-                // Set Turret
-                bool turretAtAngle = IO.shooter.SetTurretAngle(turretTarget, tol);
-
-                // Shoot Maybe
-                if (turretAtAngle)
+                IO.shooter.SetFeeder(8_V);
+                if (IO.shooter.Shoot())
                 {
-                    IO.shooter.SetFeeder(8_V);
-                    if (IO.shooter.Shoot()) {
-                        NextState();
-                    }
+                    NextState();
                 }
             }
-
-            break;
         }
-        case 3:
+
+        break;
+    }
+    case 3:
+    {
+        auto reference = m_trajectory_second.Sample(m_autoTimer.Get());
+
+        IO.drivetrain.Drive(reference);
+
+        if (m_autoTimer.Get() > m_trajectory_second.TotalTime())
         {
-            auto reference = m_trajectory_second.Sample(m_autoTimer.Get());
-
-            IO.drivetrain.Drive(reference);
-
-            if (m_autoTimer.Get() > m_trajectory_second.TotalTime())
-            {
-                NextState();
-            }
-
-            break;
+            NextState();
         }
-        case 4:
+
+        break;
+    }
+    case 4:
+    {
+        vision::RJVisionPipeline::visionData data = IO.rjVision.Run();
+        if (data.filled)
         {
-            vision::RJVisionPipeline::visionData data = IO.rjVision.Run();
-            if (data.filled && !hasLimelightData)
+            IO.shooter.SetShooterRPM(3000_rpm);
+
+            bool turretAtAngle = IO.shooter.SetTurretAngle(data.turretAngle, 0.5_deg);
+            // Shoot Maybe
+
+            if (turretAtAngle)
             {
-                // Set Turret
-                turretTarget = IO.shooter.GetTurretAngle() + data.angle;
-
-
-                bool turretAtAngle = IO.shooter.SetTurretAngle(turretTarget, tol);
-
-                Shooter::State shotStat = IO.shooter.CalculateShot(data.distance);
-
-                IO.shooter.SetShooterRPM(3000_rpm);
-
-                hasLimelightData = true;
-            } else if (hasLimelightData) {
-                // Set Turret
-                bool turretAtAngle = IO.shooter.SetTurretAngle(turretTarget, tol);
-
-                // Shoot Maybe
-                if (turretAtAngle)
+                IO.shooter.SetFeeder(8_V);
+                if (IO.shooter.Shoot())
                 {
-                    IO.shooter.SetFeeder(8_V);
-                    if (IO.shooter.Shoot()) {
-                        NextState();
-                    }
+                    NextState();
                 }
             }
-
-            break;
         }
-        case 5:
+
+        break;
+    }
+    case 5:
+    {
+        auto reference = m_trajectory_third.Sample(m_autoTimer.Get());
+
+        IO.drivetrain.Drive(reference);
+
+        if (m_autoTimer.Get() > m_trajectory_third.TotalTime())
         {
-            auto reference = m_trajectory_third.Sample(m_autoTimer.Get());
-
-            IO.drivetrain.Drive(reference);
-
-            if (m_autoTimer.Get() > m_trajectory_third.TotalTime())
-            {
-                NextState();
-            }
-
-            break;
+            NextState();
         }
-        case 6:
+
+        break;
+    }
+    case 6:
+    {
+        vision::RJVisionPipeline::visionData data = IO.rjVision.Run();
+        if (data.filled)
         {
-            vision::RJVisionPipeline::visionData data = IO.rjVision.Run();
-            if (data.filled && !hasLimelightData)
+            IO.shooter.SetShooterRPM(3000_rpm);
+
+            bool turretAtAngle = IO.shooter.SetTurretAngle(data.turretAngle, 0.5_deg);
+            // Shoot Maybe
+
+            if (turretAtAngle)
             {
-                // Set Turret
-                turretTarget = IO.shooter.GetTurretAngle() + data.angle;
-
-
-                bool turretAtAngle = IO.shooter.SetTurretAngle(turretTarget, tol);
-
-                Shooter::State shotStat = IO.shooter.CalculateShot(data.distance);
-
-                IO.shooter.SetShooterRPM(3000_rpm);
-
-                hasLimelightData = true;
-            } else if (hasLimelightData) {
-                // Set Turret
-                bool turretAtAngle = IO.shooter.SetTurretAngle(turretTarget, tol);
-
-                // Shoot Maybe
-                if (turretAtAngle)
+                IO.shooter.SetFeeder(8_V);
+                if (IO.shooter.Shoot())
                 {
-                    IO.shooter.SetFeeder(8_V);
-                    if (IO.shooter.Shoot()) {
-                        NextState();
-                    }
+                    NextState();
                 }
             }
+        }
 
-            break;
-        }
-        default:
-        {
-            // std::cout << "Done!" << std::endl;
-            IO.drivetrain.Arcade(0.0, 0.0);
-        }
+        break;
+    }
+    default:
+    {
+        // std::cout << "Done!" << std::endl;
+        IO.drivetrain.Arcade(0.0, 0.0);
+    }
     }
 }
 

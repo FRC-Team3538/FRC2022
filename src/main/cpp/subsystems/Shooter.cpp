@@ -84,6 +84,10 @@ void Shooter::UpdateTelemetry()
     turret.Config_kP(0, frc::SmartDashboard::GetNumber("TURRET P", 0.4));
     turret.Config_kI(0, frc::SmartDashboard::GetNumber("TURRET I", 0.0001));
     turret.Config_kI(0, frc::SmartDashboard::GetNumber("TURRET D", 0.0));
+
+    frc::SmartDashboard::PutBoolean("ZEROED", zeroed);
+    frc::SmartDashboard::PutBoolean("ZEROED SWITCH", GetTurretSwitch());
+    frc::SmartDashboard::PutBoolean("NOT ZEROED!!!", blinkyZeroLight);
 }
 
 void Shooter::SetIntakeState(Position pos)
@@ -138,8 +142,43 @@ void Shooter::SetTurret(units::volt_t voltage)
     turret.SetVoltage(voltage);
 }
 
+bool Shooter::GetTurretSwitch()
+{
+    return !turretZeroSwitch.Get();
+}
+
+void Shooter::ZeroTurret(bool negative)
+{
+    if (negative)
+        turret.SetSelectedSensorPosition(-3.0 / kScaleFactorTurret);
+    else
+        turret.SetSelectedSensorPosition(0.4 / kScaleFactorTurret);
+    zeroed = true;
+}
+
+void Shooter::ZeroTurret()
+{
+    turret.SetSelectedSensorPosition(0.0);
+    zeroed = true;
+    blinkyZeroLight = true;
+}
+
+void Shooter::SetBlinkyZeroThing()
+{
+    epilepsyTimer.Start();
+    if (epilepsyTimer.Get() > 0.2_s)
+    {
+        blinkyZeroLight = !blinkyZeroLight;
+        epilepsyTimer.Reset();
+        epilepsyTimer.Start();
+    }
+}
+
 bool Shooter::SetTurretAngle(units::degree_t targetAngle, units::degree_t tol)
 {
+    if (!zeroed)
+        return false;
+
     turret.Set(ctre::phoenix::motorcontrol::ControlMode::Position, (targetAngle / kScaleFactorTurret).value());
 
     return (units::math::abs((GetTurretAngle() - targetAngle)) < tol);
@@ -167,7 +206,7 @@ void Shooter::SetHoodAngle(Shooter::HoodPosition pos)
 
 void Shooter::SetHoodAngle()
 {
-    //std::cout << (int)cmd_hoodPosition << std::endl;
+    // std::cout << (int)cmd_hoodPosition << std::endl;
 
     if (cmd_hoodPosition == HoodPosition::Top)
         return;
@@ -229,7 +268,6 @@ units::degree_t Shooter::GetTurretAngle()
 bool Shooter::Shoot()
 {
 
-
     static frc::Timer settleTimer;
     settleTimer.Start();
 
@@ -280,7 +318,7 @@ bool Shooter::Shoot()
 
 Shooter::State Shooter::CalculateShot(units::inch_t distance)
 {
-    double mainWheel = 1881.0 + (0.0015 * std::pow(distance.value(), 3)) + (-0.34445 * std::pow(distance.value(), 2)) + (28.5196 * std::pow(distance.value(), 1));
+    double mainWheel = 2031.0 + (0.0015 * std::pow(distance.value(), 3)) + (-0.34445 * std::pow(distance.value(), 2)) + (28.5196 * std::pow(distance.value(), 1));
 
     State shotStates;
     shotStates.hoodAngle = HoodPosition::Middle;

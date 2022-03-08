@@ -17,43 +17,66 @@ void Climber::ConfigureSystem()
 
     SetStatusFrames(climberA, 250);
     SetStatusFrames(climberB, 250);
+
+    climberA.ConfigForwardSoftLimitThreshold(1 / kScaleFactor);
+    climberA.ConfigReverseSoftLimitThreshold(3000.0);
+    climberA.ConfigForwardSoftLimitEnable(true);
+    climberA.ConfigReverseSoftLimitEnable(true);
+
+    climberB.ConfigForwardSoftLimitThreshold(1 / kScaleFactor);
+    climberB.ConfigReverseSoftLimitThreshold(3000.0);
+    climberB.ConfigForwardSoftLimitEnable(true);
+    climberB.ConfigReverseSoftLimitEnable(true);
+
+    climberA.SetSelectedSensorPosition(0.0);
+    climberB.SetSelectedSensorPosition(0.0);
 }
 
 void Climber::UpdateTelemetry()
 {
     frc::SmartDashboard::PutBoolean("Climber Sensor Enabled", !sensorOverrode);
+    frc::SmartDashboard::PutNumber("CLIMBER TICKS", climberA.GetSelectedSensorPosition());
+    frc::SmartDashboard::PutNumber("CLIMBER TICKS AGAIN", climberB.GetSelectedSensorPosition());
 }
 
 void Climber::SetSensorOverride(bool override)
 {
+    if (sensorOverrode != override)
+    {
+        climberA.ConfigForwardSoftLimitEnable(!override);
+        climberA.ConfigReverseSoftLimitEnable(!override);
+        climberB.ConfigForwardSoftLimitEnable(!override);
+        climberB.ConfigReverseSoftLimitEnable(!override);
+    }
+
     sensorOverrode = override;
 }
 
 void Climber::SetClimber(units::volt_t targetVoltage)
 {
-    if (!sensorOverrode)
-    {
-        if (bottomMagSwitch.Get() && targetVoltage > 0.0_V)
-        {
-            climberA.SetVoltage(targetVoltage);
-            climberB.SetVoltage(targetVoltage);
-        }
-        else if (bottomMagSwitch.Get() && targetVoltage < 0.0_V)
-        {
-            climberA.SetVoltage(0.0_V);
-            climberB.SetVoltage(0.0_V);
-        }
-        else
-        {
-            climberA.SetVoltage(targetVoltage);
-            climberB.SetVoltage(targetVoltage);
-        }
-    }
-    else
-    {
-        climberA.SetVoltage(targetVoltage);
-        climberB.SetVoltage(targetVoltage);
-    }
+    // if (!sensorOverrode)
+    // {
+    //     if (bottomMagSwitch.Get() && targetVoltage > 0.0_V)
+    //     {
+    //         climberA.SetVoltage(targetVoltage);
+    //         climberB.SetVoltage(targetVoltage);
+    //     }
+    //     else if (bottomMagSwitch.Get() && targetVoltage < 0.0_V)
+    //     {
+    //         climberA.SetVoltage(0.0_V);
+    //         climberB.SetVoltage(0.0_V);
+    //     }
+    //     else
+    //     {
+    //         climberA.SetVoltage(targetVoltage);
+    //         climberB.SetVoltage(targetVoltage);
+    //     }
+    // }
+    // else
+    // {
+    climberA.SetVoltage(targetVoltage);
+    climberB.SetVoltage(targetVoltage);
+    //}
 }
 
 bool Climber::GetSensorOverride()

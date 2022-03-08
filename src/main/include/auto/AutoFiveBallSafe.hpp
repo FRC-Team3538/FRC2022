@@ -40,7 +40,6 @@ private:
     double kVisionAngleTolDefault = 0.5;
     nt::NetworkTableEntry ntVisionAngleTol = frc::SmartDashboard::GetEntry("robot/visionAngleTol");
 
-    bool hasLimelightData;
     units::radian_t turretTarget;
 
 public:

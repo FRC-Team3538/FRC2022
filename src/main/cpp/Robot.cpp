@@ -58,6 +58,11 @@ void Robot::RobotInit()
   // arg bool - log joystick data if true
   frc::DriverStation::StartDataLog(log, true);
 #endif // LOGGER
+
+  if(IO.shooter.GetTurretSwitch())
+  {
+    IO.shooter.ZeroTurret();
+  }
 }
 
 void Robot::RobotPeriodic()
@@ -66,6 +71,9 @@ void Robot::RobotPeriodic()
   IO.drivetrain.Periodic();
   autoprograms.SmartDash();
   IO.rjVision.Periodic();
+
+  if(!IO.shooter.zeroed)
+    IO.shooter.SetBlinkyZeroThing();
 }
 
 void Robot::AutonomousInit()
@@ -95,6 +103,7 @@ void Robot::TeleopPeriodic()
   //
   if (IO.mainController.GetR1Button() || IO.secondaryController.GetCircleButton()) // || IO.secondaryController.GetTriangleButton())
   {
+    climberTimerOS = false;
     manualJog = false;
     IO.shooter.SetIntakeState(Shooter::Position::Deployed);
     intakeTimer.Start();
@@ -109,15 +118,8 @@ void Robot::TeleopPeriodic()
     vision::RJVisionPipeline::visionData data = IO.rjVision.Run();
     if (data.filled)
     {
-      if (!sampleTest)
-      {
-        sampleTest = true;
-        turretTest = IO.shooter.GetTurretAngle() + data.angle;
-        shooterTest = IO.shooter.CalculateShot(data.distance).shooterRPM;
-      }
-
       // Adjust for Movement
-      VectorMath shotVector = VectorMath{data.distance, (IO.shooter.GetTurretAngle() + data.angle)}; // Plane Relative to Robot Direction, where back of the robot is 0 deg
+      VectorMath shotVector = VectorMath{data.distance, (IO.shooter.GetTurretAngle() + data.deltaX)}; // Plane Relative to Robot Direction, where back of the robot is 0 deg
       // *** NEED ROBOT VELOCITY DATA ***
       VectorMath robotMoveVector = VectorMath{(IO.drivetrain.GetVelocity() * 1_s), 180.0_deg}; // Assuming about a 1 sec shot time. Maybe add a graph?
       VectorMath adjustedShotVector = shotVector - robotMoveVector;                            // - robotMoveVector because you want to shoot opposite of movement
@@ -125,17 +127,17 @@ void Robot::TeleopPeriodic()
       // Set Turret
       units::degree_t tol{ntVisionAngleTol.GetDouble(kVisionAngleTolDefault)};
 
-      bool turretAtAngle = IO.shooter.SetTurretAngle(turretTest, 0.75_deg);
+      bool turretAtAngle = IO.shooter.SetTurretAngle(data.turretAngle, 0.75_deg);
       // bool turretAtAngle = IO.shooter.SetTurretAngle(adjustedShotVector.GetTheta(), 0.5_deg);
-      // bool turretAtAngle = IO.shooter.SetTurretAngle((IO.shooter.GetTurretAngle() + data.angle), 1.0_deg);
+      // bool turretAtAngle = IO.shooter.SetTurretAngle((IO.shooter.GetTurretAngle() + data.deltaX), 1.0_deg);
 
       // Start Shooter
       // Shooter::State shotStat = IO.shooter.CalculateShot(adjustedShotVector.GetMagnitude()); // Magnitude from adjusted vector gets us distance
       Shooter::State shotStat = IO.shooter.CalculateShot(data.distance);
 
-      // std::cout << (IO.shooter.GetTurretAngle() + data.angle).value() << std::endl;
+      // std::cout << (IO.shooter.GetTurretAngle() + data.deltaX).value() << std::endl;
 
-      // IO.shooter.SetShooterRPM(shotStat.shooterRPM);
+      //IO.shooter.SetShooterRPM(shotStat.shooterRPM);
       // IO.shooter.SetShooterRPM(shooterTest);
 
       IO.shooter.SetShooterRPM(2800_rpm);
@@ -159,6 +161,7 @@ void Robot::TeleopPeriodic()
   }
   else if (IO.secondaryController.GetSquareButton())
   {
+    climberTimerOS = false;
     manualJog = false;
     vision::RJVisionPipeline::visionData data = IO.rjVision.Run();
     if (data.filled)
@@ -166,7 +169,7 @@ void Robot::TeleopPeriodic()
       // Set Turret
       units::degree_t tol{ntVisionAngleTol.GetDouble(kVisionAngleTolDefault)};
 
-      bool turretAtAngle = IO.shooter.SetTurretAngle(turretTest, 0.75_deg);
+      IO.shooter.SetTurretAngle(data.turretAngle, 0.75_deg);
     }
     double fwd = -0.5 * deadband(IO.mainController.GetLeftY());
     double rot = -0.5 * deadband(IO.mainController.GetRightX());
@@ -210,25 +213,44 @@ void Robot::TeleopPeriodic()
     // IO.shooter.SetTurret(units::volt_t{-13.0 * deadband(IO.mainController.GetRightX())});
 
     // IO.shooter.SetTurretAngle(turretAngle, 0.25_deg);
-    if (IO.secondaryController.GetPSButton())
+    if(!IO.shooter.zeroed)
     {
+      if(IO.secondaryController.GetPSButton())
+      {
+        double turn = -1.5 * deadband(IO.secondaryController.GetRightX());
+        IO.shooter.SetTurret(units::volt_t{turn});
+        bool negative = turn > 0.0;
+        if(IO.shooter.GetTurretSwitch())
+          IO.shooter.ZeroTurret(negative);
+      }
+      else
+        IO.shooter.SetTurret(0.0_V);
+
+      
+    }
+    else if (IO.secondaryController.GetPSButton())
+    {
+      climberTimerOS = false;
       IO.shooter.SetTurretAngle(0.0_deg, 1_deg);
       m_csmode = ClimberShooterMode::Shooter;
     }
     else if (std::abs(deadband(IO.secondaryController.GetRightX())) > 0.0 || manualJog)
     {
+      climberTimerOS = false;
       manualJog = true;
-      IO.shooter.SetTurret(units::volt_t{3.0 * deadband(IO.secondaryController.GetRightX())});
+      IO.shooter.SetTurret(units::volt_t{-3.0 * deadband(IO.secondaryController.GetRightX())});
     }
     else if (m_csmode == ClimberShooterMode::Climber)
       IO.shooter.SetTurretAngle(90.0_deg, 1_deg);
     else
+    {
       IO.shooter.SetTurretAngle(0.0_deg, 1_deg);
+      climberTimerOS = false;
+    }
 
     // IO.shooter.SetTurretAngle(units::degree_t{ntTurretTargetAng.GetDouble(kTurretTargetAngDefault)}, units::degree_t{0.5});
 
     hoodOS2 = false;
-    sampleTest = false;
 
     double fwd = -deadband(IO.mainController.GetLeftY());
     // double rot = 0.0;
@@ -278,18 +300,18 @@ void Robot::TeleopPeriodic()
 
   case 180:
     // LAUNCHPAD
-    IO.shooter.SetShooterRPM(s);
+    IO.shooter.SetShooterRPM(1500_rpm);
     m_csmode = ClimberShooterMode::Shooter;
     if (!hoodOS)
     {
-      IO.shooter.SetHoodAngle(Shooter::HoodPosition::Top);
+      IO.shooter.SetHoodAngle(Shooter::HoodPosition::Middle);
       hoodOS = true;
     }
     break;
 
   case 270:
     // TARMAC
-    IO.shooter.SetShooterRPM(2800_rpm);
+    IO.shooter.SetShooterRPM(s);
     m_csmode = ClimberShooterMode::Shooter;
     if (!hoodOS)
     {
@@ -380,7 +402,17 @@ void Robot::TeleopPeriodic()
   //
   if (IO.secondaryController.GetR1Button())
   {
-    IO.climber.SetClimberState(Climber::ClimbState::Up);
+    manualJog = false;
+    if (!climberTimerOS)
+    {
+      climberTimer.Reset();
+      climberTimer.Start();
+      climberTimerOS = true;
+    }
+
+    if (climberTimer.Get() > 0.5_s)
+      IO.climber.SetClimberState(Climber::ClimbState::Up);
+
     m_csmode = ClimberShooterMode::Climber;
   }
 

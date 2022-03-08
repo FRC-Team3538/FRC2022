@@ -5,8 +5,10 @@ using namespace nt;
 namespace vision
 {
 
-    RJVisionPipeline::RJVisionPipeline(FilterType filter) : filter(filter)
+    RJVisionPipeline::RJVisionPipeline(Shooter &shooter, FilterType filter) : shooter(shooter), filter(filter)
     {
+        frc::SmartDashboard::PutNumber("ALPHA", 0.125);
+        frc::SmartDashboard::PutNumber("N", 8);
     }
 
     void RJVisionPipeline::ConfigureSystem()
@@ -23,6 +25,8 @@ namespace vision
         dy = table->GetNumber("ty", 0.0);
         tv = table->GetNumber("tv", 0.0);
 
+        alpha = frc::SmartDashboard::GetNumber("ALPHA", 0.125);
+        N = frc::SmartDashboard::GetNumber("N", 8);
         // if (snapShotTimer.Get() > snapTime)
         // {
         //     table->PutNumber("snapshot", 0.0);
@@ -40,31 +44,59 @@ namespace vision
             switch (filter)
             {
 
-            case FilterType::EMANoSpinup:
+            case FilterType::EMAWithSpinup:
             {
                 if (xList.size() >= N)
                 {
                     xList.pop_front();
-                    xList.push_back(dx);
+                    xList.push_back(dx + shooter.GetTurretAngle().value());
 
                     yList.pop_front();
                     yList.push_back(dy);
 
-                    telemetry.angle = units::degree_t{CalculateEMA(xList)};
-                    telemetry.distance = DistEstimation(units::degree_t{CalculateEMA(yList)}, telemetry.angle);
+                    // telemetry.deltaX = units::degree_t{CalculateEMA(xList)};
+                    telemetry.distance = DistEstimation(units::degree_t{CalculateEMA(yList)}, telemetry.deltaX);
+                    // telemetry.turretAngle = telemetry.deltaX + shooter.GetTurretAngle();
+                    telemetry.turretAngle = units::degree_t{CalculateEMA(xList)};
 
                     telemetry.filled = true;
                 }
                 else
                 {
-                    xList.push_back(dx);
+                    xList.push_back(dx + shooter.GetTurretAngle().value());
                     yList.push_back(dy);
                     telemetry.filled = false;
                 }
             }
             break;
 
-            case FilterType::EMAWithSpinup:
+            case FilterType::SMA:
+            {
+                if (xList.size() >= N)
+                {
+                    xList.pop_front();
+                    xList.push_back(dx + shooter.GetTurretAngle().value());
+
+                    yList.pop_front();
+                    yList.push_back(dy);
+
+                    // telemetry.deltaX = units::degree_t{CalculateEMA(xList)};
+                    telemetry.distance = DistEstimation(units::degree_t{CalculateAverage(yList)}, telemetry.deltaX);
+                    // telemetry.turretAngle = telemetry.deltaX + shooter.GetTurretAngle();
+                    telemetry.turretAngle = units::degree_t{CalculateAverage(xList)};
+
+                    telemetry.filled = true;
+                }
+                else
+                {
+                    xList.push_back(dx + shooter.GetTurretAngle().value());
+                    yList.push_back(dy);
+                    telemetry.filled = false;
+                }
+            }
+            break;
+
+            case FilterType::EMANoSpinup:
             {
                 if (xList.size() >= N)
                 {
@@ -72,11 +104,12 @@ namespace vision
                     yList.pop_front();
                 }
 
-                xList.push_back(dx);
+                xList.push_back(dx + shooter.GetTurretAngle().value());
                 yList.push_back(dy);
 
-                telemetry.angle = units::degree_t{CalculateEMA(xList)};
-                telemetry.distance = DistEstimation(units::degree_t{CalculateEMA(yList)}, telemetry.angle);
+                // telemetry.deltaX = units::degree_t{CalculateEMA(xList)};
+                telemetry.distance = DistEstimation(units::degree_t{CalculateEMA(yList)}, telemetry.deltaX);
+                telemetry.turretAngle = units::degree_t{CalculateEMA(xList)}; // telemetry.deltaX + shooter.GetTurretAngle();
 
                 telemetry.filled = true;
             }
@@ -86,8 +119,8 @@ namespace vision
             {
                 if (xList.size() >= N)
                 {
-                    telemetry.angle = units::degree_t{CalculateAverage(xList)};
-                    telemetry.distance = DistEstimation(units::degree_t{CalculateAverage(yList)}, telemetry.angle);
+                    telemetry.turretAngle = units::degree_t{CalculateAverage(xList)};
+                    telemetry.distance = DistEstimation(units::degree_t{CalculateAverage(yList)}, telemetry.deltaX);
 
                     telemetry.filled = true;
                 }
@@ -101,9 +134,9 @@ namespace vision
                         spinUpOS = true;
                     }
 
-                    if (spinUpTimer.Get() > 0.3_s)
+                    if (spinUpTimer.Get() > sampleSpinUpDelay)
                     {
-                        xList.push_back(dx);
+                        xList.push_back((dx + shooter.GetTurretAngle().value()));
                         yList.push_back(dy);
                         telemetry.filled = false;
                     }
@@ -113,8 +146,8 @@ namespace vision
 
             case FilterType::NoFilter:
             {
-                telemetry.angle = units::degree_t{dx};
-                telemetry.distance = DistEstimation(units::degree_t{dy}, telemetry.angle);
+                telemetry.deltaX = units::degree_t{dx};
+                telemetry.distance = DistEstimation(units::degree_t{dy}, telemetry.deltaX);
                 telemetry.filled = true;
             }
             break;
@@ -138,11 +171,22 @@ namespace vision
         // EXPONENTIAL MOVING AVERAGE. Maybe add an IQR Filter? Also maybe use an actual circular buffer?
         // Could also try using a Butterworth
 
-        double value = 0.0;
+        double value = *list.begin();
 
-        for (auto i = list.begin(); i != list.end(); ++i)
+        if (list.size() <= 1)
         {
-            value = (alpha * (*i)) + ((1 - alpha) * value);
+            return value;
+        }
+        else
+        {
+            // std::cout << value << ", ";
+
+            for (auto i = ++list.begin(); i != list.end(); ++i)
+            {
+                value = (alpha * (*i)) + ((1 - alpha) * value);
+                // std::cout << *i << ", ";
+            }
+            // std::cout << value << std::endl;
         }
 
         return value;
@@ -155,9 +199,12 @@ namespace vision
         for (auto i = list.begin(); i != list.end(); ++i)
         {
             value += *i;
+            // std::cout << value << ", ";
         }
 
         value /= list.size();
+
+        // std::cout << value << std::endl;
 
         return value;
     }

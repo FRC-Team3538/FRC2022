@@ -13,6 +13,7 @@
 #include <wpi/sendable/SendableRegistry.h>
 #include <wpi/sendable/SendableBuilder.h>
 #include <wpi/sendable/SendableHelper.h>
+#include <frc/DigitalInput.h>
 
 #include "Subsystem.hpp"
 
@@ -23,6 +24,8 @@ class Shooter : public Subsystem,
                 public wpi::SendableHelper<Shooter>
 {
 public:
+    bool zeroed = false;
+
     enum class Position : bool
     {
         Stowed = 0,
@@ -66,13 +69,19 @@ public:
 
     void SetTurret(units::volt_t targetVolts);
     bool SetTurretAngle(units::degree_t targetAngle, units::degree_t tol);
+    void ZeroTurret(bool negative);
+    void ZeroTurret();
 
     void SetHoodAngle(HoodPosition pos);
     void SetHoodAngle();
 
+    void SetBlinkyZeroThing();
+
     // *** GETTERS ***
     units::revolutions_per_minute_t GetShooterRPM();
     units::degree_t GetTurretAngle();
+
+    bool GetTurretSwitch();
 
     // Helpers
     bool Shoot();
@@ -123,4 +132,9 @@ private:
 
     bool hoodPosOS = false;
     frc::Timer hoodPosTimer;
+
+    frc::DigitalInput turretZeroSwitch {9};
+
+    frc::Timer epilepsyTimer;
+    bool blinkyZeroLight = false;
 };

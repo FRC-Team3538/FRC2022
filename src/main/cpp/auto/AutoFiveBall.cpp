@@ -45,7 +45,7 @@ void AutoFiveBall::NextState()
         {
             IO.shooter.SetIntakeState(Shooter::Position::Deployed);
             IO.shooter.SetIntake(8_V);
-            IO.shooter.SetShooterRPM(4000_rpm);
+            IO.shooter.SetShooterRPM(3000_rpm);
             IO.shooter.SetIndexer(8_V);
             IO.shooter.SetFeeder(-2_V);
 
