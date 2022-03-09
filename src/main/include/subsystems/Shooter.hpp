@@ -84,7 +84,7 @@ public:
     bool GetTurretSwitch();
 
     // Helpers
-    bool Shoot();
+    bool Shoot(units::second_t settleTime = 1.5_s);
     State CalculateShot(units::inch_t distance);
     void FalconSlotConfig(WPI_TalonFX &motor, int slot, SlotConfiguration &config);
 

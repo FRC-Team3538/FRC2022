@@ -52,7 +52,7 @@ void AutoFiveBallSafe::NextState()
         IO.shooter.SetFeeder(-2_V);
         IO.shooter.SetHoodAngle(Shooter::HoodPosition::Middle);
 
-        IO.shooter.SetTurretAngle(0_deg, tol);
+        IO.shooter.SetTurretAngle(20_deg, tol);
 
         IO.rjVision.SetLED(true);
 
@@ -62,7 +62,7 @@ void AutoFiveBallSafe::NextState()
     {
         IO.drivetrain.Arcade(0.0, 0.0);
         IO.shooter.SetIndexer(0_V);
-        //hasLimelightData = false;
+        // hasLimelightData = false;
 
         break;
     }
@@ -70,7 +70,6 @@ void AutoFiveBallSafe::NextState()
     {
         IO.shooter.SetFeeder(-2_V);
         IO.shooter.SetIndexer(3_V);
-
 
         IO.shooter.SetTurretAngle(35_deg, tol);
 
@@ -88,7 +87,7 @@ void AutoFiveBallSafe::NextState()
         IO.shooter.SetFeeder(-2_V);
         IO.shooter.SetIndexer(3_V);
 
-        IO.shooter.SetTurretAngle(-70_deg, tol);
+        IO.shooter.SetTurretAngle(-20_deg, tol);
 
         break;
     }
@@ -165,14 +164,20 @@ void AutoFiveBallSafe::Run()
             NextState();
         }
 
+        // vision::RJVisionPipeline::visionData data = IO.rjVision.Run();
+        // if (data.filled)
+        // {
+        //     bool turretAtAngle = IO.shooter.SetTurretAngle(data.turretAngle, 0.5_deg);
+        // }
         break;
     }
+
     case 2:
     {
         vision::RJVisionPipeline::visionData data = IO.rjVision.Run();
         if (data.filled)
         {
-            IO.shooter.SetShooterRPM(3100_rpm);
+            IO.shooter.SetShooterRPM(3075_rpm);
 
             bool turretAtAngle = IO.shooter.SetTurretAngle(data.turretAngle, 0.5_deg);
             // Shoot Maybe
@@ -182,7 +187,7 @@ void AutoFiveBallSafe::Run()
                 IO.shooter.SetFeeder(4_V);
                 IO.shooter.SetIndexer(3_V);
 
-                if (IO.shooter.Shoot())
+                if (IO.shooter.Shoot(1.5_s))
                 {
                     NextState();
                 }
@@ -218,8 +223,8 @@ void AutoFiveBallSafe::Run()
             {
                 IO.shooter.SetFeeder(4_V);
                 IO.shooter.SetIndexer(3_V);
-                
-                if (IO.shooter.Shoot())
+
+                if (IO.shooter.Shoot(1.5_s))
                 {
                     NextState();
                 }
@@ -246,7 +251,7 @@ void AutoFiveBallSafe::Run()
         vision::RJVisionPipeline::visionData data = IO.rjVision.Run();
         if (data.filled)
         {
-            IO.shooter.SetShooterRPM(2800_rpm);
+            IO.shooter.SetShooterRPM(2950_rpm);
 
             bool turretAtAngle = IO.shooter.SetTurretAngle(data.turretAngle, 0.5_deg);
             // Shoot Maybe
@@ -255,8 +260,8 @@ void AutoFiveBallSafe::Run()
             {
                 IO.shooter.SetFeeder(4_V);
                 IO.shooter.SetIndexer(3_V);
-                
-                if (IO.shooter.Shoot())
+
+                if (IO.shooter.Shoot(2.0_s))
                 {
                     NextState();
                 }

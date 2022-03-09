@@ -267,7 +267,7 @@ units::degree_t Shooter::GetTurretAngle()
     return units::degree_t(ang);
 }
 
-bool Shooter::Shoot()
+bool Shooter::Shoot(units::second_t settleTime)
 {
 
     static frc::Timer settleTimer;
@@ -309,7 +309,7 @@ bool Shooter::Shoot()
     // }
 
     // Wait for balls to exit robot in auto
-    if (settleTimer.Get() > 2.0_s) {
+    if (settleTimer.Get() > settleTime) {
         settleTimer.Reset();
         settleTimer.Stop();
 
