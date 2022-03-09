@@ -47,9 +47,10 @@ void AutoFiveBallSafe::NextState()
     {
         IO.shooter.SetIntakeState(Shooter::Position::Deployed);
         IO.shooter.SetIntake(8_V);
-        IO.shooter.SetShooterRPM(2750_rpm);
-        IO.shooter.SetIndexer(8_V);
+        IO.shooter.SetShooterRPM(3000_rpm);
+        IO.shooter.SetIndexer(3_V);
         IO.shooter.SetFeeder(-2_V);
+        IO.shooter.SetHoodAngle(Shooter::HoodPosition::Middle);
 
         IO.shooter.SetTurretAngle(0_deg, tol);
 
@@ -60,6 +61,7 @@ void AutoFiveBallSafe::NextState()
     case 2:
     {
         IO.drivetrain.Arcade(0.0, 0.0);
+        IO.shooter.SetIndexer(0_V);
         //hasLimelightData = false;
 
         break;
@@ -67,28 +69,33 @@ void AutoFiveBallSafe::NextState()
     case 3:
     {
         IO.shooter.SetFeeder(-2_V);
+        IO.shooter.SetIndexer(3_V);
 
-        IO.shooter.SetTurretAngle(0_deg, tol);
+
+        IO.shooter.SetTurretAngle(35_deg, tol);
 
         break;
     }
     case 4:
     {
         IO.drivetrain.Arcade(0.0, 0.0);
+        IO.shooter.SetIndexer(0_V);
 
         break;
     }
     case 5:
     {
         IO.shooter.SetFeeder(-2_V);
+        IO.shooter.SetIndexer(3_V);
 
-        IO.shooter.SetTurretAngle(-45_deg, tol);
+        IO.shooter.SetTurretAngle(-70_deg, tol);
 
         break;
     }
     case 6:
     {
         IO.drivetrain.Arcade(0.0, 0.0);
+        IO.shooter.SetIndexer(0_V);
 
         break;
     }
@@ -122,7 +129,7 @@ void AutoFiveBallSafe::Init()
     config.SetReversed(false);
 
     m_trajectory_first = rj::AutoHelper::LoadTrajectory("06 - 5 Ball Safe 1", &config);
-    m_trajectory_second = rj::AutoHelper::LoadTrajectory("06 - 5 Ball Safe 2 HOME", &config);
+    m_trajectory_second = rj::AutoHelper::LoadTrajectory("06 - 5 Ball Safe 2", &config);
     m_trajectory_third = rj::AutoHelper::LoadTrajectory("06 - 5 Ball Safe 3", &config);
 
     IO.drivetrain.ResetOdometry(m_trajectory_first.InitialPose());
@@ -137,6 +144,7 @@ void AutoFiveBallSafe::Init()
 void AutoFiveBallSafe::Run()
 {
     units::degree_t tol{ntVisionAngleTol.GetDouble(kVisionAngleTolDefault)};
+    IO.shooter.SetHoodAngle();
 
     switch (m_state)
     {
@@ -164,14 +172,16 @@ void AutoFiveBallSafe::Run()
         vision::RJVisionPipeline::visionData data = IO.rjVision.Run();
         if (data.filled)
         {
-            IO.shooter.SetShooterRPM(3000_rpm);
+            IO.shooter.SetShooterRPM(3100_rpm);
 
             bool turretAtAngle = IO.shooter.SetTurretAngle(data.turretAngle, 0.5_deg);
             // Shoot Maybe
 
             if (turretAtAngle)
             {
-                IO.shooter.SetFeeder(8_V);
+                IO.shooter.SetFeeder(4_V);
+                IO.shooter.SetIndexer(3_V);
+
                 if (IO.shooter.Shoot())
                 {
                     NextState();
@@ -199,14 +209,16 @@ void AutoFiveBallSafe::Run()
         vision::RJVisionPipeline::visionData data = IO.rjVision.Run();
         if (data.filled)
         {
-            IO.shooter.SetShooterRPM(3000_rpm);
+            IO.shooter.SetShooterRPM(2900_rpm);
 
             bool turretAtAngle = IO.shooter.SetTurretAngle(data.turretAngle, 0.5_deg);
             // Shoot Maybe
 
             if (turretAtAngle)
             {
-                IO.shooter.SetFeeder(8_V);
+                IO.shooter.SetFeeder(4_V);
+                IO.shooter.SetIndexer(3_V);
+                
                 if (IO.shooter.Shoot())
                 {
                     NextState();
@@ -234,14 +246,16 @@ void AutoFiveBallSafe::Run()
         vision::RJVisionPipeline::visionData data = IO.rjVision.Run();
         if (data.filled)
         {
-            IO.shooter.SetShooterRPM(3000_rpm);
+            IO.shooter.SetShooterRPM(2800_rpm);
 
             bool turretAtAngle = IO.shooter.SetTurretAngle(data.turretAngle, 0.5_deg);
             // Shoot Maybe
 
             if (turretAtAngle)
             {
-                IO.shooter.SetFeeder(8_V);
+                IO.shooter.SetFeeder(4_V);
+                IO.shooter.SetIndexer(3_V);
+                
                 if (IO.shooter.Shoot())
                 {
                     NextState();
