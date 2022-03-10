@@ -59,7 +59,7 @@ void Robot::RobotInit()
   frc::DriverStation::StartDataLog(log, true);
 #endif // LOGGER
 
-  if(IO.shooter.GetTurretSwitch())
+  if (IO.shooter.GetTurretSwitch())
   {
     IO.shooter.ZeroTurret();
   }
@@ -72,7 +72,7 @@ void Robot::RobotPeriodic()
   autoprograms.SmartDash();
   IO.rjVision.Periodic();
 
-  if(!IO.shooter.zeroed)
+  if (!IO.shooter.zeroed)
     IO.shooter.SetBlinkyZeroThing();
 }
 
@@ -103,6 +103,11 @@ void Robot::TeleopPeriodic()
   //
   if (IO.mainController.GetR1Button() || IO.secondaryController.GetCircleButton()) // || IO.secondaryController.GetTriangleButton())
   {
+    if (IO.shooter.GetShooterRPM() < 250.0_rpm)
+    {
+      IO.shooter.SetShooterRPM(2800_rpm);
+    }
+
     climberTimerOS = false;
     manualJog = false;
     IO.shooter.SetIntakeState(Shooter::Position::Deployed);
@@ -137,10 +142,8 @@ void Robot::TeleopPeriodic()
 
       // std::cout << (IO.shooter.GetTurretAngle() + data.deltaX).value() << std::endl;
 
-      //IO.shooter.SetShooterRPM(shotStat.shooterRPM);
-      // IO.shooter.SetShooterRPM(shooterTest);
-
-      IO.shooter.SetShooterRPM(2800_rpm);
+      // IO.shooter.SetShooterRPM(shotStat.shooterRPM);
+      //  IO.shooter.SetShooterRPM(shooterTest);
 
       // Set Hood
 
@@ -213,20 +216,18 @@ void Robot::TeleopPeriodic()
     // IO.shooter.SetTurret(units::volt_t{-13.0 * deadband(IO.mainController.GetRightX())});
 
     // IO.shooter.SetTurretAngle(turretAngle, 0.25_deg);
-    if(!IO.shooter.zeroed)
+    if (!IO.shooter.zeroed)
     {
-      if(IO.secondaryController.GetPSButton())
+      if (IO.secondaryController.GetPSButton())
       {
         double turn = -1.5 * deadband(IO.secondaryController.GetRightX());
         IO.shooter.SetTurret(units::volt_t{turn});
         bool negative = turn > 0.0;
-        if(IO.shooter.GetTurretSwitch())
+        if (IO.shooter.GetTurretSwitch())
           IO.shooter.ZeroTurret(negative);
       }
       else
         IO.shooter.SetTurret(0.0_V);
-
-      
     }
     else if (IO.secondaryController.GetPSButton())
     {
@@ -278,7 +279,7 @@ void Robot::TeleopPeriodic()
     break;
   case 0:
     // FENDER
-    IO.shooter.SetShooterRPM(s);
+    IO.shooter.SetShooterRPM(3500_rpm);
     m_csmode = ClimberShooterMode::Shooter;
     if (!hoodOS)
     {
@@ -300,7 +301,7 @@ void Robot::TeleopPeriodic()
 
   case 180:
     // LAUNCHPAD
-    IO.shooter.SetShooterRPM(1500_rpm);
+    IO.shooter.SetShooterRPM(1000_rpm);
     m_csmode = ClimberShooterMode::Shooter;
     if (!hoodOS)
     {
@@ -311,7 +312,7 @@ void Robot::TeleopPeriodic()
 
   case 270:
     // TARMAC
-    IO.shooter.SetShooterRPM(s);
+    IO.shooter.SetShooterRPM(2950_rpm);
     m_csmode = ClimberShooterMode::Shooter;
     if (!hoodOS)
     {
@@ -323,7 +324,7 @@ void Robot::TeleopPeriodic()
 
   if (IO.secondaryController.GetOptionsButtonPressed())
   {
-    IO.shooter.SetShooterRPM(1500_rpm);
+    IO.shooter.SetShooterRPM(s);
     m_csmode = ClimberShooterMode::Shooter;
   }
 

@@ -144,6 +144,11 @@ namespace vision
             }
             break;
 
+            // case FilterType::MedianFilter:
+            // {
+                
+            // }
+
             case FilterType::NoFilter:
             {
                 telemetry.deltaX = units::degree_t{dx};

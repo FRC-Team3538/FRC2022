@@ -196,6 +196,7 @@ bool Shooter::SetTurretAngle(units::degree_t targetAngle, units::degree_t tol)
 
 void Shooter::SetHoodAngle(Shooter::HoodPosition pos)
 {
+    return;
     cmd_hoodPosition = pos;
     hoodPosOS = false;
 
@@ -208,6 +209,7 @@ void Shooter::SetHoodAngle(Shooter::HoodPosition pos)
 
 void Shooter::SetHoodAngle()
 {
+    return;
     // std::cout << (int)cmd_hoodPosition << std::endl;
 
     if (cmd_hoodPosition == HoodPosition::Top)
