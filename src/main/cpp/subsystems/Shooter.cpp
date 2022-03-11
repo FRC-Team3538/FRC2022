@@ -75,6 +75,7 @@ Shooter::Shooter()
     frc::SmartDashboard::PutNumber("TURRET D", 0.0);
 
     indexerA.ConfigSupplyCurrentLimit(ctre::phoenix::motorcontrol::SupplyCurrentLimitConfiguration(true, 20, 20, 0));
+    intake.ConfigSupplyCurrentLimit(ctre::phoenix::motorcontrol::SupplyCurrentLimitConfiguration(true, 30, 30, 0));
 }
 
 void Shooter::ConfigureSystem() {}
