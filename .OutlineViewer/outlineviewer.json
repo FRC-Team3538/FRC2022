@@ -5,7 +5,7 @@
   },
   "SmartDashboard": {
     "shooter": {
-      "open": true
+      "open": false
     }
   },
   "limelight": {

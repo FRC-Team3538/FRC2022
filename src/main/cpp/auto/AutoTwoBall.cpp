@@ -35,7 +35,7 @@ void AutoTwoBall::NextState()
         IO.shooter.SetHoodAngle(Shooter::HoodPosition::Middle);
         IO.shooter.SetIntakeState(Shooter::Position::Deployed);
         IO.shooter.SetIntake(8_V);
-        IO.shooter.SetShooterRPM(2600_rpm);
+        IO.shooter.SetShooterRPM(2700_rpm);
         IO.shooter.SetIndexer(4_V);
         IO.shooter.SetFeeder(-2_V);
 

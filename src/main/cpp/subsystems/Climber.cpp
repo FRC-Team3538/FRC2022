@@ -19,12 +19,12 @@ void Climber::ConfigureSystem()
     SetStatusFrames(climberB, 250);
 
     climberA.ConfigForwardSoftLimitThreshold(1 / kScaleFactor);
-    climberA.ConfigReverseSoftLimitThreshold(3000.0);
+    climberA.ConfigReverseSoftLimitThreshold(1500.0);
     climberA.ConfigForwardSoftLimitEnable(true);
     climberA.ConfigReverseSoftLimitEnable(true);
 
     climberB.ConfigForwardSoftLimitThreshold(1 / kScaleFactor);
-    climberB.ConfigReverseSoftLimitThreshold(3000.0);
+    climberB.ConfigReverseSoftLimitThreshold(1500.0);
     climberB.ConfigForwardSoftLimitEnable(true);
     climberB.ConfigReverseSoftLimitEnable(true);
 
@@ -35,8 +35,8 @@ void Climber::ConfigureSystem()
 void Climber::UpdateTelemetry()
 {
     frc::SmartDashboard::PutBoolean("Climber Sensor Enabled", !sensorOverrode);
-    frc::SmartDashboard::PutNumber("CLIMBER TICKS", climberA.GetSelectedSensorPosition());
-    frc::SmartDashboard::PutNumber("CLIMBER TICKS AGAIN", climberB.GetSelectedSensorPosition());
+    // frc::SmartDashboard::PutNumber("CLIMBER TICKS", climberA.GetSelectedSensorPosition());
+    // frc::SmartDashboard::PutNumber("CLIMBER TICKS AGAIN", climberB.GetSelectedSensorPosition());
 }
 
 void Climber::SetSensorOverride(bool override)

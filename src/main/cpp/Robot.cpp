@@ -234,6 +234,7 @@ void Robot::TeleopPeriodic()
       climberTimerOS = false;
       IO.shooter.SetTurretAngle(0.0_deg, 1_deg);
       m_csmode = ClimberShooterMode::Shooter;
+      manualJog = false;
     }
     else if (std::abs(deadband(IO.secondaryController.GetRightX())) > 0.0 || manualJog)
     {
