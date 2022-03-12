@@ -157,8 +157,8 @@ void Robot::TeleopPeriodic()
       // Shoot Maybe
       shoot = turretAtAngle;
     }
-    double fwd = -0.5 * deadband(IO.mainController.GetLeftY());
-    double rot = -0.5 * deadband(IO.mainController.GetRightX());
+    double fwd = -deadband(IO.mainController.GetLeftY());
+    double rot = -deadband(IO.mainController.GetRightX());
 
     IO.drivetrain.Arcade(fwd, rot);
   }
@@ -174,8 +174,8 @@ void Robot::TeleopPeriodic()
 
       IO.shooter.SetTurretAngle(data.turretAngle, 0.75_deg);
     }
-    double fwd = -0.5 * deadband(IO.mainController.GetLeftY());
-    double rot = -0.5 * deadband(IO.mainController.GetRightX());
+    double fwd = -deadband(IO.mainController.GetLeftY());
+    double rot = -deadband(IO.mainController.GetRightX());
 
     IO.drivetrain.Arcade(fwd, rot);
   }
@@ -365,7 +365,7 @@ void Robot::TeleopPeriodic()
   }
 
   // Retract Intake after a short delay
-  if (intakeTimer.Get() > 0.5_s)
+  if (intakeTimer.Get() > 0.25_s)
   {
     IO.shooter.SetIntakeState(Shooter::Position::Stowed);
   }
