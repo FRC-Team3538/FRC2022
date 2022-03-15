@@ -52,6 +52,9 @@ void Robot::RobotInit()
   ntTurretTargetAng.ForceSetDouble(ntTurretTargetAng.GetDouble(kTurretTargetAngDefault));
   ntTurretTargetAng.SetPersistent();
 
+
+
+
   // Logging Stuff
 #ifdef LOGGER
   frc::DataLogManager::LogNetworkTables(true);
@@ -71,7 +74,8 @@ void Robot::RobotPeriodic()
   IO.drivetrain.Periodic();
   autoprograms.SmartDash();
   IO.rjVision.Periodic();
-
+  frc::SmartDashboard::PutNumber("robot/MatchTime", frc::DriverStation::GetMatchTime());
+  frc::SmartDashboard::PutNumber("robot/PressureHigh", IO.ph.GetPressure(0).value());
   if (!IO.shooter.zeroed)
     IO.shooter.SetBlinkyZeroThing();
 }
