@@ -379,7 +379,7 @@ void Robot::TeleopPeriodic()
   {
     IO.shooter.SetIndexer(units::volt_t{ntIndexerVoltage.GetDouble(kIndexerVoltageDefault)});
   }
-  else if (intakeCmd < 0.0_V)
+  else if (intakeCmd < -0.8 * 13_V)
   {
     IO.shooter.SetIndexer(units::volt_t{(-1) * ntIndexerVoltage.GetDouble(kIndexerVoltageDefault)});
   }
