@@ -16,7 +16,7 @@
 #include <memory>
 #include "lib/csv.h"
 
-class AutoFiveBall : public AutoInterface
+class AutoFiveBallBlue : public AutoInterface
 {
 public:
     // Name of this program, used by SmartDash
@@ -37,9 +37,9 @@ private:
 
 public:
     // Constructor requires a reference to the RobotMap
-    AutoFiveBall() = delete;
-    AutoFiveBall(Robotmap &);
-    ~AutoFiveBall();
+    AutoFiveBallBlue() = delete;
+    AutoFiveBallBlue(Robotmap &);
+    ~AutoFiveBallBlue();
 
     // Auto Program Logic
     void Init();

@@ -11,7 +11,7 @@
 // Name for Smart Dash Chooser
 std::string AutoFiveBallSafe::GetName()
 {
-    return "06 - Five Ball Safe";
+    return "07 - Five Ball Safe";
 }
 
 // Initialization

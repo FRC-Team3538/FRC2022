@@ -1,4 +1,4 @@
-#include "auto/AutoFiveBall.hpp"
+#include "auto/AutoFiveBallBlue.hpp"
 
 #include "lib/AutoHelper.h"
 
@@ -9,22 +9,22 @@
 #include <iostream>
 
 // Name for Smart Dash Chooser
-std::string AutoFiveBall::GetName()
+std::string AutoFiveBallBlue::GetName()
 {
-    return "05 - Five Ball Wall Ball";
+    return "06 - Five Ball Wall Ball Blue";
 }
 
 // Initialization
 // Constructor requires a reference to the robot map
-AutoFiveBall::AutoFiveBall(Robotmap &IO) : IO(IO)
+AutoFiveBallBlue::AutoFiveBallBlue(Robotmap &IO) : IO(IO)
 {
     m_state = 0;
 }
 
-AutoFiveBall::~AutoFiveBall() {}
+AutoFiveBallBlue::~AutoFiveBallBlue() {}
 
 // State Machine
-void AutoFiveBall::NextState()
+void AutoFiveBallBlue::NextState()
 {
     m_state++;
 
@@ -86,7 +86,7 @@ void AutoFiveBall::NextState()
     m_autoTimer.Start();
 }
 
-void AutoFiveBall::Init()
+void AutoFiveBallBlue::Init()
 {
     units::feet_per_second_t maxLinearVel = 5_fps;
     // units::standard_gravity_t maxCentripetalAcc = 0.5_SG;
@@ -109,7 +109,7 @@ void AutoFiveBall::Init()
 }
 
 // Execute the program
-void AutoFiveBall::Run()
+void AutoFiveBallBlue::Run()
 {
     switch (m_state)
     {
@@ -181,7 +181,7 @@ void AutoFiveBall::Run()
 }
 
 // Called Automagically by AutoPrograms (RobotPeriodic)
-void AutoFiveBall::UpdateSmartDash()
+void AutoFiveBallBlue::UpdateSmartDash()
 {
     frc::SmartDashboard::PutNumber("Auto/State", m_state);
 }
