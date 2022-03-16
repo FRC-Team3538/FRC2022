@@ -11,7 +11,7 @@
 // Name for Smart Dash Chooser
 std::string AutoFiveBallSafe::GetName()
 {
-    return "06 - Five Ball Safe";
+    return "07 - Five Ball Safe";
 }
 
 // Initialization
@@ -118,7 +118,7 @@ void AutoFiveBallSafe::Init()
 {
     units::feet_per_second_t maxLinearVel = 8_fps;
     // units::standard_gravity_t maxCentripetalAcc = 0.5_SG;
-    units::feet_per_second_squared_t maxLinearAcc = 1.5_mps_sq;
+    units::feet_per_second_squared_t maxLinearAcc = 1.7_mps_sq;
 
     // frc::TrajectoryConfig config(Drivetrain::kMaxSpeedLinear, Drivetrain::kMaxAccelerationLinear);
     frc::TrajectoryConfig config(maxLinearVel, maxLinearAcc);
@@ -164,11 +164,11 @@ void AutoFiveBallSafe::Run()
             NextState();
         }
 
-        // vision::RJVisionPipeline::visionData data = IO.rjVision.Run();
-        // if (data.filled)
-        // {
-        //     bool turretAtAngle = IO.shooter.SetTurretAngle(data.turretAngle, 0.5_deg);
-        // }
+        vision::RJVisionPipeline::visionData data = IO.rjVision.Run();
+        if (data.filled)
+        {
+            bool turretAtAngle = IO.shooter.SetTurretAngle(data.turretAngle, 0.5_deg);
+        }
         break;
     }
 
@@ -207,6 +207,12 @@ void AutoFiveBallSafe::Run()
             NextState();
         }
 
+        // vision::RJVisionPipeline::visionData data = IO.rjVision.Run();
+        // if (data.filled)
+        // {
+        //     IO.shooter.SetTurretAngle(data.turretAngle, 0.5_deg);
+        // }
+
         break;
     }
     case 4:
@@ -214,7 +220,7 @@ void AutoFiveBallSafe::Run()
         vision::RJVisionPipeline::visionData data = IO.rjVision.Run();
         if (data.filled)
         {
-            IO.shooter.SetShooterRPM(2900_rpm);
+            IO.shooter.SetShooterRPM(2825_rpm);
 
             bool turretAtAngle = IO.shooter.SetTurretAngle(data.turretAngle, 0.5_deg);
             // Shoot Maybe

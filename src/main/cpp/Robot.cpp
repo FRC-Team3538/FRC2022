@@ -52,6 +52,9 @@ void Robot::RobotInit()
   ntTurretTargetAng.ForceSetDouble(ntTurretTargetAng.GetDouble(kTurretTargetAngDefault));
   ntTurretTargetAng.SetPersistent();
 
+
+
+
   // Logging Stuff
 #ifdef LOGGER
   frc::DataLogManager::LogNetworkTables(true);
@@ -71,7 +74,8 @@ void Robot::RobotPeriodic()
   IO.drivetrain.Periodic();
   autoprograms.SmartDash();
   IO.rjVision.Periodic();
-
+  frc::SmartDashboard::PutNumber("robot/MatchTime", frc::DriverStation::GetMatchTime());
+  frc::SmartDashboard::PutNumber("robot/PressureHigh", IO.ph.GetPressure(0).value());
   if (!IO.shooter.zeroed)
     IO.shooter.SetBlinkyZeroThing();
 }
@@ -157,8 +161,8 @@ void Robot::TeleopPeriodic()
       // Shoot Maybe
       shoot = turretAtAngle;
     }
-    double fwd = -0.5 * deadband(IO.mainController.GetLeftY());
-    double rot = -0.5 * deadband(IO.mainController.GetRightX());
+    double fwd = -deadband(IO.mainController.GetLeftY());
+    double rot = -deadband(IO.mainController.GetRightX());
 
     IO.drivetrain.Arcade(fwd, rot);
   }
@@ -174,8 +178,8 @@ void Robot::TeleopPeriodic()
 
       IO.shooter.SetTurretAngle(data.turretAngle, 0.75_deg);
     }
-    double fwd = -0.5 * deadband(IO.mainController.GetLeftY());
-    double rot = -0.5 * deadband(IO.mainController.GetRightX());
+    double fwd = -deadband(IO.mainController.GetLeftY());
+    double rot = -deadband(IO.mainController.GetRightX());
 
     IO.drivetrain.Arcade(fwd, rot);
   }
@@ -365,7 +369,7 @@ void Robot::TeleopPeriodic()
   }
 
   // Retract Intake after a short delay
-  if (intakeTimer.Get() > 0.5_s)
+  if (intakeTimer.Get() > 0.25_s)
   {
     IO.shooter.SetIntakeState(Shooter::Position::Stowed);
   }
@@ -375,7 +379,7 @@ void Robot::TeleopPeriodic()
   {
     IO.shooter.SetIndexer(units::volt_t{ntIndexerVoltage.GetDouble(kIndexerVoltageDefault)});
   }
-  else if (intakeCmd < 0.0_V)
+  else if (intakeCmd < -0.8 * 13_V)
   {
     IO.shooter.SetIndexer(units::volt_t{(-1) * ntIndexerVoltage.GetDouble(kIndexerVoltageDefault)});
   }

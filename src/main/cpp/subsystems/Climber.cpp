@@ -132,4 +132,5 @@ void Climber::InitSendable(wpi::SendableBuilder &builder)
         "sol", [this]
         { return GetClimberState() == Climber::ClimbState::Up; },
         nullptr);
+    
 }
