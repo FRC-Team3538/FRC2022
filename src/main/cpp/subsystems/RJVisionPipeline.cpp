@@ -1,5 +1,7 @@
 #include "subsystems/RJVisionPipeline.hpp"
 
+#include <photonlib/PhotonUtils.h>
+
 using namespace nt;
 
 namespace vision
@@ -17,13 +19,23 @@ namespace vision
         // table->PutNumber("ledMode", 1.0);
         table->PutNumber("pipeline", 0.0);
         table->PutNumber("camMode", 0.0);
+        camera.SetPipelineIndex(0);
+        camera.SetDriverMode(false);
     }
 
     void RJVisionPipeline::Periodic()
     {
-        dx = -(table->GetNumber("tx", 0.0));
-        dy = table->GetNumber("ty", 0.0);
-        tv = table->GetNumber("tv", 0.0);
+        auto result = camera.GetLatestResult();
+        tv = result.HasTargets();
+        if (result.HasTargets()) {
+            auto target = result.GetBestTarget();
+            dx = target.GetYaw();
+            dy = target.GetPitch();
+            tv = 1.0;
+        }
+        dx = -(table->GetNumber("tx", dx));
+        dy = table->GetNumber("ty", dy);
+        tv = table->GetNumber("tv", tv);
 
         alpha = frc::SmartDashboard::GetNumber("ALPHA", 0.125);
         N = frc::SmartDashboard::GetNumber("N", 8);
@@ -229,6 +241,7 @@ namespace vision
 
     units::inch_t RJVisionPipeline::DistEstimation(units::degree_t deltaY, units::degree_t deltaX)
     {
+        // return photonlib::PhotonUtils::CalculateDistanceToTarget(32_in, 102_in, 33_deg, deltaY);
         // For now, the assumption is that the dy remains accurate despite the dx changing
         // Might need to change that for rootin, tootin, scootin, n shootin
 
@@ -245,16 +258,20 @@ namespace vision
     {
         if (enable)
         {
+            camera.SetLEDMode(photonlib::LEDMode::kOn);
             table->PutNumber("ledMode", 3.0); // Force On
         }
         else
         {
+            camera.SetLEDMode(photonlib::LEDMode::kOff);
             table->PutNumber("ledMode", 1.0); // Force Off
         }
     }
 
     void RJVisionPipeline::TakeSnapshot(uint8_t numberOfSnaps)
     {
+        camera.TakeInputSnapshot();
+        camera.TakeOutputSnapshot();
         table->PutNumber("snapshot", (double)numberOfSnaps);
         // snapTime = units::second_t{(double)numberOfSnaps / 2.0};
         // snapShotTimer.Reset();

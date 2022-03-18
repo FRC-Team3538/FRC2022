@@ -13,6 +13,8 @@
 #include <list>
 #include "subsystems/Shooter.hpp"
 
+#include <photonlib/PhotonCamera.h>
+
 namespace vision
 {
 
@@ -64,6 +66,8 @@ namespace vision
 
         units::inch_t estDist = 0.0_in;
 
+        // TODO: ensure correctness @Jordan
+        photonlib::PhotonCamera camera{"photoncamera"};
         std::shared_ptr<nt::NetworkTable> table;
         double dy, dx, tv;
         frc::Timer lightOn;
