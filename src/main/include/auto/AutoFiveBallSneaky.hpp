@@ -16,7 +16,7 @@
 #include <memory>
 #include "lib/csv.h"
 
-class AutoFiveBallSafe : public AutoInterface
+class AutoFiveBallSneaky : public AutoInterface
 {
 public:
     // Name of this program, used by SmartDash
@@ -43,7 +43,6 @@ private:
 
     frc::Trajectory m_trajectory_first;
     frc::Trajectory m_trajectory_second;
-    frc::Trajectory m_trajectory_third;
 
     double kVisionAngleTolDefault = 0.5;
     nt::NetworkTableEntry ntVisionAngleTol = frc::SmartDashboard::GetEntry("robot/visionAngleTol");
@@ -54,9 +53,9 @@ private:
 
 public:
     // Constructor requires a reference to the RobotMap
-    AutoFiveBallSafe() = delete;
-    AutoFiveBallSafe(Robotmap &);
-    ~AutoFiveBallSafe();
+    AutoFiveBallSneaky() = delete;
+    AutoFiveBallSneaky(Robotmap &);
+    ~AutoFiveBallSneaky();
 
     // Auto Program Logic
     void Init();

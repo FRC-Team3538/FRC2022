@@ -1,4 +1,4 @@
-#include "auto/AutoFiveBallSafe.hpp"
+#include "auto/AutoFiveBallSneaky.hpp"
 
 #include "lib/AutoHelper.h"
 
@@ -11,14 +11,14 @@
 #include <iostream>
 
 // Name for Smart Dash Chooser
-std::string AutoFiveBallSafe::GetName()
+std::string AutoFiveBallSneaky::GetName()
 {
-    return "07 - Five Ball Safe";
+    return "08 - Five Ball Sneaky";
 }
 
 // Initialization
 // Constructor requires a reference to the robot map
-AutoFiveBallSafe::AutoFiveBallSafe(Robotmap &IO) : IO(IO)
+AutoFiveBallSneaky::AutoFiveBallSneaky(Robotmap &IO) : IO(IO)
 {
     m_driveState = 0;
     m_shooterState = 0;
@@ -28,7 +28,7 @@ AutoFiveBallSafe::AutoFiveBallSafe(Robotmap &IO) : IO(IO)
     m_shotCount = 0;
 }
 
-AutoFiveBallSafe::~AutoFiveBallSafe() {}
+AutoFiveBallSneaky::~AutoFiveBallSneaky() {}
 
 // process
 // 1 - grab second
@@ -39,7 +39,7 @@ AutoFiveBallSafe::~AutoFiveBallSafe() {}
 // 6 - shoot last
 
 // State Machine
-void AutoFiveBallSafe::NextDriveState()
+void AutoFiveBallSneaky::NextDriveState()
 {
     m_driveState++;
     m_newDriveState = true;
@@ -49,7 +49,7 @@ void AutoFiveBallSafe::NextDriveState()
 }
 
 // State Machine
-void AutoFiveBallSafe::NextShooterState()
+void AutoFiveBallSneaky::NextShooterState()
 {
     m_shooterState++;
     m_newShooterState = true;
@@ -58,7 +58,7 @@ void AutoFiveBallSafe::NextShooterState()
     m_shooterTimer.Start();
 }
 
-void AutoFiveBallSafe::Init()
+void AutoFiveBallSneaky::Init()
 {
     units::feet_per_second_t maxLinearVel = 8_fps;
     units::meters_per_second_squared_t maxCentripetalAcc = 1.7_mps_sq;
@@ -71,11 +71,10 @@ void AutoFiveBallSafe::Init()
     config.AddConstraint(frc::DifferentialDriveKinematicsConstraint{IO.drivetrain.GetKinematics(), maxLinearVel});
     config.SetReversed(false);
 
-    m_trajectory_first = rj::AutoHelper::LoadTrajectory("06 - 5 Ball Safe 1", &config);
-    m_trajectory_second = rj::AutoHelper::LoadTrajectory("06 - 5 Ball Safe 2", &config);
-    m_trajectory_third = rj::AutoHelper::LoadTrajectory("06 - 5 Ball Safe 3", &config);
+    m_trajectory_first = rj::AutoHelper::LoadTrajectory("07 - 5 Ball Sneaky 1", &config);
+    m_trajectory_second = rj::AutoHelper::LoadTrajectory("07 - 5 Ball Sneaky 2", &config);
 
-    std::cout << m_trajectory_first.TotalTime().value() + m_trajectory_second.TotalTime().value() + m_trajectory_third.TotalTime().value() << std::endl;
+    std::cout << m_trajectory_first.TotalTime().value() + m_trajectory_second.TotalTime().value() << std::endl;
 
     IO.drivetrain.ResetOdometry(m_trajectory_first.InitialPose());
 
@@ -87,7 +86,7 @@ void AutoFiveBallSafe::Init()
     m_totalTimer.Start();
 }
 
-bool AutoFiveBallSafe::FollowTrajectory(frc::Trajectory &trajectory)
+bool AutoFiveBallSneaky::FollowTrajectory(frc::Trajectory &trajectory)
 {
     auto reference = trajectory.Sample(m_driveTimer.Get());
 
@@ -96,14 +95,14 @@ bool AutoFiveBallSafe::FollowTrajectory(frc::Trajectory &trajectory)
     return m_driveTimer.Get() > trajectory.TotalTime();
 }
 
-bool AutoFiveBallSafe::FindVisionTarget()
+bool AutoFiveBallSneaky::FindVisionTarget()
 {
     vision::RJVisionPipeline::visionData data = IO.rjVision.Run();
     return data.filled && IO.shooter.SetTurretAngle(data.turretAngle, 0.5_deg);
 }
 
 // Execute the program
-void AutoFiveBallSafe::Run()
+void AutoFiveBallSneaky::Run()
 {
     units::degree_t tol{ntVisionAngleTol.GetDouble(kVisionAngleTolDefault)};
 
@@ -133,25 +132,6 @@ void AutoFiveBallSafe::Run()
         // run second path
         if (FollowTrajectory(m_trajectory_second)) {
             std::cout << "Second path completed in  " << m_driveTimer.Get().value() << "s" << std::endl;
-            NextDriveState();
-            NextShooterState();
-        }
-        break;
-    }
-    case 3:
-    {
-        // wait until shooter is done
-        if (m_newDriveState) {
-            IO.drivetrain.Arcade(0.0, 0.0);
-        }
-        
-        break;
-    }
-    case 4:
-    {
-        // run third path
-        if (FollowTrajectory(m_trajectory_third)) {
-            std::cout << "Third path completed in  " << m_driveTimer.Get().value() << "s" << std::endl;
             NextDriveState();
             NextShooterState();
         }
@@ -256,7 +236,7 @@ void AutoFiveBallSafe::Run()
     }
     case 5:
     {
-        // shoot 2 balls
+        // shoot 3 balls
         if (m_newShooterState)
         {
             IO.shooter.SetFeeder(4_V);
@@ -268,59 +248,13 @@ void AutoFiveBallSafe::Run()
             m_shotCount += 1;
         }
 
-        if (m_shotCount >= 4 || m_shooterTimer.Get() > 2_s) {
-            std::cout << "Shot phase completed in  " << m_shooterTimer.Get().value() << "s" << std::endl;
-            NextDriveState();
-            NextShooterState();
-        }
-
-        break;
-    }
-    case 6:
-    {
-        // wait for third path
-        if (m_newShooterState) {
-            IO.shooter.SetFeeder(-2_V);
-
-            IO.shooter.SetTurretAngle(35_deg, tol);
-        }
-
-        break;
-    }
-    case 7:
-    {
-        // aim at target
-        if (m_newShooterState) {
-            IO.shooter.SetIndexer(0_V);
-        }
-
-        if (FindVisionTarget() || m_shooterTimer.Get() > 2_s)
-        {
-            std::cout << "Aim phase completed in  " << m_shooterTimer.Get().value() << "s" << std::endl;
-            NextShooterState();
-        }
-
-        break;
-    }
-    case 8:
-    {
-        // shoot 1 ball
-        if (m_newShooterState)
-        {
-            IO.shooter.SetFeeder(4_V);
-            IO.shooter.SetIndexer(3_V);
-        }
-
-        if (IO.shooter.Shoot_EdgeDetector())
-        {
-            m_shotCount += 1;
-        }
-
         if (m_shotCount >= 5 || m_shooterTimer.Get() > 2_s) {
             std::cout << "Shot phase completed in  " << m_shooterTimer.Get().value() << "s" << std::endl;
             NextDriveState();
             NextShooterState();
         }
+
+        break;
     }
     default:
     {
@@ -341,7 +275,7 @@ void AutoFiveBallSafe::Run()
 }
 
 // Called Automagically by AutoPrograms (RobotPeriodic)
-void AutoFiveBallSafe::UpdateSmartDash()
+void AutoFiveBallSneaky::UpdateSmartDash()
 {
     frc::SmartDashboard::PutNumber("Auto/DriveState", m_driveState);
     frc::SmartDashboard::PutNumber("Auto/ShooterState", m_shooterState);

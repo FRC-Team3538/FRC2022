@@ -9,6 +9,7 @@
 #include "auto/AutoFiveBallRed.hpp"
 #include "auto/AutoFiveBallBlue.hpp"
 #include "auto/AutoFiveBallSafe.hpp"
+#include "auto/AutoFiveBallSneaky.hpp"
 
 
 // Constructor requires a reference to the robot map
@@ -22,6 +23,7 @@ AutoPrograms::AutoPrograms(Robotmap &IO) : IO(IO)
     m_chooser.AddOption(AutoFiveBallRed::GetName(), AutoFiveBallRed::GetName());
     m_chooser.AddOption(AutoFiveBallBlue::GetName(), AutoFiveBallBlue::GetName());
     m_chooser.AddOption(AutoFiveBallSafe::GetName(), AutoFiveBallSafe::GetName());
+    m_chooser.AddOption(AutoFiveBallSneaky::GetName(), AutoFiveBallSneaky::GetName());
 
     // Test programs
     m_chooser.AddOption(AutoBackForward::GetName(), AutoBackForward::GetName());
@@ -63,6 +65,10 @@ void AutoPrograms::Init()
     else if (name == AutoFiveBallSafe::GetName())
     {
         m_autoProgram = new AutoFiveBallSafe(IO);
+    }
+    else if (name == AutoFiveBallSneaky::GetName())
+    {
+        m_autoProgram = new AutoFiveBallSneaky(IO);
     }
     else if (name == AutoBackForward::GetName())
     {
