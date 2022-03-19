@@ -21,6 +21,8 @@
 #include <rev/CIEColor.h>
 #include <rev/ColorMatch.h>
 
+#include <frc/SerialPort.h>
+
 class Robot : public frc::TimedRobot
 {
 public:
@@ -89,5 +91,9 @@ private:
 
   //----------- rev color sensor stuff ----------
   rev::ColorSensorV3 colorSensor{frc::I2C::Port::kMXP};
+
+  frc::SerialPort led1{9600, frc::SerialPort::Port::kUSB};
+  frc::SerialPort led2{9600, frc::SerialPort::Port::kUSB2};
+  frc::SerialPort led3{9600, frc::SerialPort::Port::kUSB1};
 
 };

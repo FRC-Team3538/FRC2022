@@ -9,6 +9,8 @@
 
 #include <frc/DriverStation.h>
 
+#include <wpi/timestamp.h>
+
 using namespace pathplanner;
 
 void Robot::RobotInit()
@@ -66,6 +68,18 @@ void Robot::RobotInit()
   {
     IO.shooter.ZeroTurret();
   }
+
+  led1.SetWriteBufferMode(frc::SerialPort::WriteBufferMode::kFlushOnAccess);
+  led2.SetWriteBufferMode(frc::SerialPort::WriteBufferMode::kFlushOnAccess);
+  led3.SetWriteBufferMode(frc::SerialPort::WriteBufferMode::kFlushOnAccess);
+
+  led1.SetWriteBufferSize(64);
+  led2.SetWriteBufferSize(64);
+  led3.SetWriteBufferSize(64);
+
+  led1.EnableTermination();
+  led2.EnableTermination();
+  led3.EnableTermination();
 }
 
 void Robot::RobotPeriodic()
@@ -102,6 +116,29 @@ void Robot::RobotPeriodic()
   frc::SmartDashboard::PutNumber("color/raw/blue", rawColor.blue);
   frc::SmartDashboard::PutNumber("color/raw/ir", rawColor.ir);
   frc::SmartDashboard::PutBoolean("color/reset", hasReset);
+
+  uint64_t time = wpi::Now();
+  uint64_t micros = time % 1000000;
+  uint64_t which = (time / 1000000) % 3;
+  // first loop of the second
+  if (micros < 20000) {
+    // first LED
+    if (which == 0) 
+    {
+      std::cout << "writing to frc::SerialPort::Port::kUSB" << std::endl;
+      led1.Write("3538,2,255,0,0,50");
+    }
+    else if (which == 1)
+    {
+      std::cout << "writing to frc::SerialPort::Port::kUSB1" << std::endl;
+      led1.Write("3538,2,0,255,0,50");
+    }
+    else if (which == 2) 
+    {
+      std::cout << "writing to frc::SerialPort::Port::kUSB2" << std::endl;
+      led1.Write("3538,2,0,0,255,50");
+    }
+  }
 }
 
 void Robot::AutonomousInit()
