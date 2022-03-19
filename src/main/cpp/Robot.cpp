@@ -69,23 +69,23 @@ void Robot::RobotInit()
     IO.shooter.ZeroTurret();
   }
 
-  led1.SetWriteBufferMode(frc::SerialPort::WriteBufferMode::kFlushOnAccess);
-  led2.SetWriteBufferMode(frc::SerialPort::WriteBufferMode::kFlushOnAccess);
-  led3.SetWriteBufferMode(frc::SerialPort::WriteBufferMode::kFlushOnAccess);
-  led4.SetWriteBufferMode(frc::SerialPort::WriteBufferMode::kFlushOnAccess);
-  led5.SetWriteBufferMode(frc::SerialPort::WriteBufferMode::kFlushOnAccess);
+  // led1.SetWriteBufferMode(frc::SerialPort::WriteBufferMode::kFlushOnAccess);
+  // led2.SetWriteBufferMode(frc::SerialPort::WriteBufferMode::kFlushOnAccess);
+  // led3.SetWriteBufferMode(frc::SerialPort::WriteBufferMode::kFlushOnAccess);
+  // led4.SetWriteBufferMode(frc::SerialPort::WriteBufferMode::kFlushOnAccess);
+  // led5.SetWriteBufferMode(frc::SerialPort::WriteBufferMode::kFlushOnAccess);
 
-  led1.SetWriteBufferSize(64);
-  led2.SetWriteBufferSize(64);
-  led3.SetWriteBufferSize(64);
-  led4.SetWriteBufferSize(64);
-  led5.SetWriteBufferSize(64);
+  // led1.SetWriteBufferSize(64);
+  // led2.SetWriteBufferSize(64);
+  // led3.SetWriteBufferSize(64);
+  // led4.SetWriteBufferSize(64);
+  // led5.SetWriteBufferSize(64);
 
-  led1.EnableTermination();
-  led2.EnableTermination();
-  led3.EnableTermination();
-  led4.EnableTermination();
-  led5.EnableTermination();
+  // led1.EnableTermination();
+  // led2.EnableTermination();
+  // led3.EnableTermination();
+  // led4.EnableTermination();
+  // led5.EnableTermination();
 }
 
 void Robot::RobotPeriodic()
@@ -99,62 +99,70 @@ void Robot::RobotPeriodic()
   if (!IO.shooter.zeroed)
     IO.shooter.SetBlinkyZeroThing();
 
-  rev::CIEColor cieColor = colorSensor.GetCIEColor();
-  frc::Color frcColor = colorSensor.GetColor();
-  double ir = colorSensor.GetIR();
-  uint32_t prox = colorSensor.GetProximity();
-  rev::ColorSensorV3::RawColor rawColor = colorSensor.GetRawColor();
-  bool hasReset = colorSensor.HasReset();
+  bool isConnected = colorSensor.IsConnected();
+  if (isConnected) 
+  {
+    rev::CIEColor cieColor = colorSensor.GetCIEColor();
+    frc::Color frcColor = colorSensor.GetColor();
+    double ir = colorSensor.GetIR();
+    uint32_t prox = colorSensor.GetProximity();
+    rev::ColorSensorV3::RawColor rawColor = colorSensor.GetRawColor();
+    bool hasReset = colorSensor.HasReset();
 
-  frc::SmartDashboard::PutNumber("color/cie/X", cieColor.GetX());
-  frc::SmartDashboard::PutNumber("color/cie/Y", cieColor.GetY());
-  frc::SmartDashboard::PutNumber("color/cie/Z", cieColor.GetZ());
-  frc::SmartDashboard::PutNumber("color/cie/Yx", cieColor.GetYx());
-  frc::SmartDashboard::PutNumber("color/cie/Yy", cieColor.GetYy());
+    frc::SmartDashboard::PutNumber("color/cie/X", cieColor.GetX());
+    frc::SmartDashboard::PutNumber("color/cie/Y", cieColor.GetY());
+    frc::SmartDashboard::PutNumber("color/cie/Z", cieColor.GetZ());
+    frc::SmartDashboard::PutNumber("color/cie/Yx", cieColor.GetYx());
+    frc::SmartDashboard::PutNumber("color/cie/Yy", cieColor.GetYy());
 
-  frc::SmartDashboard::PutNumber("color/rgb/red", frcColor.red);
-  frc::SmartDashboard::PutNumber("color/rgb/green", frcColor.green);
-  frc::SmartDashboard::PutNumber("color/rgb/blue", frcColor.blue);
-  frc::SmartDashboard::PutNumber("color/IR", ir);
-  frc::SmartDashboard::PutNumber("color/prox", prox);
-  frc::SmartDashboard::PutNumber("color/raw/red", rawColor.red);
-  frc::SmartDashboard::PutNumber("color/raw/green", rawColor.green);
-  frc::SmartDashboard::PutNumber("color/raw/blue", rawColor.blue);
-  frc::SmartDashboard::PutNumber("color/raw/ir", rawColor.ir);
-  frc::SmartDashboard::PutBoolean("color/reset", hasReset);
-
-  uint64_t time = wpi::Now();
-  uint64_t micros = time % 1000000;
-  uint64_t which = (time / 1000000) % 5;
-  // first loop of the second
-  if (micros < 20000) {
-    // first LED
-    if (which == 0) 
-    {
-      std::cout << "writing red to frc::SerialPort::Port::kUSB" << std::endl;
-      led1.Write("3538,2,255,0,0,50");
-    }
-    else if (which == 1)
-    {
-      std::cout << "writing green to frc::SerialPort::Port::kUSB1" << std::endl;
-      led2.Write("3538,2,0,255,0,50");
-    }
-    else if (which == 2) 
-    {
-      std::cout << "writing blue to frc::SerialPort::Port::kUSB2" << std::endl;
-      led3.Write("3538,2,0,0,255,50");
-    }
-    else if (which == 3) 
-    {
-      std::cout << "writing teal to frc::SerialPort::Port::kOnboard" << std::endl;
-      led4.Write("3538,2,0,128,128,50");
-    }
-    else if (which == 4) 
-    {
-      std::cout << "writing white to frc::SerialPort::Port::kMXP" << std::endl;
-      led5.Write("3538,2,255,255,255,50");
-    }
+    frc::SmartDashboard::PutNumber("color/rgb/red", frcColor.red);
+    frc::SmartDashboard::PutNumber("color/rgb/green", frcColor.green);
+    frc::SmartDashboard::PutNumber("color/rgb/blue", frcColor.blue);
+    frc::SmartDashboard::PutNumber("color/IR", ir);
+    frc::SmartDashboard::PutNumber("color/prox", prox);
+    frc::SmartDashboard::PutNumber("color/raw/red", rawColor.red);
+    frc::SmartDashboard::PutNumber("color/raw/green", rawColor.green);
+    frc::SmartDashboard::PutNumber("color/raw/blue", rawColor.blue);
+    frc::SmartDashboard::PutNumber("color/raw/ir", rawColor.ir);
+    frc::SmartDashboard::PutBoolean("color/reset", hasReset);
   }
+  frc::SmartDashboard::PutBoolean("color/connected", isConnected);
+
+  
+
+  // uint64_t time = wpi::Now();
+  // uint64_t micros = time % 1000000;
+  // uint64_t which = (time / 1000000) % 5;
+  // // first loop of the second
+  // if (micros < 20000) {
+  //   // first LED
+  //   if (which == 0) 
+  //   {
+  //     std::cout << "writing red to frc::SerialPort::Port::kUSB" << std::endl;
+  //     led1.Write("3538,2,255,0,0,50");
+  //   }
+  //   else if (which == 1)
+  //   {
+  //     std::cout << "writing green to frc::SerialPort::Port::kUSB1" << std::endl;
+  //     led2.Write("3538,2,0,255,0,50");
+  //   }
+  //   else if (which == 2) 
+  //   {
+  //     std::cout << "writing blue to frc::SerialPort::Port::kUSB2" << std::endl;
+  //     led3.Write("3538,2,0,0,255,50");
+  //   }
+  //   else if (which == 3) 
+  //   {
+  //     std::cout << "writing teal to frc::SerialPort::Port::kOnboard" << std::endl;
+  //     led4.Write("3538,2,0,128,128,50");
+  //   }
+  //   else if (which == 4) 
+  //   {
+  //     std::cout << "writing white to frc::SerialPort::Port::kMXP" << std::endl;
+  //     led5.Write("3538,2,255,255,255,50");
+  //   }
+  // }
+  
 }
 
 void Robot::AutonomousInit()

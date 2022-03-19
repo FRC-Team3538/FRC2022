@@ -1,4 +1,13 @@
 {
+  "HALProvider": {
+    "Other Devices": {
+      "Talon FX[2]/Fwd Limit": {
+        "header": {
+          "open": true
+        }
+      }
+    }
+  },
   "NTProvider": {
     "types": {
       "/FMSInfo": "FMSInfo",
@@ -22,7 +31,23 @@
         }
       },
       "/SmartDashboard/Field": {
-        "image": "/home/dereck/projects/FRC2022/field22.png",
+        "Robot": {
+          "arrowSize": 37,
+          "color": [
+            0.0,
+            0.5803921818733215,
+            0.5803921818733215,
+            255.0
+          ],
+          "length": 0.8381999731063843,
+          "selectable": false,
+          "style": "Box/Image",
+          "weight": 2.0,
+          "width": 0.8381999731063843
+        },
+        "height": 8.229599952697754,
+        "image": "C:\\Code\\FRC-Team3538\\FRC2022\\field22.png",
+        "width": 16.459199905395508,
         "window": {
           "visible": true
         }
@@ -31,6 +56,14 @@
   },
   "NetworkTables": {
     "SmartDashboard": {
+      "Auto": {
+        "open": true
+      },
+      "Drive": {
+        "pose": {
+          "open": true
+        }
+      },
       "DriveBase": {
         "IMU": {
           "open": true
@@ -39,11 +72,66 @@
           "open": true
         },
         "open": true,
+        "pose": {
+          "open": true
+        },
         "right": {
           "open": true
         }
       },
+      "Shooter": {
+        "open": true,
+        "shooter": {
+          "open": true
+        }
+      },
+      "auton": {
+        "open": true
+      },
+      "open": true,
+      "robot": {
+        "open": true
+      },
+      "traj": {
+        "open": true
+      }
+    },
+    "limelight": {
       "open": true
+    }
+  },
+  "Plot": {
+    "Plot <0>": {
+      "plots": [
+        {
+          "axis": [
+            {
+              "autoFit": true
+            }
+          ],
+          "height": 441,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/Auto/DriveState"
+            },
+            {
+              "color": [
+                0.8666667342185974,
+                0.5176470875740051,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/Auto/ShooterState"
+            }
+          ]
+        }
+      ]
     }
   }
 }
