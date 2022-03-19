@@ -1,4 +1,4 @@
-#include "auto/AutoFourBall.hpp"
+#include "auto/AutoFiveBallBlue.hpp"
 
 #include "lib/AutoHelper.h"
 
@@ -9,22 +9,22 @@
 #include <iostream>
 
 // Name for Smart Dash Chooser
-std::string AutoFourBall::GetName()
+std::string AutoFiveBallBlue::GetName()
 {
-    return "04 - Four Ball";
+    return "06 - Five Ball Wall Ball Blue";
 }
 
 // Initialization
 // Constructor requires a reference to the robot map
-AutoFourBall::AutoFourBall(Robotmap &IO) : IO(IO)
+AutoFiveBallBlue::AutoFiveBallBlue(Robotmap &IO) : IO(IO)
 {
     m_state = 0;
 }
 
-AutoFourBall::~AutoFourBall() {}
+AutoFiveBallBlue::~AutoFiveBallBlue() {}
 
 // State Machine
-void AutoFourBall::NextState()
+void AutoFiveBallBlue::NextState()
 {
     m_state++;
 
@@ -36,35 +36,42 @@ void AutoFourBall::NextState()
         }
         case 1:
         {
-            IO.shooter.SetIntakeState(Shooter::Position::Deployed);
-            IO.shooter.SetIntake(8_V);
-            IO.shooter.SetShooterRPM(4000_rpm);
-            IO.shooter.SetIndexer(8_V);
-            IO.shooter.SetFeeder(-2_V);
+            IO.drivetrain.Arcade(0.0, 0.0);
+            IO.shooter.SetFeeder(8_V);
 
             break;
         }
         case 2:
         {
-            IO.drivetrain.Arcade(0.0, 0.0);
-            IO.shooter.SetFeeder(8_V);
+            IO.shooter.SetIntakeState(Shooter::Position::Deployed);
+            IO.shooter.SetIntake(8_V);
+            IO.shooter.SetShooterRPM(3000_rpm);
+            IO.shooter.SetIndexer(8_V);
+            IO.shooter.SetFeeder(-2_V);
 
             break;
         }
         case 3:
         {
-            IO.shooter.SetFeeder(-2_V);
+            IO.drivetrain.Arcade(0.0, 0.0);
+            IO.shooter.SetFeeder(8_V);
 
             break;
         }
         case 4:
+        {
+            IO.shooter.SetFeeder(-2_V);
+
+            break;
+        }
+        case 5:
         {
             IO.drivetrain.Arcade(0.0, 0.0);
             IO.shooter.SetFeeder(8_V);
 
             break;
         }
-        case 5:
+        default:
         {
             IO.shooter.SetIntakeState(Shooter::Position::Stowed);
             IO.shooter.SetIntake(0_V);
@@ -73,17 +80,13 @@ void AutoFourBall::NextState()
             IO.shooter.SetFeeder(0_V);
             break;
         }
-        default:
-        {
-            break;
-        }
     }
 
     m_autoTimer.Reset();
     m_autoTimer.Start();
 }
 
-void AutoFourBall::Init()
+void AutoFiveBallBlue::Init()
 {
     units::feet_per_second_t maxLinearVel = 5_fps;
     // units::standard_gravity_t maxCentripetalAcc = 0.5_SG;
@@ -96,8 +99,8 @@ void AutoFourBall::Init()
     config.AddConstraint(frc::DifferentialDriveKinematicsConstraint{IO.drivetrain.GetKinematics(), maxLinearVel});
     config.SetReversed(false);
 
-    m_trajectory_first = rj::AutoHelper::LoadTrajectory("04 - Four Ball Pt 1", &config);
-    m_trajectory_second = rj::AutoHelper::LoadTrajectory("04 - Four Ball Pt 2", &config);
+    m_trajectory_first = rj::AutoHelper::LoadTrajectory("05 - 5 Ball Wall Ball 1", &config);
+    m_trajectory_second = rj::AutoHelper::LoadTrajectory("05 - 5 Ball Wall Ball 2", &config);
 
     IO.drivetrain.ResetOdometry(m_trajectory_first.InitialPose());
 
@@ -106,7 +109,7 @@ void AutoFourBall::Init()
 }
 
 // Execute the program
-void AutoFourBall::Run()
+void AutoFiveBallBlue::Run()
 {
     switch (m_state)
     {
@@ -118,25 +121,36 @@ void AutoFourBall::Run()
         }
         case 1:
         {
+            if (IO.shooter.Shoot())
+            {
+                NextState();
+            }
+
+            break;
+        }
+        case 2:
+        {
             auto reference = m_trajectory_first.Sample(m_autoTimer.Get());
 
             IO.drivetrain.Drive(reference);
 
-            if (m_autoTimer.Get() > m_trajectory_first.TotalTime() + 1.5_s)
+            if (m_autoTimer.Get() > m_trajectory_first.TotalTime())
             {
                 NextState();
             }
+
             break;
         }
-        case 2:
+        case 3:
         {
             if (IO.shooter.Shoot())
             {
                 NextState();
             }
+
             break;
         }
-        case 3:
+        case 4:
         {
             auto reference = m_trajectory_second.Sample(m_autoTimer.Get());
 
@@ -146,14 +160,16 @@ void AutoFourBall::Run()
             {
                 NextState();
             }
+
             break;
         }
-        case 4:
+        case 5:
         {
             if (IO.shooter.Shoot())
             {
                 NextState();
             }
+
             break;
         }
         default:
@@ -165,7 +181,7 @@ void AutoFourBall::Run()
 }
 
 // Called Automagically by AutoPrograms (RobotPeriodic)
-void AutoFourBall::UpdateSmartDash()
+void AutoFiveBallBlue::UpdateSmartDash()
 {
     frc::SmartDashboard::PutNumber("Auto/State", m_state);
 }

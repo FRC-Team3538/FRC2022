@@ -35,7 +35,7 @@ void AutoTwoBall::NextState()
         IO.shooter.SetHoodAngle(Shooter::HoodPosition::Middle);
         IO.shooter.SetIntakeState(Shooter::Position::Deployed);
         IO.shooter.SetIntake(8_V);
-        IO.shooter.SetShooterRPM(2600_rpm);
+        IO.shooter.SetShooterRPM(2700_rpm);
         IO.shooter.SetIndexer(4_V);
         IO.shooter.SetFeeder(-2_V);
 
@@ -70,12 +70,12 @@ void AutoTwoBall::Init()
 {
     units::feet_per_second_t maxLinearVel = 5_fps;
     // units::standard_gravity_t maxCentripetalAcc = 0.5_SG;
-    units::feet_per_second_squared_t maxLinearAcc = 2_mps_sq;
+    units::feet_per_second_squared_t maxLinearAcc = 1_mps_sq;
 
     // frc::TrajectoryConfig config(Drivetrain::kMaxSpeedLinear, Drivetrain::kMaxAccelerationLinear);
     frc::TrajectoryConfig config(maxLinearVel, maxLinearAcc);
     config.AddConstraint(frc::CentripetalAccelerationConstraint{maxLinearAcc});
-    config.AddConstraint(frc::DifferentialDriveVoltageConstraint{IO.drivetrain.GetFeedForward(), IO.drivetrain.GetKinematics(), 8_V});
+    config.AddConstraint(frc::DifferentialDriveVoltageConstraint{IO.drivetrain.GetFeedForward(), IO.drivetrain.GetKinematics(), 12_V});
     config.AddConstraint(frc::DifferentialDriveKinematicsConstraint{IO.drivetrain.GetKinematics(), maxLinearVel});
     config.SetReversed(false);
 
@@ -104,17 +104,9 @@ void AutoTwoBall::Run()
 
         auto reference = m_trajectory.Sample(m_autoTimer.Get());
 
-        frc::SmartDashboard::PutNumber("traj/t", reference.t.value());
-        frc::SmartDashboard::PutNumber("traj/x", reference.pose.Translation().X().value());
-        frc::SmartDashboard::PutNumber("traj/y", reference.pose.Translation().Y().value());
-        frc::SmartDashboard::PutNumber("traj/theta", reference.pose.Rotation().Radians().value());
-        frc::SmartDashboard::PutNumber("traj/k", reference.curvature.value());
-        frc::SmartDashboard::PutNumber("traj/v", reference.velocity.value());
-        frc::SmartDashboard::PutNumber("traj/a", reference.acceleration.value());
-
         IO.drivetrain.Drive(reference);
 
-        if ((m_autoTimer.Get() > m_trajectory.TotalTime() + 1.5_s))
+        if (m_autoTimer.Get() > m_trajectory.TotalTime() + 1.5_s)
         {
             NextState();
         }

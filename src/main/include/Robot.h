@@ -17,6 +17,12 @@
 
 #include <frc/DataLogManager.h>
 
+#include <rev/ColorSensorV3.h>
+#include <rev/CIEColor.h>
+#include <rev/ColorMatch.h>
+
+#include <frc/SerialPort.h>
+
 class Robot : public frc::TimedRobot
 {
 public:
@@ -52,13 +58,13 @@ private:
   frc::Timer shotTimer;
   frc::Timer brakeTimer;
   frc::Timer intakeTimer;
+  frc::Timer climberTimer; // Rhyme points
+  bool climberTimerOS = false;
 
   bool hoodOS = false;
   bool hoodOS2 = false;
-  bool sampleTest = false;
-  units::degree_t turretTest = 0.0_deg;
-  units::revolutions_per_minute_t shooterTest = 0.0_rpm;
-
+  bool manualJog = false;
+  
   enum class ClimberShooterMode:uint8_t
   {
     Shooter = 0,
@@ -82,5 +88,14 @@ private:
 
   static constexpr double kTurretTargetAngDefault = 0.0;
   nt::NetworkTableEntry ntTurretTargetAng = frc::SmartDashboard::GetEntry("robot/turretTargetAng");
+
+  //----------- rev color sensor stuff ----------
+  rev::ColorSensorV3 colorSensor{frc::I2C::Port::kMXP};
+
+  frc::SerialPort led1{9600, frc::SerialPort::Port::kUSB};
+  frc::SerialPort led2{9600, frc::SerialPort::Port::kUSB1};
+  frc::SerialPort led3{9600, frc::SerialPort::Port::kUSB2};
+  frc::SerialPort led4{9600, frc::SerialPort::Port::kOnboard};
+  frc::SerialPort led5{9600, frc::SerialPort::Port::kMXP};
 
 };

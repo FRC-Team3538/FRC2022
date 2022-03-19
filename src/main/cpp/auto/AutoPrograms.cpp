@@ -2,14 +2,14 @@
 
 // Include all auto programs [List 1 of 3]
 #include "auto/AutoLine.hpp"
-#include "auto/AutoLine_Backward.hpp"
 #include "auto/AutoTurn.hpp"
 #include "auto/AutoBackForward.hpp"
-#include "auto/Auto4ft.hpp"
 #include "auto/AutoTwoBall.hpp"
-#include "auto/NinetyDegreeAngle.hpp"
 #include "auto/AutoFourBall.hpp"
-#include "auto/AutoFiveBall.hpp"
+#include "auto/AutoFiveBallRed.hpp"
+#include "auto/AutoFiveBallBlue.hpp"
+#include "auto/AutoFiveBallSafe.hpp"
+#include "auto/AutoFiveBallSneaky.hpp"
 
 
 // Constructor requires a reference to the robot map
@@ -20,13 +20,13 @@ AutoPrograms::AutoPrograms(Robotmap &IO) : IO(IO)
     m_chooser.AddOption(AutoLine::GetName(), AutoLine::GetName());
     m_chooser.AddOption(AutoTwoBall::GetName(), AutoTwoBall::GetName());
     m_chooser.AddOption(AutoFourBall::GetName(), AutoFourBall::GetName());
-    m_chooser.AddOption(AutoFiveBall::GetName(), AutoFiveBall::GetName());
+    m_chooser.AddOption(AutoFiveBallRed::GetName(), AutoFiveBallRed::GetName());
+    m_chooser.AddOption(AutoFiveBallBlue::GetName(), AutoFiveBallBlue::GetName());
+    m_chooser.AddOption(AutoFiveBallSafe::GetName(), AutoFiveBallSafe::GetName());
+    m_chooser.AddOption(AutoFiveBallSneaky::GetName(), AutoFiveBallSneaky::GetName());
 
     // Test programs
-    m_chooser.AddOption(Auto4ft::GetName(), Auto4ft::GetName());
-    m_chooser.AddOption(AutoLine_Backward::GetName(), AutoLine_Backward::GetName());
     m_chooser.AddOption(AutoBackForward::GetName(), AutoBackForward::GetName());
-    m_chooser.AddOption(NinetyDegreeAngle::GetName(), NinetyDegreeAngle::GetName());
     m_chooser.AddOption(AutoTurn::GetName(), AutoTurn::GetName());
 }
 
@@ -45,22 +45,6 @@ void AutoPrograms::Init()
     if (name == AutoLine::GetName())
     {
         m_autoProgram = new AutoLine(IO);
-    } 
-    else if (name == AutoLine_Backward::GetName()) 
-    {
-        m_autoProgram = new AutoLine_Backward(IO);
-    } 
-    else if (name == AutoTurn::GetName()) 
-    {
-        m_autoProgram = new AutoTurn(IO);
-    }
-    else if (name == AutoBackForward::GetName())
-    {
-        m_autoProgram = new AutoBackForward(IO);
-    }
-    else if (name == Auto4ft::GetName())
-    {
-        m_autoProgram = new Auto4ft(IO);
     }
     else if (name == AutoTwoBall::GetName())
     {
@@ -70,10 +54,31 @@ void AutoPrograms::Init()
     {
         m_autoProgram = new AutoFourBall(IO);
     }
-    else if (name == AutoFiveBall::GetName())
+    else if (name == AutoFiveBallRed::GetName())
     {
-        m_autoProgram = new AutoFiveBall(IO);
+        m_autoProgram = new AutoFiveBallRed(IO);
     }
+     else if (name == AutoFiveBallBlue::GetName())
+    {
+        m_autoProgram = new AutoFiveBallBlue(IO);
+    }
+    else if (name == AutoFiveBallSafe::GetName())
+    {
+        m_autoProgram = new AutoFiveBallSafe(IO);
+    }
+    else if (name == AutoFiveBallSneaky::GetName())
+    {
+        m_autoProgram = new AutoFiveBallSneaky(IO);
+    }
+    else if (name == AutoBackForward::GetName())
+    {
+        m_autoProgram = new AutoBackForward(IO);
+    }
+    else if (name == AutoTurn::GetName()) 
+    {
+        m_autoProgram = new AutoTurn(IO);
+    }
+
     if (m_autoProgram != NULL)
         m_autoProgram->Init();
 }

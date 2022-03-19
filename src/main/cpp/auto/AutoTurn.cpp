@@ -8,7 +8,7 @@
 // Name for Smart Dash Chooser
 std::string AutoTurn::GetName()
 {
-    return "94 - Turn";
+    return "92 - Turn";
 }
 
 // Initialization
@@ -30,17 +30,18 @@ void AutoTurn::NextState()
 
 void AutoTurn::Init()
 {
-    units::feet_per_second_t maxLinearVel = 8_fps;
-    units::feet_per_second_squared_t maxLinearAcc = 8_fps_sq;
+    units::feet_per_second_t maxLinearVel = 5_fps;
+    // units::standard_gravity_t maxCentripetalAcc = 0.5_SG;
+    units::feet_per_second_squared_t maxLinearAcc = 1_mps_sq;
 
+    // frc::TrajectoryConfig config(Drivetrain::kMaxSpeedLinear, Drivetrain::kMaxAccelerationLinear);
     frc::TrajectoryConfig config(maxLinearVel, maxLinearAcc);
-    config.AddConstraint(frc::CentripetalAccelerationConstraint{5_mps_sq});
-    config.AddConstraint(frc::DifferentialDriveVoltageConstraint{IO.drivetrain.GetFeedForward(), IO.drivetrain.GetKinematics(), 10_V});
+    config.AddConstraint(frc::CentripetalAccelerationConstraint{maxLinearAcc});
+    config.AddConstraint(frc::DifferentialDriveVoltageConstraint{IO.drivetrain.GetFeedForward(), IO.drivetrain.GetKinematics(), 12_V});
     config.AddConstraint(frc::DifferentialDriveKinematicsConstraint{IO.drivetrain.GetKinematics(), maxLinearVel});
     config.SetReversed(false);
 
-    m_trajectory = rj::AutoHelper::LoadTrajectory("94 - Turning Left and Right", &config);
-    //m_trajectory = rj::AutoHelper::LoadTrajectory("95 - Big Circle", &config);
+    m_trajectory = rj::AutoHelper::LoadTrajectory("92 - Turning Left and Right", &config);
 
     m_autoTimer.Reset();
     m_autoTimer.Start();
@@ -58,19 +59,11 @@ void AutoTurn::Run()
         // std::cout << m_autoTimer.Get().value() << std::endl;
         auto reference = m_trajectory.Sample(m_autoTimer.Get());
 
-        frc::SmartDashboard::PutNumber("traj/t", reference.t.value());
-        frc::SmartDashboard::PutNumber("traj/x", reference.pose.Translation().X().value());
-        frc::SmartDashboard::PutNumber("traj/y", reference.pose.Translation().Y().value());
-        frc::SmartDashboard::PutNumber("traj/theta", reference.pose.Rotation().Radians().value());
-        frc::SmartDashboard::PutNumber("traj/k", reference.curvature.value());
-        frc::SmartDashboard::PutNumber("traj/v", reference.velocity.value());
-        frc::SmartDashboard::PutNumber("traj/a", reference.acceleration.value());
-
         IO.drivetrain.Drive(reference);
 
         if ((m_autoTimer.Get() > m_trajectory.TotalTime()))
         {
-            //NextState();
+            NextState();
         }
         break;
     }

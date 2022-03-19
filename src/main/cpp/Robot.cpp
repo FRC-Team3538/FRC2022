@@ -9,6 +9,8 @@
 
 #include <frc/DriverStation.h>
 
+#include <wpi/timestamp.h>
+
 using namespace pathplanner;
 
 void Robot::RobotInit()
@@ -52,12 +54,38 @@ void Robot::RobotInit()
   ntTurretTargetAng.ForceSetDouble(ntTurretTargetAng.GetDouble(kTurretTargetAngDefault));
   ntTurretTargetAng.SetPersistent();
 
+
+
+
   // Logging Stuff
 #ifdef LOGGER
   frc::DataLogManager::LogNetworkTables(true);
   // arg bool - log joystick data if true
   frc::DriverStation::StartDataLog(log, true);
 #endif // LOGGER
+
+  if (IO.shooter.GetTurretSwitch())
+  {
+    IO.shooter.ZeroTurret();
+  }
+
+  led1.SetWriteBufferMode(frc::SerialPort::WriteBufferMode::kFlushOnAccess);
+  led2.SetWriteBufferMode(frc::SerialPort::WriteBufferMode::kFlushOnAccess);
+  led3.SetWriteBufferMode(frc::SerialPort::WriteBufferMode::kFlushOnAccess);
+  led4.SetWriteBufferMode(frc::SerialPort::WriteBufferMode::kFlushOnAccess);
+  led5.SetWriteBufferMode(frc::SerialPort::WriteBufferMode::kFlushOnAccess);
+
+  led1.SetWriteBufferSize(64);
+  led2.SetWriteBufferSize(64);
+  led3.SetWriteBufferSize(64);
+  led4.SetWriteBufferSize(64);
+  led5.SetWriteBufferSize(64);
+
+  led1.EnableTermination();
+  led2.EnableTermination();
+  led3.EnableTermination();
+  led4.EnableTermination();
+  led5.EnableTermination();
 }
 
 void Robot::RobotPeriodic()
@@ -66,6 +94,67 @@ void Robot::RobotPeriodic()
   IO.drivetrain.Periodic();
   autoprograms.SmartDash();
   IO.rjVision.Periodic();
+  frc::SmartDashboard::PutNumber("robot/MatchTime", frc::DriverStation::GetMatchTime());
+  frc::SmartDashboard::PutNumber("robot/PressureHigh", IO.ph.GetPressure(0).value());
+  if (!IO.shooter.zeroed)
+    IO.shooter.SetBlinkyZeroThing();
+
+  rev::CIEColor cieColor = colorSensor.GetCIEColor();
+  frc::Color frcColor = colorSensor.GetColor();
+  double ir = colorSensor.GetIR();
+  uint32_t prox = colorSensor.GetProximity();
+  rev::ColorSensorV3::RawColor rawColor = colorSensor.GetRawColor();
+  bool hasReset = colorSensor.HasReset();
+
+  frc::SmartDashboard::PutNumber("color/cie/X", cieColor.GetX());
+  frc::SmartDashboard::PutNumber("color/cie/Y", cieColor.GetY());
+  frc::SmartDashboard::PutNumber("color/cie/Z", cieColor.GetZ());
+  frc::SmartDashboard::PutNumber("color/cie/Yx", cieColor.GetYx());
+  frc::SmartDashboard::PutNumber("color/cie/Yy", cieColor.GetYy());
+
+  frc::SmartDashboard::PutNumber("color/rgb/red", frcColor.red);
+  frc::SmartDashboard::PutNumber("color/rgb/green", frcColor.green);
+  frc::SmartDashboard::PutNumber("color/rgb/blue", frcColor.blue);
+  frc::SmartDashboard::PutNumber("color/IR", ir);
+  frc::SmartDashboard::PutNumber("color/prox", prox);
+  frc::SmartDashboard::PutNumber("color/raw/red", rawColor.red);
+  frc::SmartDashboard::PutNumber("color/raw/green", rawColor.green);
+  frc::SmartDashboard::PutNumber("color/raw/blue", rawColor.blue);
+  frc::SmartDashboard::PutNumber("color/raw/ir", rawColor.ir);
+  frc::SmartDashboard::PutBoolean("color/reset", hasReset);
+
+  uint64_t time = wpi::Now();
+  uint64_t micros = time % 1000000;
+  uint64_t which = (time / 1000000) % 5;
+  // first loop of the second
+  if (micros < 20000) {
+    // first LED
+    if (which == 0) 
+    {
+      std::cout << "writing red to frc::SerialPort::Port::kUSB" << std::endl;
+      led1.Write("3538,2,255,0,0,50");
+    }
+    else if (which == 1)
+    {
+      std::cout << "writing green to frc::SerialPort::Port::kUSB1" << std::endl;
+      led2.Write("3538,2,0,255,0,50");
+    }
+    else if (which == 2) 
+    {
+      std::cout << "writing blue to frc::SerialPort::Port::kUSB2" << std::endl;
+      led3.Write("3538,2,0,0,255,50");
+    }
+    else if (which == 3) 
+    {
+      std::cout << "writing teal to frc::SerialPort::Port::kOnboard" << std::endl;
+      led4.Write("3538,2,0,128,128,50");
+    }
+    else if (which == 4) 
+    {
+      std::cout << "writing white to frc::SerialPort::Port::kMXP" << std::endl;
+      led5.Write("3538,2,255,255,255,50");
+    }
+  }
 }
 
 void Robot::AutonomousInit()
@@ -93,9 +182,15 @@ void Robot::TeleopPeriodic()
   //
   // *** VISION AND DRIVING ***
   //
-  if (IO.mainController.GetR1Button()) // || IO.secondaryController.GetTriangleButton())
+  if (IO.mainController.GetR1Button() || IO.secondaryController.GetCircleButton()) // || IO.secondaryController.GetTriangleButton())
   {
+    if (IO.shooter.GetShooterRPM() < 250.0_rpm)
+    {
+      IO.shooter.SetShooterRPM(2800_rpm);
+    }
 
+    climberTimerOS = false;
+    manualJog = false;
     IO.shooter.SetIntakeState(Shooter::Position::Deployed);
     intakeTimer.Start();
     intakeTimer.Reset();
@@ -109,15 +204,8 @@ void Robot::TeleopPeriodic()
     vision::RJVisionPipeline::visionData data = IO.rjVision.Run();
     if (data.filled)
     {
-      if (!sampleTest)
-      {
-        sampleTest = true;
-        turretTest = IO.shooter.GetTurretAngle() + data.angle;
-        shooterTest = IO.shooter.CalculateShot(data.distance).shooterRPM;
-      }
-
       // Adjust for Movement
-      VectorMath shotVector = VectorMath{data.distance, (IO.shooter.GetTurretAngle() + data.angle)}; // Plane Relative to Robot Direction, where back of the robot is 0 deg
+      VectorMath shotVector = VectorMath{data.distance, (IO.shooter.GetTurretAngle() + data.deltaX)}; // Plane Relative to Robot Direction, where back of the robot is 0 deg
       // *** NEED ROBOT VELOCITY DATA ***
       VectorMath robotMoveVector = VectorMath{(IO.drivetrain.GetVelocity() * 1_s), 180.0_deg}; // Assuming about a 1 sec shot time. Maybe add a graph?
       VectorMath adjustedShotVector = shotVector - robotMoveVector;                            // - robotMoveVector because you want to shoot opposite of movement
@@ -125,20 +213,18 @@ void Robot::TeleopPeriodic()
       // Set Turret
       units::degree_t tol{ntVisionAngleTol.GetDouble(kVisionAngleTolDefault)};
 
-      bool turretAtAngle = IO.shooter.SetTurretAngle(turretTest, 0.75_deg);
+      bool turretAtAngle = IO.shooter.SetTurretAngle(data.turretAngle, 0.75_deg);
       // bool turretAtAngle = IO.shooter.SetTurretAngle(adjustedShotVector.GetTheta(), 0.5_deg);
-      // bool turretAtAngle = IO.shooter.SetTurretAngle((IO.shooter.GetTurretAngle() + data.angle), 1.0_deg);
+      // bool turretAtAngle = IO.shooter.SetTurretAngle((IO.shooter.GetTurretAngle() + data.deltaX), 1.0_deg);
 
       // Start Shooter
       // Shooter::State shotStat = IO.shooter.CalculateShot(adjustedShotVector.GetMagnitude()); // Magnitude from adjusted vector gets us distance
       Shooter::State shotStat = IO.shooter.CalculateShot(data.distance);
 
-      // std::cout << (IO.shooter.GetTurretAngle() + data.angle).value() << std::endl;
+      // std::cout << (IO.shooter.GetTurretAngle() + data.deltaX).value() << std::endl;
 
       // IO.shooter.SetShooterRPM(shotStat.shooterRPM);
-      //IO.shooter.SetShooterRPM(shooterTest);
-
-      IO.shooter.SetShooterRPM(2750_rpm);
+      //  IO.shooter.SetShooterRPM(shooterTest);
 
       // Set Hood
 
@@ -151,11 +237,28 @@ void Robot::TeleopPeriodic()
 
       // Shoot Maybe
       shoot = turretAtAngle;
-
-      double fwd = -0.5 * deadband(IO.mainController.GetLeftY());
-
-      IO.drivetrain.Arcade(fwd, 0.0);
     }
+    double fwd = -deadband(IO.mainController.GetLeftY());
+    double rot = -deadband(IO.mainController.GetRightX());
+
+    IO.drivetrain.Arcade(fwd, rot);
+  }
+  else if (IO.secondaryController.GetSquareButton())
+  {
+    climberTimerOS = false;
+    manualJog = false;
+    vision::RJVisionPipeline::visionData data = IO.rjVision.Run();
+    if (data.filled)
+    {
+      // Set Turret
+      units::degree_t tol{ntVisionAngleTol.GetDouble(kVisionAngleTolDefault)};
+
+      IO.shooter.SetTurretAngle(data.turretAngle, 0.75_deg);
+    }
+    double fwd = -deadband(IO.mainController.GetLeftY());
+    double rot = -deadband(IO.mainController.GetRightX());
+
+    IO.drivetrain.Arcade(fwd, rot);
   }
   else
   {
@@ -194,11 +297,43 @@ void Robot::TeleopPeriodic()
     // IO.shooter.SetTurret(units::volt_t{-13.0 * deadband(IO.mainController.GetRightX())});
 
     // IO.shooter.SetTurretAngle(turretAngle, 0.25_deg);
+    if (!IO.shooter.zeroed)
+    {
+      if (IO.secondaryController.GetPSButton())
+      {
+        double turn = -1.5 * deadband(IO.secondaryController.GetRightX());
+        IO.shooter.SetTurret(units::volt_t{turn});
+        bool negative = turn > 0.0;
+        if (IO.shooter.GetTurretSwitch())
+          IO.shooter.ZeroTurret(negative);
+      }
+      else
+        IO.shooter.SetTurret(0.0_V);
+    }
+    else if (IO.secondaryController.GetPSButton())
+    {
+      climberTimerOS = false;
+      IO.shooter.SetTurretAngle(0.0_deg, 1_deg);
+      m_csmode = ClimberShooterMode::Shooter;
+      manualJog = false;
+    }
+    else if (std::abs(deadband(IO.secondaryController.GetRightX())) > 0.0 || manualJog)
+    {
+      climberTimerOS = false;
+      manualJog = true;
+      IO.shooter.SetTurret(units::volt_t{-3.0 * deadband(IO.secondaryController.GetRightX())});
+    }
+    else if (m_csmode == ClimberShooterMode::Climber)
+      IO.shooter.SetTurretAngle(90.0_deg, 1_deg);
+    else
+    {
+      IO.shooter.SetTurretAngle(0.0_deg, 1_deg);
+      climberTimerOS = false;
+    }
 
     // IO.shooter.SetTurretAngle(units::degree_t{ntTurretTargetAng.GetDouble(kTurretTargetAngDefault)}, units::degree_t{0.5});
 
     hoodOS2 = false;
-    sampleTest = false;
 
     double fwd = -deadband(IO.mainController.GetLeftY());
     // double rot = 0.0;
@@ -226,7 +361,7 @@ void Robot::TeleopPeriodic()
     break;
   case 0:
     // FENDER
-    IO.shooter.SetShooterRPM(s);
+    IO.shooter.SetShooterRPM(3500_rpm);
     m_csmode = ClimberShooterMode::Shooter;
     if (!hoodOS)
     {
@@ -237,7 +372,7 @@ void Robot::TeleopPeriodic()
 
   case 90:
     // MIDFIELD
-    IO.shooter.SetShooterRPM(s);
+    IO.shooter.SetShooterRPM(2750_rpm);
     m_csmode = ClimberShooterMode::Shooter;
     if (!hoodOS)
     {
@@ -248,18 +383,18 @@ void Robot::TeleopPeriodic()
 
   case 180:
     // LAUNCHPAD
-    IO.shooter.SetShooterRPM(s);
+    IO.shooter.SetShooterRPM(1000_rpm);
     m_csmode = ClimberShooterMode::Shooter;
     if (!hoodOS)
     {
-      IO.shooter.SetHoodAngle(Shooter::HoodPosition::Top);
+      IO.shooter.SetHoodAngle(Shooter::HoodPosition::Middle);
       hoodOS = true;
     }
     break;
 
   case 270:
     // TARMAC
-    IO.shooter.SetShooterRPM(2700_rpm);
+    IO.shooter.SetShooterRPM(2950_rpm);
     m_csmode = ClimberShooterMode::Shooter;
     if (!hoodOS)
     {
@@ -269,10 +404,16 @@ void Robot::TeleopPeriodic()
     break;
   }
 
+  if (IO.secondaryController.GetOptionsButtonPressed())
+  {
+    IO.shooter.SetShooterRPM(s);
+    m_csmode = ClimberShooterMode::Shooter;
+  }
+
   IO.shooter.SetHoodAngle();
 
   // Shoot
-  if (shoot || IO.secondaryController.GetSquareButton() || IO.mainController.GetSquareButton())
+  if (shoot || IO.secondaryController.GetTriangleButton() || IO.mainController.GetL1Button())
   {
     m_csmode = ClimberShooterMode::Shooter;
     IO.shooter.Shoot();
@@ -305,7 +446,7 @@ void Robot::TeleopPeriodic()
   }
 
   // Retract Intake after a short delay
-  if (intakeTimer.Get() > 0.5_s)
+  if (intakeTimer.Get() > 0.25_s)
   {
     IO.shooter.SetIntakeState(Shooter::Position::Stowed);
   }
@@ -315,7 +456,7 @@ void Robot::TeleopPeriodic()
   {
     IO.shooter.SetIndexer(units::volt_t{ntIndexerVoltage.GetDouble(kIndexerVoltageDefault)});
   }
-  else if (intakeCmd < 0.0_V)
+  else if (intakeCmd < -0.8 * 13_V)
   {
     IO.shooter.SetIndexer(units::volt_t{(-1) * ntIndexerVoltage.GetDouble(kIndexerVoltageDefault)});
   }
@@ -344,7 +485,17 @@ void Robot::TeleopPeriodic()
   //
   if (IO.secondaryController.GetR1Button())
   {
-    IO.climber.SetClimberState(Climber::ClimbState::Up);
+    manualJog = false;
+    if (!climberTimerOS)
+    {
+      climberTimer.Reset();
+      climberTimer.Start();
+      climberTimerOS = true;
+    }
+
+    if (climberTimer.Get() > 0.5_s)
+      IO.climber.SetClimberState(Climber::ClimbState::Up);
+
     m_csmode = ClimberShooterMode::Climber;
   }
 
@@ -398,6 +549,18 @@ void Robot::TestPeriodic()
 {
   IO.shooter.SetTurret(0_V);
   IO.rjVision.SetLED(true);
+
+  if (IO.mainController.GetPSButton())
+  {
+    IO.rjVision.TakeSnapshot(1);
+  }
+  else
+    IO.rjVision.TakeSnapshot(0);
+
+  double fwd = -0.5 * deadband(IO.mainController.GetLeftY());
+  double rot = -0.5 * deadband(IO.mainController.GetRightX());
+
+  IO.drivetrain.Arcade(fwd, rot);
 }
 
 double Robot::deadband(double val, double min, double max)

@@ -73,6 +73,9 @@ Shooter::Shooter()
     frc::SmartDashboard::PutNumber("TURRET P", 0.4);
     frc::SmartDashboard::PutNumber("TURRET I", 0.0001);
     frc::SmartDashboard::PutNumber("TURRET D", 0.0);
+
+    indexerA.ConfigSupplyCurrentLimit(ctre::phoenix::motorcontrol::SupplyCurrentLimitConfiguration(true, 20, 20, 0));
+    intake.ConfigSupplyCurrentLimit(ctre::phoenix::motorcontrol::SupplyCurrentLimitConfiguration(true, 30, 30, 0));
 }
 
 void Shooter::ConfigureSystem() {}
@@ -84,6 +87,10 @@ void Shooter::UpdateTelemetry()
     turret.Config_kP(0, frc::SmartDashboard::GetNumber("TURRET P", 0.4));
     turret.Config_kI(0, frc::SmartDashboard::GetNumber("TURRET I", 0.0001));
     turret.Config_kI(0, frc::SmartDashboard::GetNumber("TURRET D", 0.0));
+
+    frc::SmartDashboard::PutBoolean("ZEROED", zeroed);
+    frc::SmartDashboard::PutBoolean("ZEROED SWITCH", GetTurretSwitch());
+    frc::SmartDashboard::PutBoolean("NOT ZEROED!!!", blinkyZeroLight);
 }
 
 void Shooter::SetIntakeState(Position pos)
@@ -138,8 +145,43 @@ void Shooter::SetTurret(units::volt_t voltage)
     turret.SetVoltage(voltage);
 }
 
+bool Shooter::GetTurretSwitch()
+{
+    return !turretZeroSwitch.Get();
+}
+
+void Shooter::ZeroTurret(bool negative)
+{
+    if (negative)
+        turret.SetSelectedSensorPosition(-3.0 / kScaleFactorTurret);
+    else
+        turret.SetSelectedSensorPosition(0.4 / kScaleFactorTurret);
+    zeroed = true;
+}
+
+void Shooter::ZeroTurret()
+{
+    turret.SetSelectedSensorPosition(0.0);
+    zeroed = true;
+    blinkyZeroLight = true;
+}
+
+void Shooter::SetBlinkyZeroThing()
+{
+    epilepsyTimer.Start();
+    if (epilepsyTimer.Get() > 0.2_s)
+    {
+        blinkyZeroLight = !blinkyZeroLight;
+        epilepsyTimer.Reset();
+        epilepsyTimer.Start();
+    }
+}
+
 bool Shooter::SetTurretAngle(units::degree_t targetAngle, units::degree_t tol)
 {
+    if (!zeroed)
+        return false;
+
     turret.Set(ctre::phoenix::motorcontrol::ControlMode::Position, (targetAngle / kScaleFactorTurret).value());
 
     return (units::math::abs((GetTurretAngle() - targetAngle)) < tol);
@@ -155,6 +197,7 @@ bool Shooter::SetTurretAngle(units::degree_t targetAngle, units::degree_t tol)
 
 void Shooter::SetHoodAngle(Shooter::HoodPosition pos)
 {
+    return;
     cmd_hoodPosition = pos;
     hoodPosOS = false;
 
@@ -167,7 +210,8 @@ void Shooter::SetHoodAngle(Shooter::HoodPosition pos)
 
 void Shooter::SetHoodAngle()
 {
-    //std::cout << (int)cmd_hoodPosition << std::endl;
+    return;
+    // std::cout << (int)cmd_hoodPosition << std::endl;
 
     if (cmd_hoodPosition == HoodPosition::Top)
         return;
@@ -192,7 +236,7 @@ void Shooter::SetHoodAngle()
             hoodPosOS = true;
         }
 
-        if ((hoodPosTimer.Get() > 0.4_s) && (hoodPosOS))
+        if ((hoodPosTimer.Get() > 0.5_s) && (hoodPosOS))
             hood.Set(false);
     }
     break;
@@ -226,8 +270,39 @@ units::degree_t Shooter::GetTurretAngle()
     return units::degree_t(ang);
 }
 
-bool Shooter::Shoot()
+void Shooter::ResetEdgeDetector()
 {
+    m_upToSpeed = false;
+}
+
+bool Shooter::Shoot_EdgeDetector()
+{
+    // Resume Last Command (in case shooter was stopped)
+    SetShooterRPM(cmd_shooterRPM);
+
+#ifdef __FRC_ROBORIO__
+
+    const double tol = 0.1;
+    if (m_upToSpeed) {
+        if (units::math::abs(GetShooterRPM() - cmd_shooterRPM) < (cmd_shooterRPM * tol)) {
+            m_upToSpeed = false;
+            return true;
+        }
+        return false;
+    } else {
+        m_upToSpeed = units::math::abs(GetShooterRPM() - cmd_shooterRPM) > (cmd_shooterRPM * tol);
+        return false;
+    }
+#else
+    // TODO: how to handle in sim
+    // for now just assume it's legendary
+    return true;
+#endif
+}
+
+bool Shooter::Shoot(units::second_t settleTime)
+{
+
     static frc::Timer settleTimer;
     settleTimer.Start();
 
@@ -267,12 +342,18 @@ bool Shooter::Shoot()
     // }
 
     // Wait for balls to exit robot in auto
-    return (settleTimer.Get() > 2.0_s); // TODO: Move to NT Parameter / Class Constant?
+    if (settleTimer.Get() > settleTime) {
+        settleTimer.Reset();
+        settleTimer.Stop();
+
+        return true;
+    }
+    return false; // TODO: Move to NT Parameter / Class Constant?
 }
 
 Shooter::State Shooter::CalculateShot(units::inch_t distance)
 {
-    double mainWheel = 1029.7 + (0.00108 * std::pow(distance.value(), 3)) + (-0.350649 * std::pow(distance.value(), 2)) + (41.70178 * std::pow(distance.value(), 1));
+    double mainWheel = 2031.0 + (0.0015 * std::pow(distance.value(), 3)) + (-0.34445 * std::pow(distance.value(), 2)) + (28.5196 * std::pow(distance.value(), 1));
 
     State shotStates;
     shotStates.hoodAngle = HoodPosition::Middle;

@@ -53,6 +53,8 @@ public:
 
 
 private:
+    const double kScaleFactor = 1 / 124000.0; // Ticks over climber position (from 0 - 1)
+
     bool sensorOverrode = false;
 
     WPI_TalonFX climberA{20};
@@ -60,5 +62,5 @@ private:
 
     frc::Solenoid tiltPiston{frc::PneumaticsModuleType::REVPH, 1};
 
-    frc::DigitalInput bottomMagSwitch {9};
+    frc::DigitalInput bottomMagSwitch {8};
 };

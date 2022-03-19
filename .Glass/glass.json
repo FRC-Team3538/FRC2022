@@ -27,18 +27,30 @@
       "/FMSInfo": "FMSInfo",
       "/SmartDashboard/Choose Auto": "String Chooser",
       "/SmartDashboard/Field": "Field2d"
+    },
+    "windows": {
+      "/SmartDashboard/Choose Auto": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Field": {
+        "image": "C:\\Dev\\FRC-Team3538\\frc2022\\field22.png",
+        "window": {
+          "visible": true
+        }
+      }
     }
   },
   "NetworkTables Settings": {
     "mode": "Client",
-    "serverTeam": "3538",
-    "visible": false
+    "serverTeam": "3538"
   },
   "Plots": {
     "Plot <0>": {
       "plots": [
         {
-          "height": 440,
+          "height": 489,
           "series": [
             {
               "color": [
@@ -61,7 +73,7 @@
           ]
         },
         {
-          "height": 440,
+          "height": 489,
           "series": [
             {
               "color": [
@@ -91,7 +103,7 @@
     "Plot <1>": {
       "plots": [
         {
-          "height": 911
+          "height": 189
         }
       ]
     }

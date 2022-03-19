@@ -76,24 +76,24 @@ private:
     /***************************************************************************/
     // Characterization Values
 
-    static constexpr units::meter_t kTrackWidth = 0.74123_m;
+    static constexpr units::meter_t kTrackWidth = 0.79237_m;
     static constexpr units::meter_t kWheelRadius = 1.95_in;
 
-    static constexpr double kGearRatio = (60.0 / 11.0) * (56.0 / 36.0);
+    static constexpr double kGearRatio = (60.0 / 11.0) * (54.0 / 38.0);
     static constexpr int kEncoderResolution = 2048;
     static constexpr int kMotorCount = 3; // Per gearbox
 
     // Made these slightly more obscure to support use in calculating kMaxSpeedLinear/Angular at compile time.
     static constexpr auto kMaxVoltage = 12.0_V;
-    static constexpr auto kStatic = 0.64781_V;
-    static constexpr auto kVlinear = 2.87860_V / 1_mps;
-    static constexpr auto kAlinear = 0.18800_V / 1_mps_sq;
-    static constexpr auto kVangular = 2.87740_V / 1_rad_per_s;
-    static constexpr auto kAangular = 0.043271_V / 1_rad_per_s_sq;
+    static constexpr auto kStatic = 0.66366_V;
+    static constexpr auto kVlinear = 2.5434_V / 1_mps;
+    static constexpr auto kAlinear = 0.2185_V / 1_mps_sq;
+    static constexpr auto kVangular = 2.8388_V / 1_rad_per_s;
+    static constexpr auto kAangular = 0.09634_V / 1_rad_per_s_sq;
 
     // Velocity Control PID (Is this really required ???)
-    frc2::PIDController m_leftPIDController{0.0, 0.0, 0.0}; // {1.1827, 0.0, 0.0};
-    frc2::PIDController m_rightPIDController{0.0, 0.0, 0.0}; // {1.1827, 0.0, 0.0};
+    frc2::PIDController m_leftPIDController{0.89223, 0.0, 0.0}; //{0.89223, 0.0, 0.0};
+    frc2::PIDController m_rightPIDController{0.89223, 0.0, 0.0}; //{0.89223, 0.0, 0.0};
 
     // Average Battery Resistance (Simulation)
     static constexpr auto kBatteryResistance = 0.03;
@@ -173,4 +173,6 @@ private:
     frc::Field2d m_fieldSim;
 
     frc::PIDController m_yawPID{0.25, 0.0, 0.05};
+
+    frc::Trajectory::State reference;
 };

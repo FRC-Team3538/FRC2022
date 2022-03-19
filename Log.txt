@@ -1,8 +1,0 @@
-1/10:
-    Done:
-        Made code structure
-    Todo:
-        Clean Drivebase and Add Abstract Functions
-        Use Constants.hpp
-        Add more things
-        Win worlds

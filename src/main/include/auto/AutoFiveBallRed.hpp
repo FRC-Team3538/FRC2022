@@ -16,7 +16,7 @@
 #include <memory>
 #include "lib/csv.h"
 
-class AutoLine_Backward : public AutoInterface
+class AutoFiveBallRed : public AutoInterface
 {
 public:
     // Name of this program, used by SmartDash
@@ -32,13 +32,14 @@ private:
 
     void NextState();
 
-    frc::Trajectory m_trajectory;
+    frc::Trajectory m_trajectory_first;
+    frc::Trajectory m_trajectory_second;
 
 public:
     // Constructor requires a reference to the RobotMap
-    AutoLine_Backward() = delete;
-    AutoLine_Backward(Robotmap &);
-    ~AutoLine_Backward();
+    AutoFiveBallRed() = delete;
+    AutoFiveBallRed(Robotmap &);
+    ~AutoFiveBallRed();
 
     // Auto Program Logic
     void Init();

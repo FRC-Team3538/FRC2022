@@ -16,7 +16,7 @@
 #include <memory>
 #include "lib/csv.h"
 
-class AutoFiveBall : public AutoInterface
+class AutoFiveBallSafe : public AutoInterface
 {
 public:
     // Name of this program, used by SmartDash
@@ -27,19 +27,36 @@ private:
     Robotmap &IO;
 
     // State Variables
-    int m_state;
-    frc::Timer m_autoTimer;
+    int m_driveState;
+    bool m_newDriveState;
+    int m_shooterState;
+    bool m_newShooterState;
+    frc::Timer m_driveTimer;
+    frc::Timer m_shooterTimer;
+    frc::Timer m_totalTimer;
 
-    void NextState();
+    void NextDriveState();
+    void NextShooterState();
+
+    bool FollowTrajectory(frc::Trajectory &trajectory);
+    bool FindVisionTarget();
 
     frc::Trajectory m_trajectory_first;
     frc::Trajectory m_trajectory_second;
+    frc::Trajectory m_trajectory_third;
+
+    double kVisionAngleTolDefault = 0.5;
+    nt::NetworkTableEntry ntVisionAngleTol = frc::SmartDashboard::GetEntry("robot/visionAngleTol");
+
+    units::radian_t turretTarget;
+    int m_shotCount;
+
 
 public:
     // Constructor requires a reference to the RobotMap
-    AutoFiveBall() = delete;
-    AutoFiveBall(Robotmap &);
-    ~AutoFiveBall();
+    AutoFiveBallSafe() = delete;
+    AutoFiveBallSafe(Robotmap &);
+    ~AutoFiveBallSafe();
 
     // Auto Program Logic
     void Init();
