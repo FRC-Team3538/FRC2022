@@ -270,6 +270,36 @@ units::degree_t Shooter::GetTurretAngle()
     return units::degree_t(ang);
 }
 
+void Shooter::ResetEdgeDetector()
+{
+    m_upToSpeed = false;
+}
+
+bool Shooter::Shoot_EdgeDetector()
+{
+    // Resume Last Command (in case shooter was stopped)
+    SetShooterRPM(cmd_shooterRPM);
+
+#ifdef __FRC_ROBORIO__
+
+    const double tol = 0.1;
+    if (m_upToSpeed) {
+        if (units::math::abs(GetShooterRPM() - cmd_shooterRPM) < (cmd_shooterRPM * tol)) {
+            m_upToSpeed = false;
+            return true;
+        }
+        return false;
+    } else {
+        m_upToSpeed = units::math::abs(GetShooterRPM() - cmd_shooterRPM) > (cmd_shooterRPM * tol);
+        return false;
+    }
+#else
+    // TODO: how to handle in sim
+    // for now just assume it's legendary
+    return true;
+#endif
+}
+
 bool Shooter::Shoot(units::second_t settleTime)
 {
 

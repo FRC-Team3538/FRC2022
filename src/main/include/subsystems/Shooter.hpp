@@ -84,6 +84,8 @@ public:
     bool GetTurretSwitch();
 
     // Helpers
+    void ResetEdgeDetector();
+    bool Shoot_EdgeDetector();
     bool Shoot(units::second_t settleTime = 1.5_s);
     State CalculateShot(units::inch_t distance);
     void FalconSlotConfig(WPI_TalonFX &motor, int slot, SlotConfiguration &config);
@@ -137,4 +139,5 @@ private:
 
     frc::Timer epilepsyTimer;
     bool blinkyZeroLight = false;
+    bool m_upToSpeed = false;
 };
