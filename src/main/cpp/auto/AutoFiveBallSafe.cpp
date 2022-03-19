@@ -321,6 +321,8 @@ void AutoFiveBallSafe::Run()
             NextDriveState();
             NextShooterState();
         }
+
+        break;
     }
     default:
     {
