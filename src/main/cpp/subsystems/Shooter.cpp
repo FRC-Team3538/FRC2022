@@ -93,6 +93,11 @@ void Shooter::UpdateTelemetry()
     frc::SmartDashboard::PutBoolean("NOT ZEROED!!!", blinkyZeroLight);
 }
 
+void Shooter::Periodic()
+{
+    m_latestFilterResult = filter.Calculate(GetShooterRPM());
+}
+
 void Shooter::SetIntakeState(Position pos)
 {
     deployPiston.Set((bool)pos);
@@ -284,7 +289,7 @@ bool Shooter::Shoot_EdgeDetector()
 
     const double tol = 0.1;
     if (m_upToSpeed) {
-        if (units::math::abs(GetShooterRPM() - cmd_shooterRPM) < (cmd_shooterRPM * tol)) {
+        if (m_latestFilterResult < (cmd_shooterRPM * tol) - cmd_shooterRPM) {
             m_upToSpeed = false;
             return true;
         }
@@ -438,6 +443,7 @@ void Shooter::InitSendable(wpi::SendableBuilder &builder)
 
     // Shooter PID
     // TODO: Disable this for Competition?
+    /*
     builder.AddDoubleProperty(
         "shooter/kP",
         [this]
@@ -515,4 +521,7 @@ void Shooter::InitSendable(wpi::SendableBuilder &builder)
         "intake/sol", [this]
         { return deployPiston.Get() ? "Deployed" : "Stowed"; },
         nullptr);
+    */
+
+    builder.AddDoubleProperty("shooter/hp_filter_result", [this] { return m_latestFilterResult.value(); }, nullptr);
 }

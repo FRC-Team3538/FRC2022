@@ -14,6 +14,7 @@
 #include <wpi/sendable/SendableBuilder.h>
 #include <wpi/sendable/SendableHelper.h>
 #include <frc/DigitalInput.h>
+#include <frc/filter/LinearFilter.h>
 
 #include "Subsystem.hpp"
 
@@ -56,6 +57,8 @@ public:
     // RJ::Subsystem Interface
     void ConfigureSystem();
     void UpdateTelemetry();
+
+    void Periodic();
 
     // *** SETTERS ***
     void SetIntakeState(Position pos);
@@ -115,7 +118,7 @@ private:
     frc::Solenoid hoodStop{frc::PneumaticsModuleType::REVPH, 3};
 
     // Constants
-    static constexpr double kScaleFactorTurret = 360.0 * (18.0 / 184.0) * (11.0 / 60.0) * (1.0 / 2048.0);// Angle Over Ticks
+    static constexpr double kScaleFactorTurret = 360.0 * (18.0 / 184.0) * (11.0 / 60.0) * (1.0 / 2048.0); // Angle Over Ticks
     static constexpr double kTicks2RPM = (1.0 / (2048.0)) * 10.0 * 60.0;
 
     // Controllers
@@ -140,4 +143,7 @@ private:
     frc::Timer epilepsyTimer;
     bool blinkyZeroLight = false;
     bool m_upToSpeed = false;
+
+    frc::LinearFilter<units::angular_velocity::revolutions_per_minute_t> filter = frc::LinearFilter<units::angular_velocity::revolutions_per_minute_t>::HighPass(0.1, 0.02_s);
+    units::angular_velocity::revolutions_per_minute_t m_latestFilterResult;
 };

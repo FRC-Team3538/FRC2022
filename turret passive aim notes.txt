@@ -1,0 +1,19 @@
+
+PhotonUtils::EstimateFieldToRobot args:
+  cameraHeightMeters - 31"
+  targetHeightMeters - 103.25"
+
+  cameraPitchRadians - 33deg?
+
+  targetPitchRadians - from target
+
+  # SEE NOTE
+  targetYaw - from target
+  
+  gyroAngle - robotAngle + turetAngle
+
+  fieldToTarget - ~{x 8.2_m, y 4.1_m}
+
+  # need to know cameraToTurret and TurretToRobot
+  #    turretToRobot is constant, cameraToTurret is based on turret angle
+  cameraToRobot - Transform2d{x 5", y 0"}
