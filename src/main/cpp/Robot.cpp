@@ -72,14 +72,20 @@ void Robot::RobotInit()
   led1.SetWriteBufferMode(frc::SerialPort::WriteBufferMode::kFlushOnAccess);
   led2.SetWriteBufferMode(frc::SerialPort::WriteBufferMode::kFlushOnAccess);
   led3.SetWriteBufferMode(frc::SerialPort::WriteBufferMode::kFlushOnAccess);
+  led4.SetWriteBufferMode(frc::SerialPort::WriteBufferMode::kFlushOnAccess);
+  led5.SetWriteBufferMode(frc::SerialPort::WriteBufferMode::kFlushOnAccess);
 
   led1.SetWriteBufferSize(64);
   led2.SetWriteBufferSize(64);
   led3.SetWriteBufferSize(64);
+  led4.SetWriteBufferSize(64);
+  led5.SetWriteBufferSize(64);
 
   led1.EnableTermination();
   led2.EnableTermination();
   led3.EnableTermination();
+  led4.EnableTermination();
+  led5.EnableTermination();
 }
 
 void Robot::RobotPeriodic()
@@ -119,24 +125,34 @@ void Robot::RobotPeriodic()
 
   uint64_t time = wpi::Now();
   uint64_t micros = time % 1000000;
-  uint64_t which = (time / 1000000) % 3;
+  uint64_t which = (time / 1000000) % 5;
   // first loop of the second
   if (micros < 20000) {
     // first LED
     if (which == 0) 
     {
-      std::cout << "writing to frc::SerialPort::Port::kUSB" << std::endl;
+      std::cout << "writing red to frc::SerialPort::Port::kUSB" << std::endl;
       led1.Write("3538,2,255,0,0,50");
     }
     else if (which == 1)
     {
-      std::cout << "writing to frc::SerialPort::Port::kUSB1" << std::endl;
-      led1.Write("3538,2,0,255,0,50");
+      std::cout << "writing green to frc::SerialPort::Port::kUSB1" << std::endl;
+      led2.Write("3538,2,0,255,0,50");
     }
     else if (which == 2) 
     {
-      std::cout << "writing to frc::SerialPort::Port::kUSB2" << std::endl;
-      led1.Write("3538,2,0,0,255,50");
+      std::cout << "writing blue to frc::SerialPort::Port::kUSB2" << std::endl;
+      led3.Write("3538,2,0,0,255,50");
+    }
+    else if (which == 3) 
+    {
+      std::cout << "writing teal to frc::SerialPort::Port::kOnboard" << std::endl;
+      led4.Write("3538,2,0,128,128,50");
+    }
+    else if (which == 4) 
+    {
+      std::cout << "writing white to frc::SerialPort::Port::kMXP" << std::endl;
+      led5.Write("3538,2,255,255,255,50");
     }
   }
 }

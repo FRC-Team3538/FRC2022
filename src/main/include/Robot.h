@@ -93,7 +93,9 @@ private:
   rev::ColorSensorV3 colorSensor{frc::I2C::Port::kMXP};
 
   frc::SerialPort led1{9600, frc::SerialPort::Port::kUSB};
-  frc::SerialPort led2{9600, frc::SerialPort::Port::kUSB2};
-  frc::SerialPort led3{9600, frc::SerialPort::Port::kUSB1};
+  frc::SerialPort led2{9600, frc::SerialPort::Port::kUSB1};
+  frc::SerialPort led3{9600, frc::SerialPort::Port::kUSB2};
+  frc::SerialPort led4{9600, frc::SerialPort::Port::kOnboard};
+  frc::SerialPort led5{9600, frc::SerialPort::Port::kMXP};
 
 };
