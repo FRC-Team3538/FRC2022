@@ -17,6 +17,10 @@
 
 #include <frc/DataLogManager.h>
 
+#include <rev/ColorSensorV3.h>
+#include <rev/CIEColor.h>
+#include <rev/ColorMatch.h>
+
 class Robot : public frc::TimedRobot
 {
 public:
@@ -82,5 +86,8 @@ private:
 
   static constexpr double kTurretTargetAngDefault = 0.0;
   nt::NetworkTableEntry ntTurretTargetAng = frc::SmartDashboard::GetEntry("robot/turretTargetAng");
+
+  //----------- rev color sensor stuff ----------
+  rev::ColorSensorV3 colorSensor{frc::I2C::Port::kMXP};
 
 };

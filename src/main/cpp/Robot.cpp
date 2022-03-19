@@ -78,6 +78,30 @@ void Robot::RobotPeriodic()
   frc::SmartDashboard::PutNumber("robot/PressureHigh", IO.ph.GetPressure(0).value());
   if (!IO.shooter.zeroed)
     IO.shooter.SetBlinkyZeroThing();
+
+  rev::CIEColor cieColor = colorSensor.GetCIEColor();
+  frc::Color frcColor = colorSensor.GetColor();
+  double ir = colorSensor.GetIR();
+  uint32_t prox = colorSensor.GetProximity();
+  rev::ColorSensorV3::RawColor rawColor = colorSensor.GetRawColor();
+  bool hasReset = colorSensor.HasReset();
+
+  frc::SmartDashboard::PutNumber("color/cie/X", cieColor.GetX());
+  frc::SmartDashboard::PutNumber("color/cie/Y", cieColor.GetY());
+  frc::SmartDashboard::PutNumber("color/cie/Z", cieColor.GetZ());
+  frc::SmartDashboard::PutNumber("color/cie/Yx", cieColor.GetYx());
+  frc::SmartDashboard::PutNumber("color/cie/Yy", cieColor.GetYy());
+
+  frc::SmartDashboard::PutNumber("color/rgb/red", frcColor.red);
+  frc::SmartDashboard::PutNumber("color/rgb/green", frcColor.green);
+  frc::SmartDashboard::PutNumber("color/rgb/blue", frcColor.blue);
+  frc::SmartDashboard::PutNumber("color/IR", ir);
+  frc::SmartDashboard::PutNumber("color/prox", prox);
+  frc::SmartDashboard::PutNumber("color/raw/red", rawColor.red);
+  frc::SmartDashboard::PutNumber("color/raw/green", rawColor.green);
+  frc::SmartDashboard::PutNumber("color/raw/blue", rawColor.blue);
+  frc::SmartDashboard::PutNumber("color/raw/ir", rawColor.ir);
+  frc::SmartDashboard::PutBoolean("color/reset", hasReset);
 }
 
 void Robot::AutonomousInit()
