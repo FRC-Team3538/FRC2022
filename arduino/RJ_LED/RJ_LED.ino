@@ -61,8 +61,8 @@ void setup() {
 // loop() function -- runs repeatedly as long as board is on ---------------
 
 // ------------------------- Robot command ----------------------------------
+int cmd = 0;
 int mode = 3, p1=0, p2=255, p3=80, p4=100;
-
 
 // ------------------------- SERIAL -----------------------------------------
 const byte numChars = 32;
@@ -111,7 +111,7 @@ void parseData() {
 
   // Parse Each Token
   strtokIndx = strtok(tempChars,",");
-  mode = atoi(strtokIndx);
+  cmd = atoi(strtokIndx);
 
   strtokIndx = strtok(NULL, ",");
   p1 = atoi(strtokIndx);
@@ -128,7 +128,7 @@ void parseData() {
 
 void showParsedData() {
   Serial.print("Command: ");
-  Serial.print(mode);
+  Serial.print(cmd);
   Serial.print(",");
   Serial.print(p1);
   Serial.print(",");
@@ -150,32 +150,84 @@ void loop() {
     newData = false;
   }
 
+
+ if (cmd < 1)
+ {
+  //NO OP
+ }
+ else if (cmd < 90)
+ {
+  mode = cmd;
+ }
+ else if (cmd == 90)
+ {
+   strip.setBrightness(p1);
+   cmd = 0;
+ }
+ else
+ {
+   cmd = 0;
+ }
+  
+
   // Fill along the length of the strip in various colors...
   switch(mode)
   {
-    case 1: 
-    strip.setBrightness(p1);
-    mode = 0;
-    break;
     
-    case 2:
+    case 1:
     colorWipe(strip.Color(p1, p2, p3), p4);
     break;
     
-    case 3:
+    case 2:
     theaterChase(strip.Color(p1, p2, p3), p4);
     break;
 
-    case 4:
+    case 3:
     rainbow(p1);
     break;
     
-    case 5:
+    case 4:
     theaterChaseRainbow(p1);
+    break;
+
+    case 5:
+    Pong(strip.Color(p1, p2, p3), p4);
     break;
   }
 }
 
+void Pong(uint32_t color, int wait) {
+  static int start = 10;
+  int len = 4;
+  static boolean reverse = false;
+  
+  for(int i=0; i<strip.numPixels(); i++) { // For each pixel in strip...
+    if (i >= start && i <= (start + len)){
+      strip.setPixelColor(i, color);
+    }
+    else {
+      strip.setPixelColor(i, strip.Color(0, 0, 0));
+      }         //  Set pixel's color (in RAM)
+  }
+    strip.show();                          //  Update strip to match
+    delay(wait);
+    if (reverse == false)
+    {
+      start++;
+    }
+    else 
+    {
+      start--;
+    }
+    if (start + len == strip.numPixels())
+    {
+      reverse = true;
+      }
+    if (start == 0)
+    {
+      reverse = false;
+    }
+}
 
 // Some functions of our own for creating animated effects -----------------
 
