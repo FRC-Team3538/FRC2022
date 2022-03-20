@@ -470,28 +470,22 @@ void Robot::TeleopPeriodic()
       auto redAlliance = frc::DriverStation::GetAlliance() == frc::DriverStation::Alliance::kRed;
       auto blueBall = ballColor.blue > ballColor.red;
       auto redBall = !blueBall;
-      if(blueAlliance && redBall || redAlliance && blueBall)
+      if((blueAlliance && redBall) || (redAlliance && blueBall))
       {
         autoEjectTimer.Start();
       }
 
-      if(blueAlliance && blueBall || redAlliance && redBall)
+      if((blueAlliance && blueBall) || (redAlliance && redBall))
       {
         autoEjectTimer.Stop();
         autoEjectTimer.Reset();
+        IO.shooter.SetShooter(0_V);
       }
-    }
-
-    // Attempt to eject this ball for x seconds
-    if(autoEjectTimer.Get() > 1.5_s)
-    {
-      autoEjectTimer.Stop();
-      autoEjectTimer.Reset();
     }
 
     if(autoEjectTimer.Get() > 0.25_s)
     {
-      IO.shooter.SetShooterRPM(700_rpm);
+      IO.shooter.SetShooterRPM(800_rpm);
       if(IO.shooter.SetTurretAngle(0.0_deg, 10_deg))
       {
         m_csmode = ClimberShooterMode::Shooter;
@@ -499,6 +493,14 @@ void Robot::TeleopPeriodic()
         shoot = true;
       }
     }
+  }
+
+  // Attempt to eject this ball for x seconds
+  if(autoEjectTimer.Get() > 2.0_s)
+  {
+    autoEjectTimer.Stop();
+    autoEjectTimer.Reset();
+    IO.shooter.SetShooter(0_V);
   }
 
   // Retract Intake after a short delay
