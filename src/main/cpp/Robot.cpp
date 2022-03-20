@@ -55,8 +55,6 @@ void Robot::RobotInit()
   ntTurretTargetAng.SetPersistent();
 
 
-
-
   // Logging Stuff
 #ifdef LOGGER
   frc::DataLogManager::LogNetworkTables(true);
@@ -332,7 +330,9 @@ void Robot::TeleopPeriodic()
       IO.shooter.SetTurret(units::volt_t{-3.0 * deadband(IO.secondaryController.GetRightX())});
     }
     else if (m_csmode == ClimberShooterMode::Climber)
+    {
       IO.shooter.SetTurretAngle(90.0_deg, 1_deg);
+    }
     else
     {
       IO.shooter.SetTurretAngle(0.0_deg, 1_deg);
@@ -451,6 +451,54 @@ void Robot::TeleopPeriodic()
     IO.shooter.SetIntakeState(Shooter::Position::Deployed);
     intakeTimer.Start();
     intakeTimer.Reset();
+  }
+
+  //
+  // Automatic Ball Ejection
+  //
+
+  // if intaking balls and color sensor is connected
+  if (units::math::abs(intakeCmd) > 0.0_V && colorSensor.IsConnected())
+  {
+
+    // If a ball is present
+    frc::Color ballColor = colorSensor.GetColor();
+    if(fabs(ballColor.blue - ballColor.red) > 0.2)
+    {
+      // Check for ball color missmatch
+      auto blueAlliance = frc::DriverStation::GetAlliance() == frc::DriverStation::Alliance::kBlue;
+      auto redAlliance = frc::DriverStation::GetAlliance() == frc::DriverStation::Alliance::kRed;
+      auto blueBall = ballColor.blue > ballColor.red;
+      auto redBall = !blueBall;
+      if(blueAlliance && redBall || redAlliance && blueBall)
+      {
+        autoEjectTimer.Start();
+      }
+
+      if(blueAlliance && blueBall || redAlliance && redBall)
+      {
+        autoEjectTimer.Stop();
+        autoEjectTimer.Reset();
+      }
+    }
+
+    // Attempt to eject this ball for x seconds
+    if(autoEjectTimer.Get() > 1.5_s)
+    {
+      autoEjectTimer.Stop();
+      autoEjectTimer.Reset();
+    }
+
+    if(autoEjectTimer.Get() > 0.25_s)
+    {
+      IO.shooter.SetShooterRPM(700_rpm);
+      if(IO.shooter.SetTurretAngle(0.0_deg, 10_deg))
+      {
+        m_csmode = ClimberShooterMode::Shooter;
+        IO.shooter.Shoot();
+        shoot = true;
+      }
+    }
   }
 
   // Retract Intake after a short delay

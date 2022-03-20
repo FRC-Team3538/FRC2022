@@ -92,6 +92,8 @@ private:
   //----------- rev color sensor stuff ----------
   rev::ColorSensorV3 colorSensor{frc::I2C::Port::kMXP};
 
+  frc::Timer autoEjectTimer;
+
   // frc::SerialPort led1{9600, frc::SerialPort::Port::kUSB};
   // frc::SerialPort led2{9600, frc::SerialPort::Port::kUSB1};
   // frc::SerialPort led3{9600, frc::SerialPort::Port::kUSB2};
