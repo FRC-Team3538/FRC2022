@@ -44,6 +44,12 @@ namespace vision
             bool filled = false;
         };
 
+        struct photonVisionResult
+        {
+            photonlib::PhotonPipelineResult base_result;
+            units::second_t read_time;
+        };
+
         // Init Stuff
         RJVisionPipeline() = delete;
         RJVisionPipeline(Shooter &shooter, FilterType filter = FilterType::NoFilter);
@@ -55,6 +61,7 @@ namespace vision
 
         // Setter
         RJVisionPipeline::visionData Run();
+        RJVisionPipeline::photonVisionResult RunPhotonVision();
         units::inch_t DistEstimation(units::degree_t deltaY, units::degree_t deltaX);
         void Reset();
         void SetLED(bool enable);
@@ -67,7 +74,7 @@ namespace vision
         units::inch_t estDist = 0.0_in;
 
         // TODO: ensure correctness @Jordan
-        photonlib::PhotonCamera camera{"photoncamera"};
+        photonlib::PhotonCamera camera{""};
         std::shared_ptr<nt::NetworkTable> table;
         double dy, dx, tv;
         frc::Timer lightOn;

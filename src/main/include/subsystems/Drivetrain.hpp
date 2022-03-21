@@ -26,6 +26,9 @@
 #include <units/voltage.h>
 #include <wpi/numbers>
 #include <math.h>
+#include <frc/estimator/DifferentialDrivePoseEstimator.h>
+#include <frc/smartdashboard/SmartDashboard.h>
+#include <networktables/NetworkTableInstance.h>
 
 #include "Subsystem.hpp"
 
@@ -56,6 +59,7 @@ public:
     void Drive(const frc::Trajectory::State& target);
     // TODO: Turn2Goal() 
 
+    void UpdateOdometryWithGlobalEstimate(frc::Pose2d globalEstimate, units::second_t estimateTime);
     void UpdateOdometry();
     void ResetOdometry(const frc::Pose2d &pose);
     frc::Rotation2d GetYaw();
@@ -140,6 +144,12 @@ private:
     //
     frc::DifferentialDriveKinematics m_kinematics{kTrackWidth};
     frc::DifferentialDriveOdometry m_odometry{GetYaw()};
+    frc::DifferentialDrivePoseEstimator m_poseEstimator{
+        GetYaw(), 
+        frc::Pose2d{}, 
+        {0.002, 0.002, 0.0001, 0.5, 0.5},
+        {0.005, 0.005, 0.0001},
+        {0.2, 0.2, 0.1}};
     frc::SimpleMotorFeedforward<units::meters> m_feedforward{kStatic, kVlinear, kAlinear};
     frc::RamseteController m_ramsete{units::unit_t<frc::RamseteController::b_unit>{2.0},
                                      units::unit_t<frc::RamseteController::zeta_unit>{0.7}};
@@ -175,4 +185,6 @@ private:
     frc::PIDController m_yawPID{0.25, 0.0, 0.05};
 
     frc::Trajectory::State reference;
+
+    nt::NetworkTableEntry localization_flag_entry = frc::SmartDashboard::GetEntry("flags/alternate_localization");
 };

@@ -8,6 +8,8 @@
 
 #include <iostream>
 
+#include <frc/Timer.h>
+
 Drivetrain::Drivetrain()
 {
     // Motor Configuration
@@ -127,7 +129,19 @@ void Drivetrain::Drive(const frc::Trajectory::State &target)
 
 frc::Pose2d Drivetrain::GetPose() const
 {
-    return m_odometry.GetPose();
+    if (localization_flag_entry.GetBoolean(false))
+    {
+        return m_odometry.GetPose();
+    }
+    else 
+    {   
+        return m_poseEstimator.GetEstimatedPosition();
+    }
+}
+
+void Drivetrain::UpdateOdometryWithGlobalEstimate(frc::Pose2d globalEstimate, units::second_t estimateTime)
+{
+    m_poseEstimator.AddVisionMeasurement(globalEstimate, estimateTime);
 }
 
 void Drivetrain::UpdateOdometry()
@@ -136,6 +150,9 @@ void Drivetrain::UpdateOdometry()
     auto imuYaw = m_imu.GetRotation2d();
     auto left = m_driveL0.GetSelectedSensorPosition(0) * kDPP;
     auto right = m_driveR0.GetSelectedSensorPosition(0) * kDPP;
+
+    auto leftV = m_driveL0.GetSelectedSensorVelocity(0) * kDPP / 100_ms;
+    auto rightV = m_driveR0.GetSelectedSensorVelocity(0) * kDPP / 100_ms;
 #else
     auto imuYaw = m_imu.GetRotation2d();
     // auto imuYaw = -m_drivetrainSimulator.GetHeading();
@@ -144,6 +161,8 @@ void Drivetrain::UpdateOdometry()
 #endif
 
     m_odometry.Update(imuYaw, left, right);
+
+    m_poseEstimator.Update(GetYaw(), frc::DifferentialDriveWheelSpeeds { left = leftV, right = rightV}, left, right);
 
     m_fieldSim.SetRobotPose(GetPose()); // TEMP DEBUG OFFSET
 }
@@ -168,9 +187,11 @@ void Drivetrain::ResetOdometry(const frc::Pose2d &pose)
     m_odometry.ResetPosition(pose, GetYaw());
     // std::cout << "Heading after reset: " << m_odometry.GetPose().Rotation().Radians().value() << std::endl;
 
+    m_poseEstimator.ResetPosition(pose, GetYaw());
+
     // Simulator
     // Reset the pose of the robot but do not reset the Simulated IMU.
-    m_drivetrainSimulator.SetPose({pose.Translation(), GetYaw()});
+    m_drivetrainSimulator.SetPose({pose.Translation(), pose.Rotation()});
 }
 
 units::meters_per_second_t Drivetrain::GetVelocity()

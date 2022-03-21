@@ -12,8 +12,13 @@ PhotonUtils::EstimateFieldToRobot args:
   
   gyroAngle - robotAngle + turetAngle
 
-  fieldToTarget - ~{x 8.2_m, y 4.1_m}
+
+  fieldToHubCenter - ~{x 8.2296_m, y 4.1148_m}
 
   # need to know cameraToTurret and TurretToRobot
   #    turretToRobot is constant, cameraToTurret is based on turret angle
+  camera lens: 8.35" from turret center
+  # NOTE: turrent 0 is facing away from the front of the robot
+  turretToRobot = {x: -2", y: 0"}
+
   cameraToRobot - Transform2d{x 5", y 0"}

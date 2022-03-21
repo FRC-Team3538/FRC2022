@@ -11,6 +11,8 @@
 
 #include <wpi/timestamp.h>
 
+#include <photonlib/PhotonUtils.h>
+
 using namespace pathplanner;
 
 void Robot::RobotInit()
@@ -55,8 +57,6 @@ void Robot::RobotInit()
   ntTurretTargetAng.SetPersistent();
 
 
-
-
   // Logging Stuff
 #ifdef LOGGER
   frc::DataLogManager::LogNetworkTables(true);
@@ -86,6 +86,8 @@ void Robot::RobotInit()
   // led3.EnableTermination();
   // led4.EnableTermination();
   // led5.EnableTermination();
+
+  localization_flag_entry.SetDefaultBoolean(false);
 }
 
 void Robot::RobotPeriodic()
@@ -100,7 +102,7 @@ void Robot::RobotPeriodic()
     IO.shooter.SetBlinkyZeroThing();
 
   bool isConnected = colorSensor.IsConnected();
-  if (isConnected) 
+  if (isConnected)
   {
     rev::CIEColor cieColor = colorSensor.GetCIEColor();
     frc::Color frcColor = colorSensor.GetColor();
@@ -162,7 +164,70 @@ void Robot::RobotPeriodic()
   //     led5.Write("3538,2,255,255,255,50");
   //   }
   // }
-  
+
+  // touchpad to toggle between old odometry & limelight and new pose estimation / photon vision / turret fun
+  if (IO.secondaryController.IsConnected() && IO.secondaryController.GetTouchpadPressed())
+  {
+    auto new_flag = !localization_flag_entry.GetBoolean(false);
+    localization_flag_entry.SetBoolean(new_flag);
+
+    IO.rjVision.SetLED(new_flag);
+  }
+
+  if (localization_flag_entry.GetBoolean(false))
+  {
+    auto result = IO.rjVision.RunPhotonVision();
+    if (result.base_result.HasTargets())
+    {
+      auto target = result.base_result.GetBestTarget();
+      /* ---------- vision data ----------- */
+      auto target_pitch = units::degree_t{target.GetPitch()};
+      // negated because photonvision + limelight are CW-positive while world is CCW-positive
+      auto target_yaw = -units::degree_t{target.GetYaw()};
+
+      /* ---------- robot state data ------------ */
+
+      // TODO which one?
+      // auto robot_heading = IO.drivetrain.GetPose().Rotation().Degrees();
+      auto robot_heading = IO.drivetrain.GetYaw().Degrees();
+
+      auto turret_heading = IO.shooter.GetTurretAngle();
+      auto turret_facing = robot_heading + turret_heading + 180_deg;
+
+
+      // this gets the point on the rim of the hub closest to the robot.
+      // this is the point that we're targeting in our pipeline
+      // negative brings the edge closer to us, not further away
+      auto hub_edge_facing_robot = center_hub + frc::Transform2d{frc::Translation2d{}, frc::Rotation2d{180_deg + turret_facing}} + frc::Transform2d{frc::Translation2d{hub_upper_radius, 0_ft}, frc::Rotation2d{}};
+
+      // negative because we're going backward
+      auto camera_to_turret = frc::Transform2d{frc::Translation2d{-camera_to_center_turret_distance, 0_in}, frc::Rotation2d{}};
+      auto turret_to_facing_robot_north = frc::Transform2d{frc::Translation2d{}, frc::Rotation2d{180_deg - turret_heading}};
+      // positive because we're facing forward on the robot
+      auto turret_to_robot = frc::Transform2d{frc::Translation2d{turret_to_center_robot_distance, 0_in}, frc::Rotation2d{}};
+      auto camera_to_robot = camera_to_turret + turret_to_facing_robot_north + turret_to_robot;
+
+
+      auto distance = photonlib::PhotonUtils::CalculateDistanceToTarget(camera_height, target_height, camera_pitch, target_pitch);
+      auto camera_to_target_translation = photonlib::PhotonUtils::EstimateCameraToTargetTranslation(distance, target_yaw);
+      // I don't know exactly why turret_facing needs to be negative but it does.
+      auto camera_to_target_transform = photonlib::PhotonUtils::EstimateCameraToTarget(camera_to_target_translation, hub_edge_facing_robot, frc::Rotation2d{-turret_facing});
+      auto estimated_camera_pose = photonlib::PhotonUtils::EstimateFieldToCamera(camera_to_target_transform, hub_edge_facing_robot);
+      auto estimated_robot_pose = photonlib::PhotonUtils::EstimateFieldToRobot(camera_to_target_transform, hub_edge_facing_robot, camera_to_robot);
+
+      IO.drivetrain.UpdateOdometryWithGlobalEstimate(estimated_robot_pose, result.read_time - result.base_result.GetLatency());
+
+      // now we set our turret angle to the angle needed to face the center of the hub
+      auto turret_position = IO.drivetrain.GetPose() + turret_to_robot.Inverse() + frc::Transform2d{frc::Translation2d{}, frc::Rotation2d{180_deg}};
+      auto global_angle_to_hub = units::math::atan2(center_hub.Y() - turret_position.Y(), center_hub.X() - turret_position.X());
+      auto turret_angle_to_hub = global_angle_to_hub - turret_position.Rotation().Radians();
+      IO.shooter.SetTurretAngle(turret_angle_to_hub, 0.75_deg);
+
+      // distance because we can
+      Shooter::State shooter_state = IO.shooter.CalculateShot(distance);
+      IO.shooter.SetShooterRPM(shooter_state.shooterRPM);
+    }
+  }
 }
 
 void Robot::AutonomousInit()
@@ -332,7 +397,9 @@ void Robot::TeleopPeriodic()
       IO.shooter.SetTurret(units::volt_t{-3.0 * deadband(IO.secondaryController.GetRightX())});
     }
     else if (m_csmode == ClimberShooterMode::Climber)
+    {
       IO.shooter.SetTurretAngle(90.0_deg, 1_deg);
+    }
     else
     {
       IO.shooter.SetTurretAngle(0.0_deg, 1_deg);
@@ -451,6 +518,56 @@ void Robot::TeleopPeriodic()
     IO.shooter.SetIntakeState(Shooter::Position::Deployed);
     intakeTimer.Start();
     intakeTimer.Reset();
+  }
+
+  //
+  // Automatic Ball Ejection
+  //
+
+  // if intaking balls and color sensor is connected
+  if (units::math::abs(intakeCmd) > 0.0_V && colorSensor.IsConnected())
+  {
+
+    // If a ball is present
+    frc::Color ballColor = colorSensor.GetColor();
+    if(fabs(ballColor.blue - ballColor.red) > 0.2)
+    {
+      // Check for ball color missmatch
+      auto blueAlliance = frc::DriverStation::GetAlliance() == frc::DriverStation::Alliance::kBlue;
+      auto redAlliance = frc::DriverStation::GetAlliance() == frc::DriverStation::Alliance::kRed;
+      auto blueBall = ballColor.blue > ballColor.red;
+      auto redBall = !blueBall;
+      if((blueAlliance && redBall) || (redAlliance && blueBall))
+      {
+        autoEjectTimer.Start();
+      }
+
+      if((blueAlliance && blueBall) || (redAlliance && redBall))
+      {
+        autoEjectTimer.Stop();
+        autoEjectTimer.Reset();
+        IO.shooter.SetShooter(0_V);
+      }
+    }
+
+    if(autoEjectTimer.Get() > 0.25_s)
+    {
+      IO.shooter.SetShooterRPM(800_rpm);
+      if(IO.shooter.SetTurretAngle(0.0_deg, 10_deg))
+      {
+        m_csmode = ClimberShooterMode::Shooter;
+        IO.shooter.Shoot();
+        shoot = true;
+      }
+    }
+  }
+
+  // Attempt to eject this ball for x seconds
+  if(autoEjectTimer.Get() > 2.0_s)
+  {
+    autoEjectTimer.Stop();
+    autoEjectTimer.Reset();
+    IO.shooter.SetShooter(0_V);
   }
 
   // Retract Intake after a short delay
