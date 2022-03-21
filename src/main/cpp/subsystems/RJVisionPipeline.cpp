@@ -1,8 +1,8 @@
 #include "subsystems/RJVisionPipeline.hpp"
 
-#include <photonlib/PhotonUtils.h>
+#include <wpi/timestamp.h>
 
-using namespace nt;
+using namespace nt; 
 
 namespace vision
 {
@@ -25,17 +25,9 @@ namespace vision
 
     void RJVisionPipeline::Periodic()
     {
-        auto result = camera.GetLatestResult();
-        tv = result.HasTargets();
-        if (result.HasTargets()) {
-            auto target = result.GetBestTarget();
-            dx = target.GetYaw();
-            dy = target.GetPitch();
-            tv = 1.0;
-        }
-        dx = -(table->GetNumber("tx", dx));
-        dy = table->GetNumber("ty", dy);
-        tv = table->GetNumber("tv", tv);
+        dx = -(table->GetNumber("tx", 0.0));
+        dy = table->GetNumber("ty", 0.0);
+        tv = table->GetNumber("tv", 0.0);
 
         alpha = frc::SmartDashboard::GetNumber("ALPHA", 0.125);
         N = frc::SmartDashboard::GetNumber("N", 8);
@@ -178,6 +170,14 @@ namespace vision
         }
     }
 
+    RJVisionPipeline::photonVisionResult RJVisionPipeline::RunPhotonVision()
+    {
+        RJVisionPipeline::photonVisionResult result;
+
+        result.read_time = units::microsecond_t{wpi::Now()};
+        result.base_result = camera.GetLatestResult();
+    }
+
     void RJVisionPipeline::SetFilterType(FilterType setFilter)
     {
         filter = setFilter;
@@ -241,7 +241,6 @@ namespace vision
 
     units::inch_t RJVisionPipeline::DistEstimation(units::degree_t deltaY, units::degree_t deltaX)
     {
-        // return photonlib::PhotonUtils::CalculateDistanceToTarget(32_in, 102_in, 33_deg, deltaY);
         // For now, the assumption is that the dy remains accurate despite the dx changing
         // Might need to change that for rootin, tootin, scootin, n shootin
 
