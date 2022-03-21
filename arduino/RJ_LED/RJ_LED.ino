@@ -193,6 +193,10 @@ void loop() {
     case 5:
     Pong(strip.Color(p1, p2, p3), p4);
     break;
+
+    case 6:
+    theaterChaseBackward(strip.Color(p1, p2, p3), p4);
+    break;
   }
 }
 
@@ -257,6 +261,22 @@ void theaterChase(uint32_t color, int wait) {
       strip.show(); // Update strip with new contents
       delay(wait);  // Pause for a moment
     }
+}
+
+void theaterChaseBackward(uint32_t color, uint8_t wait) { 
+    for (int b=0; b < 3; b++) {
+    strip.clear();
+      for (int c=b; c < strip.numPixels(); c+=3) {
+        strip.setPixelColor(c+b, color);    //turn every third pixel on
+      }
+      strip.show();
+      delay(wait);
+      for (int c=b; c < strip.numPixels(); c+=3) {
+        strip.setPixelColor(c+b, 0);        //turn every third pixel off
+      }
+ 
+    }
+  
 }
 
 // Rainbow cycle along whole strip. Pass delay time (in ms) between frames.
