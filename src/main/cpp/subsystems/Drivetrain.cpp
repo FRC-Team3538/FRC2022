@@ -162,7 +162,7 @@ void Drivetrain::UpdateOdometry()
 
     m_odometry.Update(imuYaw, left, right);
 
-    m_poseEstimator.Update(GetYaw(), frc::DifferentialDriveWheelSpeeds { left = leftV, right = rightV}, left, right);
+    //m_poseEstimator.Update(GetYaw(), frc::DifferentialDriveWheelSpeeds { left = leftV, right = rightV}, left, right);
 
     m_fieldSim.SetRobotPose(GetPose()); // TEMP DEBUG OFFSET
 }

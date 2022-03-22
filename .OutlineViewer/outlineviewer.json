@@ -4,6 +4,7 @@
     "serverTeam": "10.35.38.2"
   },
   "SmartDashboard": {
+    "open": true,
     "shooter": {
       "open": false
     }

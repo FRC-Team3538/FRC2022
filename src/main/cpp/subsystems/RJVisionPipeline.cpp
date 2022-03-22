@@ -10,7 +10,7 @@ namespace vision
     RJVisionPipeline::RJVisionPipeline(Shooter &shooter, FilterType filter) : shooter(shooter), filter(filter)
     {
         frc::SmartDashboard::PutNumber("ALPHA", 0.125);
-        frc::SmartDashboard::PutNumber("N", 8);
+        frc::SmartDashboard::PutNumber("N", 10);
     }
 
     void RJVisionPipeline::ConfigureSystem()
@@ -30,7 +30,8 @@ namespace vision
         tv = table->GetNumber("tv", 0.0);
 
         alpha = frc::SmartDashboard::GetNumber("ALPHA", 0.125);
-        N = frc::SmartDashboard::GetNumber("N", 8);
+        N = frc::SmartDashboard::GetNumber("N", 10);
+        estimatedPhaseShift = (double)(N + 1) / 2.0;
         // if (snapShotTimer.Get() > snapTime)
         // {
         //     table->PutNumber("snapshot", 0.0);
@@ -78,22 +79,26 @@ namespace vision
             {
                 if (xList.size() >= N)
                 {
+                    turretList.pop_front();
+                    turretList.push_back(dx + shooter.GetTurretAngle().value());
+
                     xList.pop_front();
-                    xList.push_back(dx + shooter.GetTurretAngle().value());
+                    xList.push_back(dx);
 
                     yList.pop_front();
                     yList.push_back(dy);
 
-                    // telemetry.deltaX = units::degree_t{CalculateEMA(xList)};
+                    telemetry.deltaX = units::degree_t{CalculateAverage(xList)};
+                    telemetry.deltaY = units::degree_t{CalculateAverage(yList)};
                     telemetry.distance = DistEstimation(units::degree_t{CalculateAverage(yList)}, telemetry.deltaX);
-                    // telemetry.turretAngle = telemetry.deltaX + shooter.GetTurretAngle();
-                    telemetry.turretAngle = units::degree_t{CalculateAverage(xList)};
+                    telemetry.turretAngle = units::degree_t{CalculateAverage(turretList)};
 
                     telemetry.filled = true;
                 }
                 else
                 {
-                    xList.push_back(dx + shooter.GetTurretAngle().value());
+                    turretList.push_back(dx + shooter.GetTurretAngle().value());
+                    xList.push_back(dx);
                     yList.push_back(dy);
                     telemetry.filled = false;
                 }
@@ -148,11 +153,6 @@ namespace vision
             }
             break;
 
-            // case FilterType::MedianFilter:
-            // {
-                
-            // }
-
             case FilterType::NoFilter:
             {
                 telemetry.deltaX = units::degree_t{dx};
@@ -201,11 +201,11 @@ namespace vision
             for (auto i = ++list.begin(); i != list.end(); ++i)
             {
                 value = (alpha * (*i)) + ((1 - alpha) * value);
-                // std::cout << *i << ", ";
+                std::cout << *i << ", ";
             }
-            // std::cout << value << std::endl;
         }
 
+        std::cout << std::endl;
         return value;
     }
 
@@ -213,9 +213,9 @@ namespace vision
     {
         double value = 0.0;
 
-        for (auto i = list.begin(); i != list.end(); ++i)
+        for (auto i : list)
         {
-            value += *i;
+            value += i;
             // std::cout << value << ", ";
         }
 
@@ -234,6 +234,7 @@ namespace vision
 
     void RJVisionPipeline::Reset()
     {
+        turretList.clear();
         xList.clear();
         yList.clear();
         spinUpOS = false;
