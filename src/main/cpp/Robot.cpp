@@ -33,7 +33,7 @@ void Robot::RobotInit()
   // frc::SmartDashboard::PutData("Power", &IO.pdp);
   // // frc::SmartDashboard::PutData("Dr", &IO.mainController);
   // // frc::SmartDashboard::PutData("Op", &IO.secondaryController);
-  // frc::SmartDashboard::PutData("Drive", &IO.drivetrain);
+  frc::SmartDashboard::PutData("Drive", &IO.drivetrain);
   // frc::SmartDashboard::PutData("Shooter", &IO.shooter);
   // frc::SmartDashboard::PutData("Climber", &IO.climber);
   // frc::SmartDashboard::PutData("Ph", &IO.ph);
@@ -99,71 +99,7 @@ void Robot::RobotPeriodic()
   frc::SmartDashboard::PutNumber("robot/MatchTime", frc::DriverStation::GetMatchTime());
   frc::SmartDashboard::PutNumber("robot/PressureHigh", IO.ph.GetPressure(0).value());
   if (!IO.shooter.zeroed)
-    IO.shooter.SetBlinkyZeroThing();
-
-  bool isConnected = colorSensor.IsConnected();
-  if (isConnected)
-  {
-    rev::CIEColor cieColor = colorSensor.GetCIEColor();
-    frc::Color frcColor = colorSensor.GetColor();
-    double ir = colorSensor.GetIR();
-    uint32_t prox = colorSensor.GetProximity();
-    rev::ColorSensorV3::RawColor rawColor = colorSensor.GetRawColor();
-    bool hasReset = colorSensor.HasReset();
-
-    frc::SmartDashboard::PutNumber("color/cie/X", cieColor.GetX());
-    frc::SmartDashboard::PutNumber("color/cie/Y", cieColor.GetY());
-    frc::SmartDashboard::PutNumber("color/cie/Z", cieColor.GetZ());
-    frc::SmartDashboard::PutNumber("color/cie/Yx", cieColor.GetYx());
-    frc::SmartDashboard::PutNumber("color/cie/Yy", cieColor.GetYy());
-
-    frc::SmartDashboard::PutNumber("color/rgb/red", frcColor.red);
-    frc::SmartDashboard::PutNumber("color/rgb/green", frcColor.green);
-    frc::SmartDashboard::PutNumber("color/rgb/blue", frcColor.blue);
-    frc::SmartDashboard::PutNumber("color/IR", ir);
-    frc::SmartDashboard::PutNumber("color/prox", prox);
-    frc::SmartDashboard::PutNumber("color/raw/red", rawColor.red);
-    frc::SmartDashboard::PutNumber("color/raw/green", rawColor.green);
-    frc::SmartDashboard::PutNumber("color/raw/blue", rawColor.blue);
-    frc::SmartDashboard::PutNumber("color/raw/ir", rawColor.ir);
-    frc::SmartDashboard::PutBoolean("color/reset", hasReset);
-  }
-  frc::SmartDashboard::PutBoolean("color/connected", isConnected);
-
-  
-
-  // uint64_t time = wpi::Now();
-  // uint64_t micros = time % 1000000;
-  // uint64_t which = (time / 1000000) % 5;
-  // // first loop of the second
-  // if (micros < 20000) {
-  //   // first LED
-  //   if (which == 0) 
-  //   {
-  //     std::cout << "writing red to frc::SerialPort::Port::kUSB" << std::endl;
-  //     led1.Write("3538,2,255,0,0,50");
-  //   }
-  //   else if (which == 1)
-  //   {
-  //     std::cout << "writing green to frc::SerialPort::Port::kUSB1" << std::endl;
-  //     led2.Write("3538,2,0,255,0,50");
-  //   }
-  //   else if (which == 2) 
-  //   {
-  //     std::cout << "writing blue to frc::SerialPort::Port::kUSB2" << std::endl;
-  //     led3.Write("3538,2,0,0,255,50");
-  //   }
-  //   else if (which == 3) 
-  //   {
-  //     std::cout << "writing teal to frc::SerialPort::Port::kOnboard" << std::endl;
-  //     led4.Write("3538,2,0,128,128,50");
-  //   }
-  //   else if (which == 4) 
-  //   {
-  //     std::cout << "writing white to frc::SerialPort::Port::kMXP" << std::endl;
-  //     led5.Write("3538,2,255,255,255,50");
-  //   }
-  // }
+    IO.shooter.SetBlinkyZeroThing();\
 
   // touchpad to toggle between old odometry & limelight and new pose estimation / photon vision / turret fun
   if (IO.secondaryController.IsConnected() && IO.secondaryController.GetTouchpadPressed())
@@ -176,57 +112,59 @@ void Robot::RobotPeriodic()
 
   if (localization_flag_entry.GetBoolean(false))
   {
-    auto result = IO.rjVision.RunPhotonVision();
-    if (result.base_result.HasTargets())
-    {
-      auto target = result.base_result.GetBestTarget();
-      /* ---------- vision data ----------- */
-      auto target_pitch = units::degree_t{target.GetPitch()};
-      // negated because photonvision + limelight are CW-positive while world is CCW-positive
-      auto target_yaw = -units::degree_t{target.GetYaw()};
+    
+    // auto result = IO.rjVision.RunPhotonVision();
+    // if (result.base_result.HasTargets())
+    // {
+    //   auto target = result.base_result.GetBestTarget();
+    //   /* ---------- vision data ----------- */
+    //   auto target_pitch = units::degree_t{target.GetPitch()};
+    //   // negated because photonvision + limelight are CW-positive while world is CCW-positive
+    //   auto target_yaw = -units::degree_t{target.GetYaw()};
 
-      /* ---------- robot state data ------------ */
+    //   /* ---------- robot state data ------------ */
 
-      // TODO which one?
-      // auto robot_heading = IO.drivetrain.GetPose().Rotation().Degrees();
-      auto robot_heading = IO.drivetrain.GetYaw().Degrees();
+    //   // TODO which one?
+    //   // auto robot_heading = IO.drivetrain.GetPose().Rotation().Degrees();
+    //   auto robot_heading = IO.drivetrain.GetYaw().Degrees();
 
-      auto turret_heading = IO.shooter.GetTurretAngle();
-      auto turret_facing = robot_heading + turret_heading + 180_deg;
-
-
-      // this gets the point on the rim of the hub closest to the robot.
-      // this is the point that we're targeting in our pipeline
-      // negative brings the edge closer to us, not further away
-      auto hub_edge_facing_robot = center_hub + frc::Transform2d{frc::Translation2d{}, frc::Rotation2d{180_deg + turret_facing}} + frc::Transform2d{frc::Translation2d{hub_upper_radius, 0_ft}, frc::Rotation2d{}};
-
-      // negative because we're going backward
-      auto camera_to_turret = frc::Transform2d{frc::Translation2d{-camera_to_center_turret_distance, 0_in}, frc::Rotation2d{}};
-      auto turret_to_facing_robot_north = frc::Transform2d{frc::Translation2d{}, frc::Rotation2d{180_deg - turret_heading}};
-      // positive because we're facing forward on the robot
-      auto turret_to_robot = frc::Transform2d{frc::Translation2d{turret_to_center_robot_distance, 0_in}, frc::Rotation2d{}};
-      auto camera_to_robot = camera_to_turret + turret_to_facing_robot_north + turret_to_robot;
+    //   auto turret_heading = IO.shooter.GetTurretAngle();
+    //   auto turret_facing = robot_heading + turret_heading + 180_deg;
 
 
-      auto distance = photonlib::PhotonUtils::CalculateDistanceToTarget(camera_height, target_height, camera_pitch, target_pitch);
-      auto camera_to_target_translation = photonlib::PhotonUtils::EstimateCameraToTargetTranslation(distance, target_yaw);
-      // I don't know exactly why turret_facing needs to be negative but it does.
-      auto camera_to_target_transform = photonlib::PhotonUtils::EstimateCameraToTarget(camera_to_target_translation, hub_edge_facing_robot, frc::Rotation2d{-turret_facing});
-      auto estimated_camera_pose = photonlib::PhotonUtils::EstimateFieldToCamera(camera_to_target_transform, hub_edge_facing_robot);
-      auto estimated_robot_pose = photonlib::PhotonUtils::EstimateFieldToRobot(camera_to_target_transform, hub_edge_facing_robot, camera_to_robot);
+    //   // this gets the point on the rim of the hub closest to the robot.
+    //   // this is the point that we're targeting in our pipeline
+    //   // negative brings the edge closer to us, not further away
+    //   auto hub_edge_facing_robot = center_hub + frc::Transform2d{frc::Translation2d{}, frc::Rotation2d{180_deg + turret_facing}} + frc::Transform2d{frc::Translation2d{hub_upper_radius, 0_ft}, frc::Rotation2d{}};
 
-      IO.drivetrain.UpdateOdometryWithGlobalEstimate(estimated_robot_pose, result.read_time - result.base_result.GetLatency());
+    //   // negative because we're going backward
+    //   auto camera_to_turret = frc::Transform2d{frc::Translation2d{-camera_to_center_turret_distance, 0_in}, frc::Rotation2d{}};
+    //   auto turret_to_facing_robot_north = frc::Transform2d{frc::Translation2d{}, frc::Rotation2d{180_deg - turret_heading}};
+    //   // positive because we're facing forward on the robot
+    //   auto turret_to_robot = frc::Transform2d{frc::Translation2d{turret_to_center_robot_distance, 0_in}, frc::Rotation2d{}};
+    //   auto camera_to_robot = camera_to_turret + turret_to_facing_robot_north + turret_to_robot;
 
-      // now we set our turret angle to the angle needed to face the center of the hub
-      auto turret_position = IO.drivetrain.GetPose() + turret_to_robot.Inverse() + frc::Transform2d{frc::Translation2d{}, frc::Rotation2d{180_deg}};
-      auto global_angle_to_hub = units::math::atan2(center_hub.Y() - turret_position.Y(), center_hub.X() - turret_position.X());
-      auto turret_angle_to_hub = global_angle_to_hub - turret_position.Rotation().Radians();
-      IO.shooter.SetTurretAngle(turret_angle_to_hub, 0.75_deg);
 
-      // distance because we can
-      Shooter::State shooter_state = IO.shooter.CalculateShot(distance);
-      IO.shooter.SetShooterRPM(shooter_state.shooterRPM);
-    }
+    //   auto distance = photonlib::PhotonUtils::CalculateDistanceToTarget(camera_height, target_height, camera_pitch, target_pitch);
+    //   auto camera_to_target_translation = photonlib::PhotonUtils::EstimateCameraToTargetTranslation(distance, target_yaw);
+    //   // I don't know exactly why turret_facing needs to be negative but it does.
+    //   auto camera_to_target_transform = photonlib::PhotonUtils::EstimateCameraToTarget(camera_to_target_translation, hub_edge_facing_robot, frc::Rotation2d{-turret_facing});
+    //   auto estimated_camera_pose = photonlib::PhotonUtils::EstimateFieldToCamera(camera_to_target_transform, hub_edge_facing_robot);
+    //   auto estimated_robot_pose = photonlib::PhotonUtils::EstimateFieldToRobot(camera_to_target_transform, hub_edge_facing_robot, camera_to_robot);
+
+    //   IO.drivetrain.UpdateOdometryWithGlobalEstimate(estimated_robot_pose, result.read_time - result.base_result.GetLatency());
+
+    //   // now we set our turret angle to the angle needed to face the center of the hub
+    //   auto turret_position = IO.drivetrain.GetPose() + turret_to_robot.Inverse() + frc::Transform2d{frc::Translation2d{}, frc::Rotation2d{180_deg}};
+    //   auto global_angle_to_hub = units::math::atan2(center_hub.Y() - turret_position.Y(), center_hub.X() - turret_position.X());
+    //   auto turret_angle_to_hub = global_angle_to_hub - turret_position.Rotation().Radians();
+    //   IO.shooter.SetTurretAngle(turret_angle_to_hub, 0.75_deg);
+
+    //   // distance because we can
+    //   Shooter::State shooter_state = IO.shooter.CalculateShot(distance);
+    //   IO.shooter.SetShooterRPM(shooter_state.shooterRPM);
+      
+    // }
   }
 }
 

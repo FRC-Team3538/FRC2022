@@ -105,6 +105,8 @@ bool AutoFiveBallSneaky::FindVisionTarget()
 void AutoFiveBallSneaky::Run()
 {
     units::degree_t tol{ntVisionAngleTol.GetDouble(kVisionAngleTolDefault)};
+    m_resetDriveState = m_newDriveState;
+    m_resetShooterState = m_newShooterState;
 
     switch (m_driveState)
     {
@@ -214,7 +216,7 @@ void AutoFiveBallSneaky::Run()
         if (m_newShooterState) {
             IO.shooter.SetFeeder(-2_V);
 
-            IO.shooter.SetTurretAngle(35_deg, tol);
+            IO.shooter.SetTurretAngle(-75_deg, tol);
         }
 
         break;
@@ -223,6 +225,7 @@ void AutoFiveBallSneaky::Run()
     {
         // aim at target
         if (m_newShooterState) {
+            IO.shooter.SetShooterRPM(3100_rpm);
             IO.shooter.SetIndexer(0_V);
         }
 
@@ -270,8 +273,13 @@ void AutoFiveBallSneaky::Run()
     }
     }
 
-    m_newDriveState = false;
-    m_newShooterState = false;
+    if (m_resetShooterState) {
+        m_newShooterState = false;
+    }
+
+    if (m_resetDriveState) {
+        m_resetDriveState = false;
+    }
 }
 
 // Called Automagically by AutoPrograms (RobotPeriodic)

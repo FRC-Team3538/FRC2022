@@ -50,6 +50,9 @@ private:
     units::radian_t turretTarget;
     int m_shotCount;
 
+    bool m_resetDriveState;
+    bool m_resetShooterState;
+
 
 public:
     // Constructor requires a reference to the RobotMap

@@ -72,6 +72,8 @@ Drivetrain::Drivetrain()
 
     // m_driveL0.SetStatusFramePeriod(ctre::phoenix::motorcontrol::StatusFrameEnhanced::Status_3_Quadrature, 18);
     // m_driveR0.SetStatusFramePeriod(ctre::phoenix::motorcontrol::StatusFrameEnhanced::Status_3_Quadrature, 18);
+
+    referencePose = m_fieldSim.GetObject("reference");
 }
 
 // Teleop Control
@@ -116,6 +118,7 @@ void Drivetrain::Drive(units::meters_per_second_t xSpeed,
 void Drivetrain::Drive(const frc::Trajectory::State &target)
 {
     reference = target;
+    referencePose->SetPose(reference.pose);
 
     auto pose = GetPose();
     // std::cout << "Heading @ " << target.t.value() << "s: " << pose.Rotation().Radians().value() << std::endl;
@@ -129,19 +132,19 @@ void Drivetrain::Drive(const frc::Trajectory::State &target)
 
 frc::Pose2d Drivetrain::GetPose() const
 {
-    if (localization_flag_entry.GetBoolean(false))
+    if (localization_flag_entry.GetBoolean(false) || true)
     {
         return m_odometry.GetPose();
     }
     else 
     {   
-        return m_poseEstimator.GetEstimatedPosition();
+        // return m_poseEstimator.GetEstimatedPosition();
     }
 }
 
 void Drivetrain::UpdateOdometryWithGlobalEstimate(frc::Pose2d globalEstimate, units::second_t estimateTime)
 {
-    m_poseEstimator.AddVisionMeasurement(globalEstimate, estimateTime);
+    // m_poseEstimator.AddVisionMeasurement(globalEstimate, estimateTime);
 }
 
 void Drivetrain::UpdateOdometry()
@@ -151,8 +154,8 @@ void Drivetrain::UpdateOdometry()
     auto left = m_driveL0.GetSelectedSensorPosition(0) * kDPP;
     auto right = m_driveR0.GetSelectedSensorPosition(0) * kDPP;
 
-    auto leftV = m_driveL0.GetSelectedSensorVelocity(0) * kDPP / 100_ms;
-    auto rightV = m_driveR0.GetSelectedSensorVelocity(0) * kDPP / 100_ms;
+    // auto leftV = m_driveL0.GetSelectedSensorVelocity(0) * kDPP / 100_ms;
+    // auto rightV = m_driveR0.GetSelectedSensorVelocity(0) * kDPP / 100_ms;
 #else
     auto imuYaw = m_imu.GetRotation2d();
     // auto imuYaw = -m_drivetrainSimulator.GetHeading();
@@ -162,7 +165,7 @@ void Drivetrain::UpdateOdometry()
 
     m_odometry.Update(imuYaw, left, right);
 
-    //m_poseEstimator.Update(GetYaw(), frc::DifferentialDriveWheelSpeeds { left = leftV, right = rightV}, left, right);
+    // m_poseEstimator.Update(GetYaw(), frc::DifferentialDriveWheelSpeeds { left = leftV, right = rightV}, left, right);
 
     m_fieldSim.SetRobotPose(GetPose()); // TEMP DEBUG OFFSET
 }
@@ -187,7 +190,7 @@ void Drivetrain::ResetOdometry(const frc::Pose2d &pose)
     m_odometry.ResetPosition(pose, GetYaw());
     // std::cout << "Heading after reset: " << m_odometry.GetPose().Rotation().Radians().value() << std::endl;
 
-    m_poseEstimator.ResetPosition(pose, GetYaw());
+    // m_poseEstimator.ResetPosition(pose, GetYaw());
 
     // Simulator
     // Reset the pose of the robot but do not reset the Simulated IMU.

@@ -63,7 +63,7 @@ void AutoFiveBallSafe::Init()
     units::feet_per_second_t maxLinearVel = 8_fps;
     units::meters_per_second_squared_t maxCentripetalAcc = 1.7_mps_sq;
 
-    units::meters_per_second_squared_t maxLinearAcc = 2_mps_sq;
+    units::meters_per_second_squared_t maxLinearAcc = 1.7_mps_sq;
 
     frc::TrajectoryConfig config(maxLinearVel, maxLinearAcc);
     config.AddConstraint(frc::CentripetalAccelerationConstraint{maxCentripetalAcc});
@@ -81,7 +81,7 @@ void AutoFiveBallSafe::Init()
 
     m_driveTimer.Reset();
     m_driveTimer.Start();
-    m_shooterTimer.Start();
+    m_shooterTimer.Reset();
     m_shooterTimer.Start();
     m_totalTimer.Reset();
     m_totalTimer.Start();
@@ -99,7 +99,7 @@ bool AutoFiveBallSafe::FollowTrajectory(frc::Trajectory &trajectory)
 bool AutoFiveBallSafe::FindVisionTarget()
 {
     vision::RJVisionPipeline::visionData data = IO.rjVision.Run();
-    return data.filled && IO.shooter.SetTurretAngle(data.turretAngle, 0.5_deg);
+    return data.filled && IO.shooter.SetTurretAngle(data.turretAngle, 1_deg);
 }
 
 // Execute the program
@@ -107,6 +107,9 @@ void AutoFiveBallSafe::Run()
 {
     units::degree_t tol{ntVisionAngleTol.GetDouble(kVisionAngleTolDefault)};
 
+    m_resetDriveState = m_newDriveState;
+    m_resetShooterState = m_newShooterState;
+    
     switch (m_driveState)
     {
     case 0:
@@ -177,7 +180,7 @@ void AutoFiveBallSafe::Run()
             // state entry shit
             IO.shooter.SetIntakeState(Shooter::Position::Deployed);
             IO.shooter.SetIntake(8_V);
-            IO.shooter.SetShooterRPM(3000_rpm);
+            IO.shooter.SetShooterRPM(3075_rpm);
             IO.shooter.SetIndexer(3_V);
             IO.shooter.SetFeeder(-2_V);
 
@@ -208,19 +211,19 @@ void AutoFiveBallSafe::Run()
         // shoot 2 balls
         if (m_newShooterState)
         {
-            IO.shooter.ResetEdgeDetector();
+            // IO.shooter.ResetEdgeDetector();
             IO.shooter.SetFeeder(4_V);
             IO.shooter.SetIndexer(3_V);
         }
 
         FindVisionTarget();
 
-        if (IO.shooter.Shoot_EdgeDetector())
-        {
-            m_shotCount += 1;
-        }
+        // if (IO.shooter.Shoot_EdgeDetector())
+        // {
+        //     m_shotCount += 1;
+        // }
 
-        if (m_shotCount >= 2 || m_shooterTimer.Get() > 2_s) {
+        if (IO.shooter.Shoot() || m_shotCount >= 2 || m_shooterTimer.Get() > 2_s) {
             std::cout << "Shot phase completed in  " << m_shooterTimer.Get().value() << "s" << std::endl;
             NextDriveState();
             NextShooterState();
@@ -232,6 +235,7 @@ void AutoFiveBallSafe::Run()
     {
         // wait for second path
         if (m_newShooterState) {
+            IO.shooter.SetShooterRPM(2825_rpm);
             IO.shooter.SetFeeder(-2_V);
 
             IO.shooter.SetTurretAngle(35_deg, tol);
@@ -263,12 +267,12 @@ void AutoFiveBallSafe::Run()
             IO.shooter.SetIndexer(3_V);
         }
     
-        if (IO.shooter.Shoot_EdgeDetector())
-        {
-            m_shotCount += 1;
-        }
+        // if (IO.shooter.Shoot_EdgeDetector())
+        // {
+        //     m_shotCount += 1;
+        // }
 
-        if (m_shotCount >= 4 || m_shooterTimer.Get() > 2_s) {
+        if (IO.shooter.Shoot() || m_shotCount >= 4 || m_shooterTimer.Get() > 2_s) {
             std::cout << "Shot phase completed in  " << m_shooterTimer.Get().value() << "s" << std::endl;
             NextDriveState();
             NextShooterState();
@@ -280,6 +284,7 @@ void AutoFiveBallSafe::Run()
     {
         // wait for third path
         if (m_newShooterState) {
+            IO.shooter.SetShooterRPM(2950_rpm);
             IO.shooter.SetFeeder(-2_V);
 
             IO.shooter.SetTurretAngle(35_deg, tol);
@@ -291,6 +296,8 @@ void AutoFiveBallSafe::Run()
     {
         // aim at target
         if (m_newShooterState) {
+            IO.shooter.SetShooterRPM(3000_rpm);
+
             IO.shooter.SetIndexer(0_V);
         }
 
@@ -311,12 +318,12 @@ void AutoFiveBallSafe::Run()
             IO.shooter.SetIndexer(3_V);
         }
 
-        if (IO.shooter.Shoot_EdgeDetector())
-        {
-            m_shotCount += 1;
-        }
+        // if (IO.shooter.Shoot_EdgeDetector())
+        // {
+        //     m_shotCount += 1;
+        // }
 
-        if (m_shotCount >= 5 || m_shooterTimer.Get() > 2_s) {
+        if (IO.shooter.Shoot() || m_shotCount >= 5 || m_shooterTimer.Get() > 2_s) {
             std::cout << "Shot phase completed in  " << m_shooterTimer.Get().value() << "s" << std::endl;
             NextDriveState();
             NextShooterState();
@@ -338,8 +345,13 @@ void AutoFiveBallSafe::Run()
     }
     }
 
-    m_newDriveState = false;
-    m_newShooterState = false;
+    if (m_resetShooterState) {
+        m_newShooterState = false;
+    }
+
+    if (m_resetDriveState) {
+        m_resetDriveState = false;
+    }
 }
 
 // Called Automagically by AutoPrograms (RobotPeriodic)

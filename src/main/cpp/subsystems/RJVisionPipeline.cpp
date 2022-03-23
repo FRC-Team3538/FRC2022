@@ -19,8 +19,8 @@ namespace vision
         // table->PutNumber("ledMode", 1.0);
         table->PutNumber("pipeline", 0.0);
         table->PutNumber("camMode", 0.0);
-        camera.SetPipelineIndex(0);
-        camera.SetDriverMode(false);
+        // camera.SetPipelineIndex(0);
+        // camera.SetDriverMode(false);
     }
 
     void RJVisionPipeline::Periodic()
@@ -175,7 +175,7 @@ namespace vision
         RJVisionPipeline::photonVisionResult result;
 
         result.read_time = units::microsecond_t{wpi::Now()};
-        result.base_result = camera.GetLatestResult();
+        // result.base_result = camera.GetLatestResult();
     }
 
     void RJVisionPipeline::SetFilterType(FilterType setFilter)
@@ -201,11 +201,11 @@ namespace vision
             for (auto i = ++list.begin(); i != list.end(); ++i)
             {
                 value = (alpha * (*i)) + ((1 - alpha) * value);
-                std::cout << *i << ", ";
+                // std::cout << *i << ", ";
             }
         }
 
-        std::cout << std::endl;
+        // std::cout << std::endl;
         return value;
     }
 
@@ -258,20 +258,20 @@ namespace vision
     {
         if (enable)
         {
-            camera.SetLEDMode(photonlib::LEDMode::kOn);
+            // camera.SetLEDMode(photonlib::LEDMode::kOn);
             table->PutNumber("ledMode", 3.0); // Force On
         }
         else
         {
-            camera.SetLEDMode(photonlib::LEDMode::kOff);
+            // camera.SetLEDMode(photonlib::LEDMode::kOff);
             table->PutNumber("ledMode", 1.0); // Force Off
         }
     }
 
     void RJVisionPipeline::TakeSnapshot(uint8_t numberOfSnaps)
     {
-        camera.TakeInputSnapshot();
-        camera.TakeOutputSnapshot();
+        // camera.TakeInputSnapshot();
+        // camera.TakeOutputSnapshot();
         table->PutNumber("snapshot", (double)numberOfSnaps);
         // snapTime = units::second_t{(double)numberOfSnaps / 2.0};
         // snapShotTimer.Reset();

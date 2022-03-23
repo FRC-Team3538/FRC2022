@@ -144,12 +144,12 @@ private:
     //
     frc::DifferentialDriveKinematics m_kinematics{kTrackWidth};
     frc::DifferentialDriveOdometry m_odometry{GetYaw()};
-    frc::DifferentialDrivePoseEstimator m_poseEstimator{
-        GetYaw(), 
-        frc::Pose2d{}, 
-        {0.002, 0.002, 0.0001, 0.5, 0.5},
-        {0.005, 0.005, 0.0001},
-        {0.2, 0.2, 0.1}};
+    // frc::DifferentialDrivePoseEstimator m_poseEstimator{
+    //     GetYaw(), 
+    //     frc::Pose2d{}, 
+    //     {0.002, 0.002, 0.0001, 0.5, 0.5},
+    //     {0.005, 0.005, 0.0001},
+    //     {0.2, 0.2, 0.1}};
     frc::SimpleMotorFeedforward<units::meters> m_feedforward{kStatic, kVlinear, kAlinear};
     frc::RamseteController m_ramsete{units::unit_t<frc::RamseteController::b_unit>{2.0},
                                      units::unit_t<frc::RamseteController::zeta_unit>{0.7}};
@@ -181,6 +181,7 @@ private:
         kWheelRadius};
 
     frc::Field2d m_fieldSim;
+    frc::FieldObject2d *referencePose;
 
     frc::PIDController m_yawPID{0.25, 0.0, 0.05};
 

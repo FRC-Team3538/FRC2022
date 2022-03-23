@@ -110,23 +110,27 @@ void Shooter::SetIntake(units::volt_t voltage)
 
 void Shooter::SetIndexer(units::volt_t voltage)
 {
+    // std::cout << "Indexer set to " << voltage.value() << "v" << std::endl;
     indexerA.SetVoltage(voltage);
     // indexerB.SetVoltage(voltage);
 }
 
 void Shooter::SetFeeder(units::volt_t voltage)
 {
+    // std::cout << "Feeder set to " << voltage.value() << "v" << std::endl;
     feeder.SetVoltage(voltage);
 }
 
 void Shooter::SetShooter(units::volt_t voltage)
 {
+    // std::cout << "Shooter set to " << voltage.value() << "v" << std::endl;
     shooterA.SetVoltage(voltage);
     shooterB.SetVoltage(voltage);
 }
 
 void Shooter::SetShooterRPM(units::revolutions_per_minute_t targetRPM)
 {
+    // std::cout << "Shooter set to " << targetRPM.value() << "rpm" << std::endl;
     cmd_shooterRPM = targetRPM;
 
     if (targetRPM < 1.0_rpm)
