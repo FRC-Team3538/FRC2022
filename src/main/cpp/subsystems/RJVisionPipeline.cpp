@@ -174,8 +174,9 @@ namespace vision
     {
         RJVisionPipeline::photonVisionResult result;
 
-        result.read_time = units::microsecond_t{wpi::Now()};
+        result.read_time = units::microsecond_t{(double) wpi::Now()};
         // result.base_result = camera.GetLatestResult();
+        return result;
     }
 
     void RJVisionPipeline::SetFilterType(FilterType setFilter)
