@@ -132,13 +132,13 @@ void Drivetrain::Drive(const frc::Trajectory::State &target)
 
 frc::Pose2d Drivetrain::GetPose() const
 {
-    if (localization_flag_entry.GetBoolean(false) || true)
+    if (localization_flag_entry.GetBoolean(false))
     {
-        return m_odometry.GetPose();
+        // return m_poseEstimator.GetEstimatedPosition();
     }
     else 
-    {   
-        // return m_poseEstimator.GetEstimatedPosition();
+    {  
+        return m_odometry.GetPose();
     }
 }
 
@@ -154,18 +154,21 @@ void Drivetrain::UpdateOdometry()
     auto left = m_driveL0.GetSelectedSensorPosition(0) * kDPP;
     auto right = m_driveR0.GetSelectedSensorPosition(0) * kDPP;
 
-    // auto leftV = m_driveL0.GetSelectedSensorVelocity(0) * kDPP / 100_ms;
-    // auto rightV = m_driveR0.GetSelectedSensorVelocity(0) * kDPP / 100_ms;
+    auto leftV = m_driveL0.GetSelectedSensorVelocity(0) * kDPP / 100_ms;
+    auto rightV = m_driveR0.GetSelectedSensorVelocity(0) * kDPP / 100_ms;
 #else
     auto imuYaw = m_imu.GetRotation2d();
     // auto imuYaw = -m_drivetrainSimulator.GetHeading();
     auto left = m_drivetrainSimulator.GetLeftPosition();
     auto right = m_drivetrainSimulator.GetRightPosition();
+
+    auto leftV = m_drivetrainSimulator.GetLeftVelocity();
+    auto rightV = m_drivetrainSimulator.GetRightVelocity();
 #endif
 
     m_odometry.Update(imuYaw, left, right);
 
-    // m_poseEstimator.Update(GetYaw(), frc::DifferentialDriveWheelSpeeds { left = leftV, right = rightV}, left, right);
+    // m_poseEstimator.Update(GetYaw(), frc::DifferentialDriveWheelSpeeds{leftV, rightV}, left, right);
 
     m_fieldSim.SetRobotPose(GetPose()); // TEMP DEBUG OFFSET
 }
