@@ -14,6 +14,7 @@
 #include "subsystems/Shooter.hpp"
 
 #include <photonlib/PhotonCamera.h>
+#include <photonlib/SimVisionSystem.h>
 
 namespace vision
 {
@@ -68,13 +69,14 @@ namespace vision
         void TakeSnapshot(uint8_t numberOfSnaps);
         void SetFilterType(FilterType setFilter);
 
+        void AddSimulationTarget(frc::Pose2d targetPose, units::meter_t target_elevation, units::meter_t target_width, units::meter_t target_height);
+        void Simulate(frc::Transform2d newCameraTransform, frc::Pose2d robotPose);
+
     private:
         Shooter &shooter;
 
         units::inch_t estDist = 0.0_in;
 
-        // TODO: ensure correctness @Jordan
-        // photonlib::PhotonCamera camera{""};
         std::shared_ptr<nt::NetworkTable> table;
         double dy, dx, tv;
         frc::Timer lightOn;
@@ -113,5 +115,13 @@ namespace vision
 
         frc::Timer spinUpTimer;
         bool spinUpOS = false;
+
+        // TODO: ensure correctness @Jordan
+        photonlib::PhotonCamera camera{""};
+        photonlib::SimVisionSystem simVision{
+            "photonVision", 67.65_deg, 33_deg, 
+            frc::Transform2d{}, 31_in, 6_m, 
+            320, 240, 10
+        };
     };
 } // namespace vision

@@ -103,11 +103,13 @@ private:
   // frc::SerialPort led5{9600, frc::SerialPort::Port::kMXP};
 
   static constexpr auto camera_height = 31_in;
-  static constexpr auto target_height = 103.25_in;
+  static constexpr auto target_elevation = 103.25_in;
   static constexpr auto camera_pitch = 33_deg;
 
   static constexpr auto camera_to_center_turret_distance = 8.356_in;
   static constexpr auto turret_to_center_robot_distance = 2_in;
+
+  frc::Transform2d turret_to_robot = frc::Transform2d{frc::Translation2d{turret_to_center_robot_distance, 0_in}, frc::Rotation2d{}};
 
   frc::Pose2d center_hub = frc::Pose2d{8.2296_m, 4.1148_m, 0_deg};
   static constexpr auto hub_upper_radius = 2_ft;
