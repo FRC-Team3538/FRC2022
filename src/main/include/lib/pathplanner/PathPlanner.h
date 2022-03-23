@@ -1,5 +1,3 @@
-/* https://github.com/mjansen4857/pathplannerlib 
- */
 #pragma once
 
 #include "lib/pathplanner/PathPlannerTrajectory.h"
@@ -13,7 +11,11 @@ namespace pathplanner{
         public:
             static double resolution;
 
-            static pathplanner::PathPlannerTrajectory loadPath(std::string name, units::meters_per_second_t maxVel, units::meters_per_second_squared_t maxAccel, bool reversed = false);
+            static pathplanner::PathPlannerTrajectory loadPath(std::string name, units::meters_per_second_t maxVel, units::meters_per_second_squared_t maxAccel, bool reversed);
+
+            static pathplanner::PathPlannerTrajectory loadPath(std::string name, units::meters_per_second_t maxVel, units::meters_per_second_squared_t maxAccel){
+                return PathPlanner::loadPath(name, maxVel, maxAccel, false);
+            }
 
         private:
             static pathplanner::PathPlannerTrajectory joinPaths(std::vector<pathplanner::PathPlannerTrajectory> paths);

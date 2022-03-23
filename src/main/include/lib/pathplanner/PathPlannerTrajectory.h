@@ -3,6 +3,7 @@
 #include <frc/geometry/Rotation2d.h>
 #include <frc/geometry/Translation2d.h>
 #include <frc/geometry/Pose2d.h>
+#include <frc/trajectory/Trajectory.h>
 #include <vector>
 #include <units/length.h>
 #include <units/velocity.h>
@@ -55,7 +56,7 @@ namespace pathplanner{
         private:
             std::vector<PathPlannerState> states;
             std::vector<PathPlannerState> joinSplines(std::vector<Waypoint> pathPoints, units::meters_per_second_t maxVel, double step);
-            void calculateMaxVel(std::vector<PathPlannerState> *states, units::meters_per_second_t maxVel, units::meters_per_second_squared_t maxAccel);
+            void calculateMaxVel(std::vector<PathPlannerState> *states, units::meters_per_second_t maxVel, units::meters_per_second_squared_t maxAccel, bool reversed);
             void calculateVelocity(std::vector<PathPlannerState> *states, std::vector<Waypoint> pathPoints, units::meters_per_second_squared_t maxAccel);
             void recalculateValues(std::vector<PathPlannerState> *states, bool reversed);
             units::meter_t calculateRadius(PathPlannerState s0, PathPlannerState s1, PathPlannerState s2);
@@ -72,5 +73,6 @@ namespace pathplanner{
             PathPlannerState *getInitialState() { return getState(0); }
             PathPlannerState *getEndState() { return getState(numStates() - 1); }
             units::second_t getTotalTime() { return getEndState()->time; }
+            frc::Trajectory asWPILibTrajectory();
     };
 }
