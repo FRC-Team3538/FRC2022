@@ -109,6 +109,9 @@ private:
   static constexpr auto camera_to_center_turret_distance = 8.356_in;
   static constexpr auto turret_to_center_robot_distance = 2_in;
 
+  // negative because the camera points away from the turret
+  frc::Transform2d camera_to_turret = frc::Transform2d{frc::Translation2d{-camera_to_center_turret_distance, 0_in}, frc::Rotation2d{}};
+  // positive because a different transform orients us towards the front of the robot
   frc::Transform2d turret_to_robot = frc::Transform2d{frc::Translation2d{turret_to_center_robot_distance, 0_in}, frc::Rotation2d{}};
 
   frc::Pose2d center_hub = frc::Pose2d{8.2296_m, 4.1148_m, 0_deg};
