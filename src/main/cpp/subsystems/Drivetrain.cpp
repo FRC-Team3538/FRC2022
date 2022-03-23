@@ -74,6 +74,7 @@ Drivetrain::Drivetrain()
     // m_driveR0.SetStatusFramePeriod(ctre::phoenix::motorcontrol::StatusFrameEnhanced::Status_3_Quadrature, 18);
 
     referencePose = m_fieldSim.GetObject("reference");
+    pose_estimate = m_fieldSim.GetObject("pose_estimator");
 }
 
 // Teleop Control
@@ -134,7 +135,7 @@ frc::Pose2d Drivetrain::GetPose() const
 {
     if (localization_flag_entry.GetBoolean(false))
     {
-        // return m_poseEstimator.GetEstimatedPosition();
+        return m_poseEstimator.GetEstimatedPosition();
     }
     else 
     {  
@@ -144,7 +145,7 @@ frc::Pose2d Drivetrain::GetPose() const
 
 void Drivetrain::UpdateOdometryWithGlobalEstimate(frc::Pose2d globalEstimate, units::second_t estimateTime)
 {
-    // m_poseEstimator.AddVisionMeasurement(globalEstimate, estimateTime);
+    m_poseEstimator.AddVisionMeasurement(globalEstimate, estimateTime);
 }
 
 void Drivetrain::UpdateOdometry()
@@ -168,9 +169,10 @@ void Drivetrain::UpdateOdometry()
 
     m_odometry.Update(imuYaw, left, right);
 
-    // m_poseEstimator.Update(GetYaw(), frc::DifferentialDriveWheelSpeeds{leftV, rightV}, left, right);
+    m_poseEstimator.Update(GetYaw(), frc::DifferentialDriveWheelSpeeds{leftV, rightV}, left, right);
 
     m_fieldSim.SetRobotPose(GetPose()); // TEMP DEBUG OFFSET
+    pose_estimate->SetPose(m_poseEstimator.GetEstimatedPosition());
 }
 
 void Drivetrain::ResetOdometry(const frc::Pose2d &pose)
@@ -193,7 +195,7 @@ void Drivetrain::ResetOdometry(const frc::Pose2d &pose)
     m_odometry.ResetPosition(pose, GetYaw());
     // std::cout << "Heading after reset: " << m_odometry.GetPose().Rotation().Radians().value() << std::endl;
 
-    // m_poseEstimator.ResetPosition(pose, GetYaw());
+    m_poseEstimator.ResetPosition(pose, GetYaw());
 
     // Simulator
     // Reset the pose of the robot but do not reset the Simulated IMU.
