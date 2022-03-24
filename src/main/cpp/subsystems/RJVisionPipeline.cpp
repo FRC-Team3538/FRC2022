@@ -278,4 +278,9 @@ namespace vision
         // snapShotTimer.Reset();
         // snapShotTimer.Start();
     }
+
+    void RJVisionPipeline::SetTurretAngle(units::radian_t angle)
+    {
+        turretAngle = angle;
+    }
 } // namespace vision
