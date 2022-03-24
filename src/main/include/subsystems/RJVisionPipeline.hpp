@@ -11,7 +11,9 @@
 #include <units/angle.h>
 #include "Subsystem.hpp"
 #include <list>
-#include "subsystems/Shooter.hpp"
+
+#include <units/angle.h>
+#include <units/angular_velocity.h>
 
 #include <photonlib/PhotonCamera.h>
 
@@ -52,7 +54,7 @@ namespace vision
 
         // Init Stuff
         RJVisionPipeline() = delete;
-        RJVisionPipeline(Shooter &shooter, FilterType filter = FilterType::NoFilter);
+        RJVisionPipeline(FilterType filter = FilterType::NoFilter);
         void ConfigureSystem();
 
         // Periodic
@@ -67,10 +69,10 @@ namespace vision
         void SetLED(bool enable);
         void TakeSnapshot(uint8_t numberOfSnaps);
         void SetFilterType(FilterType setFilter);
+        void SetTurretAngle(units::radian_t turretAngle);
 
     private:
-        Shooter &shooter;
-
+        units::radian_t turretAngle;
         units::inch_t estDist = 0.0_in;
 
         // TODO: ensure correctness @Jordan

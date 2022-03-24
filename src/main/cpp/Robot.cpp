@@ -95,6 +95,7 @@ void Robot::RobotPeriodic()
   IO.UpdateSmartDash();
   IO.drivetrain.Periodic();
   autoprograms.SmartDash();
+  IO.rjVision.SetTurretAngle(IO.shooter.GetTurretAngle());
   IO.rjVision.Periodic();
   frc::SmartDashboard::PutNumber("robot/MatchTime", frc::DriverStation::GetMatchTime());
   frc::SmartDashboard::PutNumber("robot/PressureHigh", IO.ph.GetPressure(0).value());
