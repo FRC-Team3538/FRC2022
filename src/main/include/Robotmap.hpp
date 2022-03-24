@@ -13,6 +13,7 @@
 
 #include <frc/PowerDistribution.h>
 #include <frc/TimedRobot.h>
+#include <unordered_map>
 
 class Robotmap
 {
