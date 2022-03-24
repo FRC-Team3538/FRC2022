@@ -70,7 +70,7 @@ units::degree_t VectorMath::GetTheta()
 void VectorMath::CalculatePolar()
 {
     magnitude = units::inch_t{sqrt(pow(x.value(), 2) + pow(y.value(), 2))};
-    theta = units::radian_t{atan2(y.value(), x.value())};
+    theta = units::degree_t{atan2(y.value(), x.value())};
 }
 
 void VectorMath::CalculateCartesian()

@@ -33,6 +33,7 @@ namespace vision
             SMA,
             EMANoSpinup,
             EMAWithSpinup,
+            MedianFilter,
             NoFilter
         };
 
@@ -40,7 +41,6 @@ namespace vision
         {
             units::inch_t distance;
             units::degree_t deltaX;
-            units::degree_t deltaY;
             units::degree_t turretAngle;
             units::revolutions_per_minute_t calculatedShotRPM;
             bool filled = false;
@@ -100,13 +100,10 @@ namespace vision
         // Filter Stuff
         std::list<double> xList;
         std::list<double> yList;
-        std::list<double> turretList;
 
         double alpha = 0.125; // Weight
-        uint8_t N = 10;        // Note, EMA will have a spinup interval of about 20ms * N
+        uint8_t N = 8;       // Note, EMA will have a spinup interval of about 20ms * N
         units::second_t sampleSpinUpDelay = 0.3_s;
-        double estimatedPhaseShift = (double)(N + 2) / 2.0;
-        units::second_t estimatedPhaseShiftTime = 20_ms * ((double)(N + 1) / 2.0);
 
         double CalculateEMA(const std::list<double> &list);
         double CalculateAverage(const std::list<double> &list);

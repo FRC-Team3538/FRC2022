@@ -13,6 +13,7 @@
 #include <frc/smartdashboard/SmartDashboard.h>
 
 #include "lib/Logging.h"
+#include "lib/VectorMath.hpp"
 
 #include <frc/DataLogManager.h>
 
@@ -59,9 +60,6 @@ private:
   frc::Timer intakeTimer;
   frc::Timer climberTimer; // Rhyme points
   bool climberTimerOS = false;
-  bool elShoot = false;
-
-  vision::RJVisionPipeline::visionData prevData;
 
   bool hoodOS = false;
   bool hoodOS2 = false;

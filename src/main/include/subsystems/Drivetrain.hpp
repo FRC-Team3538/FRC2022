@@ -31,7 +31,6 @@
 #include <networktables/NetworkTableInstance.h>
 
 #include "Subsystem.hpp"
-#include "lib/VectorMath.hpp"
 
 // leave this for wandows
 #ifndef M_PI
@@ -58,6 +57,7 @@ public:
                units::radians_per_second_t rot);
     bool TurnRel(double forward, units::degree_t target, units::degree_t tolerance);
     void Drive(const frc::Trajectory::State& target);
+    // TODO: Turn2Goal() 
 
     void UpdateOdometryWithGlobalEstimate(frc::Pose2d globalEstimate, units::second_t estimateTime);
     void UpdateOdometry();
