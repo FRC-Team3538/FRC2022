@@ -76,6 +76,9 @@ public:
 
     frc::Field2d& GetField();
 
+    void RegisterDataEntries(wpi::log::DataLog &log);
+    void LogDataEntries(wpi::log::DataLog &log);
+
 private:
     /***************************************************************************/
     // Characterization Values

@@ -10,7 +10,6 @@
 #include <frc/DriverStation.h>
 
 #include <wpi/timestamp.h>
-
 #include <photonlib/PhotonUtils.h>
 
 using namespace pathplanner;
@@ -60,6 +59,7 @@ void Robot::RobotInit()
   // Logging Stuff
 #ifdef LOGGER
   frc::DataLogManager::LogNetworkTables(true);
+  IO.RegisterDataEntries(log);
   // arg bool - log joystick data if true
   frc::DriverStation::StartDataLog(log, true);
 #endif // LOGGER
@@ -69,24 +69,6 @@ void Robot::RobotInit()
     IO.shooter.ZeroTurret();
   }
 
-  // led1.SetWriteBufferMode(frc::SerialPort::WriteBufferMode::kFlushOnAccess);
-  // led2.SetWriteBufferMode(frc::SerialPort::WriteBufferMode::kFlushOnAccess);
-  // led3.SetWriteBufferMode(frc::SerialPort::WriteBufferMode::kFlushOnAccess);
-  // led4.SetWriteBufferMode(frc::SerialPort::WriteBufferMode::kFlushOnAccess);
-  // led5.SetWriteBufferMode(frc::SerialPort::WriteBufferMode::kFlushOnAccess);
-
-  // led1.SetWriteBufferSize(64);
-  // led2.SetWriteBufferSize(64);
-  // led3.SetWriteBufferSize(64);
-  // led4.SetWriteBufferSize(64);
-  // led5.SetWriteBufferSize(64);
-
-  // led1.EnableTermination();
-  // led2.EnableTermination();
-  // led3.EnableTermination();
-  // led4.EnableTermination();
-  // led5.EnableTermination();
-
   localization_flag_entry.SetDefaultBoolean(false);
 }
 
@@ -95,11 +77,12 @@ void Robot::RobotPeriodic()
   IO.UpdateSmartDash();
   IO.drivetrain.Periodic();
   autoprograms.SmartDash();
+  IO.rjVision.SetTurretAngle(IO.shooter.GetTurretAngle());
   IO.rjVision.Periodic();
   frc::SmartDashboard::PutNumber("robot/MatchTime", frc::DriverStation::GetMatchTime());
   frc::SmartDashboard::PutNumber("robot/PressureHigh", IO.ph.GetPressure(0).value());
   if (!IO.shooter.zeroed)
-    IO.shooter.SetBlinkyZeroThing();\
+    IO.shooter.SetBlinkyZeroThing();
 
   // touchpad to toggle between old odometry & limelight and new pose estimation / photon vision / turret fun
   if (IO.secondaryController.IsConnected() && IO.secondaryController.GetTouchpadPressed())
@@ -166,6 +149,14 @@ void Robot::RobotPeriodic()
       
     // }
   }
+
+  // Logging Stuff
+#ifdef LOGGER
+  uint64_t t0 = wpi::Now();
+  IO.LogDataEntries(log);
+  uint64_t t1 = wpi::Now();
+  std::cout << "time to log: " << t1 - t0 << "us" << std::endl;
+#endif // LOGGER
 }
 
 void Robot::AutonomousInit()

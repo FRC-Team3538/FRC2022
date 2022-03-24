@@ -68,6 +68,9 @@ namespace vision
         void TakeSnapshot(uint8_t numberOfSnaps);
         void SetFilterType(FilterType setFilter);
 
+        void RegisterDataEntries(wpi::log::DataLog &log);
+        void LogDataEntries(wpi::log::DataLog &log);
+
     private:
         Shooter &shooter;
 

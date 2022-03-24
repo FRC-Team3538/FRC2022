@@ -39,8 +39,12 @@ public:
 
     void UpdateSmartDash();
     void ConfigureSystem();
+    void RegisterDataEntries(wpi::log::DataLog &log);
+    void LogDataEntries(wpi::log::DataLog &log);
     void watchDog();
 
     // SmartDash Cycler
     size_t telemetryCt = 0;
+
+    std::unordered_map<std::string_view, int> data_entries;
 };

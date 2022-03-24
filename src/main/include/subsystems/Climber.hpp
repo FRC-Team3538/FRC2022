@@ -51,6 +51,8 @@ public:
     void InitSendable(wpi::SendableBuilder &builder) override;
     void FalconSendableHelper(wpi::SendableBuilder &builder, WPI_TalonFX& motor, std::string name);
 
+    void RegisterDataEntries(wpi::log::DataLog &log);
+    void LogDataEntries(wpi::log::DataLog &log);
 
 private:
     const double kScaleFactor = 1 / 124000.0; // Ticks over climber position (from 0 - 1)

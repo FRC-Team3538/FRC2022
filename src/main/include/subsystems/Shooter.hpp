@@ -58,6 +58,9 @@ public:
     void ConfigureSystem();
     void UpdateTelemetry();
 
+    void RegisterDataEntries(wpi::log::DataLog &log);
+    void LogDataEntries(wpi::log::DataLog &log);
+
     void Periodic();
 
     // *** SETTERS ***

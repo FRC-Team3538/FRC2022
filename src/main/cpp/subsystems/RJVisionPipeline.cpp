@@ -1,6 +1,7 @@
 #include "subsystems/RJVisionPipeline.hpp"
 
 #include <wpi/timestamp.h>
+#include <wpi/DataLog.h>
 
 using namespace nt; 
 
@@ -278,4 +279,22 @@ namespace vision
         // snapShotTimer.Reset();
         // snapShotTimer.Start();
     }
+
+    void RJVisionPipeline::SetTurretAngle(units::radian_t angle)
+    {
+        turretAngle = angle;
+    }
+
+    void RJVisionPipeline::RegisterDataEntries(wpi::log::DataLog &log)
+    {
+        RegisterDataEntry(log, "dx", "double");
+        RegisterDataEntry(log, "Vision Dist", "double");
+    }
+    
+    void RJVisionPipeline::LogDataEntries(wpi::log::DataLog &log)
+    {
+        log.AppendDouble(GetDataEntry("dx"), dx, 0);
+        log.AppendDouble(GetDataEntry("Vision Dist"), estDist.value(), 0);
+    }
+    
 } // namespace vision

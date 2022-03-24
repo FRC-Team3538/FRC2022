@@ -1,5 +1,7 @@
 #include "subsystems/Subsystem.hpp"
 
+#include <wpi/DataLog.h>
+
 /*
 Trust me when I say this is a good thing - 
 use coprimes for status frames to minimize collision
@@ -25,4 +27,32 @@ void Subsystem::SetStatusFrames(WPI_TalonFX &talon, uint8_t framePeriod)
     talon.SetStatusFramePeriod(StatusFrameEnhanced::Status_8_PulseWidth, 223, 50);
     talon.SetStatusFramePeriod(StatusFrameEnhanced::Status_11_UartGadgeteer, 217, 50);
     talon.SetStatusFramePeriod(StatusFrameEnhanced::Status_Brushless_Current, 211, 50);
+}
+
+void Subsystem::RegisterDataEntry(wpi::log::DataLog &log, std::string_view entry_name, std::string_view type, std::string_view metadata, int64_t timestamp)
+{
+    data_entries[entry_name] = log.Start(entry_name, type, metadata, timestamp);
+}
+
+int Subsystem::GetDataEntry(std::string_view entry_name)
+{
+    return data_entries[entry_name];
+}
+
+void Subsystem::FalconEntryStartHelper(wpi::log::DataLog &log, std::string name)
+{
+    RegisterDataEntry(log, name + "/percent", "double");
+    RegisterDataEntry(log, name + "/voltage", "double");
+    RegisterDataEntry(log, name + "/rpm", "double");
+    RegisterDataEntry(log, name + "/temperature", "double");
+    RegisterDataEntry(log, name + "/current", "double");
+}
+
+void Subsystem::FalconEntryHelper(wpi::log::DataLog &log, WPI_TalonFX &motor, std::string name, uint64_t timestamp)
+{
+    log.AppendDouble(GetDataEntry(name + "/percent"), motor.Get(), timestamp);
+    log.AppendDouble(GetDataEntry(name + "/voltage"), motor.GetMotorOutputVoltage(), timestamp);
+    log.AppendDouble(GetDataEntry(name + "/rpm"), motor.GetSelectedSensorVelocity() * kTicks2RPM, timestamp);
+    log.AppendDouble(GetDataEntry(name + "/temperature"), motor.GetTemperature(), timestamp);
+    log.AppendDouble(GetDataEntry(name + "/current"), motor.GetOutputCurrent(), timestamp);
 }

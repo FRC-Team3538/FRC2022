@@ -1,5 +1,7 @@
 #include "subsystems/Climber.hpp"
 
+#include <wpi/DataLog.h>
+
 Climber::Climber()
 {
 }
@@ -132,5 +134,18 @@ void Climber::InitSendable(wpi::SendableBuilder &builder)
         "sol", [this]
         { return GetClimberState() == Climber::ClimbState::Up; },
         nullptr);
-    
+}
+
+void Climber::RegisterDataEntries(wpi::log::DataLog &log)
+{
+    RegisterDataEntry(log, "Climber/sol", "boolean");
+    FalconEntryStartHelper(log, "Climber/elevatorA");
+    FalconEntryStartHelper(log, "Climber/elevatorB");
+}
+
+void Climber::LogDataEntries(wpi::log::DataLog &log)
+{
+    log.AppendBoolean(GetDataEntry("Climber/sol"), tiltPiston.Get(), 0);
+    FalconEntryHelper(log, climberA, "Climber/elevatorA");
+    FalconEntryHelper(log, climberB, "Climber/elevatorB");
 }
