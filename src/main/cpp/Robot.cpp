@@ -33,7 +33,7 @@ void Robot::RobotInit()
   // frc::SmartDashboard::PutData("Power", &IO.pdp);
   // // frc::SmartDashboard::PutData("Dr", &IO.mainController);
   // // frc::SmartDashboard::PutData("Op", &IO.secondaryController);
-  frc::SmartDashboard::PutData("Drive", &IO.drivetrain);
+  // frc::SmartDashboard::PutData("Drive", &IO.drivetrain);
   // frc::SmartDashboard::PutData("Shooter", &IO.shooter);
   // frc::SmartDashboard::PutData("Climber", &IO.climber);
   // frc::SmartDashboard::PutData("Ph", &IO.ph);
@@ -55,7 +55,6 @@ void Robot::RobotInit()
   ntIndexerVoltage.SetPersistent();
   ntTurretTargetAng.ForceSetDouble(ntTurretTargetAng.GetDouble(kTurretTargetAngDefault));
   ntTurretTargetAng.SetPersistent();
-
 
   // Logging Stuff
 #ifdef LOGGER
@@ -100,7 +99,7 @@ void Robot::RobotPeriodic()
   frc::SmartDashboard::PutNumber("robot/MatchTime", frc::DriverStation::GetMatchTime());
   frc::SmartDashboard::PutNumber("robot/PressureHigh", IO.ph.GetPressure(0).value());
   if (!IO.shooter.zeroed)
-    IO.shooter.SetBlinkyZeroThing();\
+    IO.shooter.SetBlinkyZeroThing();
 
   // touchpad to toggle between old odometry & limelight and new pose estimation / photon vision / turret fun
   if (IO.secondaryController.IsConnected() && IO.secondaryController.GetTouchpadPressed())
@@ -113,7 +112,7 @@ void Robot::RobotPeriodic()
 
   if (localization_flag_entry.GetBoolean(false))
   {
-    
+
     // auto result = IO.rjVision.RunPhotonVision();
     // if (result.base_result.HasTargets())
     // {
@@ -132,7 +131,6 @@ void Robot::RobotPeriodic()
     //   auto turret_heading = IO.shooter.GetTurretAngle();
     //   auto turret_facing = robot_heading + turret_heading + 180_deg;
 
-
     //   // this gets the point on the rim of the hub closest to the robot.
     //   // this is the point that we're targeting in our pipeline
     //   // negative brings the edge closer to us, not further away
@@ -144,7 +142,6 @@ void Robot::RobotPeriodic()
     //   // positive because we're facing forward on the robot
     //   auto turret_to_robot = frc::Transform2d{frc::Translation2d{turret_to_center_robot_distance, 0_in}, frc::Rotation2d{}};
     //   auto camera_to_robot = camera_to_turret + turret_to_facing_robot_north + turret_to_robot;
-
 
     //   auto distance = photonlib::PhotonUtils::CalculateDistanceToTarget(camera_height, target_height, camera_pitch, target_pitch);
     //   auto camera_to_target_translation = photonlib::PhotonUtils::EstimateCameraToTargetTranslation(distance, target_yaw);
@@ -164,7 +161,7 @@ void Robot::RobotPeriodic()
     //   // distance because we can
     //   Shooter::State shooter_state = IO.shooter.CalculateShot(distance);
     //   IO.shooter.SetShooterRPM(shooter_state.shooterRPM);
-      
+
     // }
   }
 }
@@ -216,30 +213,31 @@ void Robot::TeleopPeriodic()
     vision::RJVisionPipeline::visionData data = IO.rjVision.Run();
     if (data.filled)
     {
+
       units::meters_per_second_t driveVel = IO.drivetrain.GetVelocity();
 
       // vision::RJVisionPipeline::visionData lookAhead = IO.rjVision.LookAhead(data, prevData);
       // if (lookAhead.filled)
       // {
-        // Adjust for Movement
-        VectorMath shotVector = VectorMath{data.distance, data.turretAngle}; // Plane Relative to Robot Direction, where back of the robot is 0 deg
-        VectorMath robotMoveVector = VectorMath{(driveVel * 1_s), 180.0_deg};          // Assuming about a 1 sec shot time. Maybe add a graph?
-        VectorMath adjustedShotVector = shotVector - robotMoveVector;                  // - robotMoveVector because you want to shoot opposite of movement
+      // Adjust for Movement
+      VectorMath shotVector = VectorMath{data.distance, data.turretAngle};  // Plane Relative to Robot Direction, where back of the robot is 0 deg
+      VectorMath robotMoveVector = VectorMath{(driveVel * 1_s), 180.0_deg}; // Assuming about a 1 sec shot time. Maybe add a graph?
+      VectorMath adjustedShotVector = shotVector - robotMoveVector;         // - robotMoveVector because you want to shoot opposite of movement
 
-        // Calculate Turret
-        //std::cout << adjustedShotVector.GetTheta().value() << std::endl;
-        bool turretAtAngle = IO.shooter.SetTurretAngle(adjustedShotVector.GetTheta(), 1.0_deg);
-        // bool turretAtAngle = IO.shooter.SetTurretAngle(data.turretAngle, 1.0_deg);
+      // Calculate Turret
+      // std::cout << adjustedShotVector.GetTheta().value() << std::endl;
+      bool turretAtAngle = IO.shooter.SetTurretAngle(adjustedShotVector.GetTheta(), 1.0_deg);
+      // bool turretAtAngle = IO.shooter.SetTurretAngle(data.turretAngle, 1.0_deg);
 
-        // Calculate Shooter
-        Shooter::State shotStat = IO.shooter.CalculateShot(adjustedShotVector.GetMagnitude()); // Magnitude from adjusted vector gets us distance
+      // Calculate Shooter
+      Shooter::State shotStat = IO.shooter.CalculateShot(adjustedShotVector.GetMagnitude()); // Magnitude from adjusted vector gets us distance
 
-        IO.shooter.SetShooterRPM(shotStat.shooterRPM);
+      IO.shooter.SetShooterRPM(shotStat.shooterRPM);
 
-        // Shoot Maybe
-        if(turretAtAngle)
-          elShoot = true;
-        shoot = elShoot;
+      // Shoot Maybe
+      // if(turretAtAngle)
+      //   elShoot = true;
+      shoot = turretAtAngle && (units::math::abs(shotStat.shooterRPM - IO.shooter.GetShooterRPM()) < 150.0_rpm);
       //}
     }
     double fwd = -deadband(IO.mainController.GetLeftY());
@@ -256,10 +254,21 @@ void Robot::TeleopPeriodic()
     vision::RJVisionPipeline::visionData data = IO.rjVision.Run();
     if (data.filled)
     {
-      // Set Turret
-      units::degree_t tol{ntVisionAngleTol.GetDouble(kVisionAngleTolDefault)};
+      //std::cout << data.turretAngle.value() << std::endl;
 
-      IO.shooter.SetTurretAngle(data.turretAngle, 0.75_deg);
+      units::meters_per_second_t driveVel = IO.drivetrain.GetVelocity();
+
+      // vision::RJVisionPipeline::visionData lookAhead = IO.rjVision.LookAhead(data, prevData);
+      // if (lookAhead.filled)
+      // {
+        // Adjust for Movement
+        VectorMath shotVector = VectorMath{data.distance, data.turretAngle}; // Plane Relative to Robot Direction, where back of the robot is 0 deg
+        VectorMath robotMoveVector = VectorMath{(driveVel * 1_s), 180.0_deg};          // Assuming about a 1 sec shot time. Maybe add a graph?
+        VectorMath adjustedShotVector = shotVector - robotMoveVector;                  // - robotMoveVector because you want to shoot opposite of movement
+
+        // Calculate Turret
+        //std::cout << adjustedShotVector.GetTheta().value() << std::endl;
+        bool turretAtAngle = IO.shooter.SetTurretAngle(adjustedShotVector.GetTheta(), 0.5_deg);
     }
     double fwd = -deadband(IO.mainController.GetLeftY());
     double rot = -deadband(IO.mainController.GetRightX());
@@ -461,24 +470,24 @@ void Robot::TeleopPeriodic()
   //
 
   // if intaking balls and color sensor is connected
-  if (units::math::abs(intakeCmd) > 0.0_V && colorSensor.IsConnected())
+  if (false)//(units::math::abs(intakeCmd) > 0.0_V && colorSensor.IsConnected())
   {
 
     // If a ball is present
     frc::Color ballColor = colorSensor.GetColor();
-    if(fabs(ballColor.blue - ballColor.red) > 0.2)
+    if (fabs(ballColor.blue - ballColor.red) > 0.2)
     {
       // Check for ball color missmatch
       auto blueAlliance = frc::DriverStation::GetAlliance() == frc::DriverStation::Alliance::kBlue;
       auto redAlliance = frc::DriverStation::GetAlliance() == frc::DriverStation::Alliance::kRed;
       auto blueBall = ballColor.blue > ballColor.red;
       auto redBall = !blueBall;
-      if((blueAlliance && redBall) || (redAlliance && blueBall))
+      if ((blueAlliance && redBall) || (redAlliance && blueBall))
       {
         autoEjectTimer.Start();
       }
 
-      if((blueAlliance && blueBall) || (redAlliance && redBall))
+      if ((blueAlliance && blueBall) || (redAlliance && redBall))
       {
         autoEjectTimer.Stop();
         autoEjectTimer.Reset();
@@ -486,10 +495,10 @@ void Robot::TeleopPeriodic()
       }
     }
 
-    if(autoEjectTimer.Get() > 0.25_s)
+    if (autoEjectTimer.Get() > 0.25_s)
     {
       IO.shooter.SetShooterRPM(800_rpm);
-      if(IO.shooter.SetTurretAngle(0.0_deg, 10_deg))
+      if (IO.shooter.SetTurretAngle(0.0_deg, 10_deg))
       {
         m_csmode = ClimberShooterMode::Shooter;
         IO.shooter.Shoot();
@@ -499,7 +508,7 @@ void Robot::TeleopPeriodic()
   }
 
   // Attempt to eject this ball for x seconds
-  if(autoEjectTimer.Get() > 2.0_s)
+  if (autoEjectTimer.Get() > 2.0_s)
   {
     autoEjectTimer.Stop();
     autoEjectTimer.Reset();

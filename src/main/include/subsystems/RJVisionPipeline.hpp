@@ -54,7 +54,7 @@ namespace vision
 
         // Init Stuff
         RJVisionPipeline() = delete;
-        RJVisionPipeline(FilterType filter = FilterType::NoFilter);
+        RJVisionPipeline(FilterType filter = FilterType::EMAWithSpinup);
         void ConfigureSystem();
 
         // Periodic
@@ -69,10 +69,10 @@ namespace vision
         void SetLED(bool enable);
         void TakeSnapshot(uint8_t numberOfSnaps);
         void SetFilterType(FilterType setFilter);
-        void SetTurretAngle(units::radian_t turretAngle);
+        void SetTurretAngle(units::degree_t turretAngle);
 
     private:
-        units::radian_t turretAngle;
+        units::degree_t turretAngle;
         units::inch_t estDist = 0.0_in;
 
         // TODO: ensure correctness @Jordan
@@ -102,7 +102,7 @@ namespace vision
         std::list<double> yList;
         std::list<double> turretList;
 
-        double alpha = 0.125; // Weight
+        double alpha = 0.2; // Weight
         uint8_t N = 10;        // Note, EMA will have a spinup interval of about 20ms * N
         units::second_t sampleSpinUpDelay = 0.3_s;
         double estimatedPhaseShift = (double)(N + 2) / 2.0;

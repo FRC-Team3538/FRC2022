@@ -9,7 +9,7 @@ namespace vision
 
     RJVisionPipeline::RJVisionPipeline(FilterType filter) : filter(filter)
     {
-        frc::SmartDashboard::PutNumber("ALPHA", 0.125);
+        frc::SmartDashboard::PutNumber("ALPHA", 0.2);
         frc::SmartDashboard::PutNumber("N", 10);
     }
 
@@ -29,7 +29,7 @@ namespace vision
         dy = table->GetNumber("ty", 0.0);
         tv = table->GetNumber("tv", 0.0);
 
-        alpha = frc::SmartDashboard::GetNumber("ALPHA", 0.125);
+        alpha = frc::SmartDashboard::GetNumber("ALPHA", 0.2);
         N = frc::SmartDashboard::GetNumber("N", 10);
         estimatedPhaseShift = (double)(N + 1) / 2.0;
         // if (snapShotTimer.Get() > snapTime)
@@ -68,6 +68,7 @@ namespace vision
                 }
                 else
                 {
+                    //std::cout << dx << ", " << turretAngle.value() << std::endl;
                     xList.push_back(dx + turretAngle.value());
                     yList.push_back(dy);
                     telemetry.filled = false;
@@ -161,7 +162,9 @@ namespace vision
             }
             break;
             }
+
             return telemetry;
+
         }
         else
         {
@@ -197,16 +200,16 @@ namespace vision
         }
         else
         {
-            // std::cout << value << ", ";
+            //std::cout << value << ", ";
 
             for (auto i = ++list.begin(); i != list.end(); ++i)
             {
                 value = (alpha * (*i)) + ((1 - alpha) * value);
-                // std::cout << *i << ", ";
+                //std::cout << *i << ", ";
             }
         }
 
-        // std::cout << std::endl;
+        //std::cout << std::endl;
         return value;
     }
 
@@ -279,7 +282,7 @@ namespace vision
         // snapShotTimer.Start();
     }
 
-    void RJVisionPipeline::SetTurretAngle(units::radian_t angle)
+    void RJVisionPipeline::SetTurretAngle(units::degree_t angle)
     {
         turretAngle = angle;
     }

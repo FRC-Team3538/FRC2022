@@ -59,8 +59,8 @@ Shooter::Shooter()
     turret.SetSelectedSensorPosition(0.0);
     turret.SetInverted(true);
     turret.SetNeutralMode(ctre::phoenix::motorcontrol::NeutralMode::Brake);
-    turret.ConfigPeakOutputForward(0.75); // Crank it!!!
-    turret.ConfigPeakOutputReverse(-0.75);
+    turret.ConfigPeakOutputForward(0.625); // Crank it!!!
+    turret.ConfigPeakOutputReverse(-0.625);
     turret.ConfigForwardSoftLimitThreshold(kTurretMax / kScaleFactorTurret);
     turret.ConfigReverseSoftLimitThreshold(kTurretMin / kScaleFactorTurret);
     turret.Config_IntegralZone(0, 2.0 / kScaleFactorTurret);
