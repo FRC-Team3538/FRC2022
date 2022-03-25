@@ -5,22 +5,20 @@
 
 #pragma once
 
-#include <frc/TimedRobot.h>
-
-#include "Robotmap.hpp"
-#include "auto/AutoPrograms.hpp"
-
-#include <frc/smartdashboard/SmartDashboard.h>
-
-#include "lib/Logging.h"
-
-#include <frc/DataLogManager.h>
-
-#include <rev/ColorSensorV3.h>
-#include <rev/CIEColor.h>
-#include <rev/ColorMatch.h>
-
-#include <frc/SerialPort.h>
+#include <frc/TimedRobot.h>                     // for TimedRobot
+#include <frc/smartdashboard/SmartDashboard.h>  // for SmartDashboard
+#include <rev/ColorSensorV3.h>                  // for ColorSensorV3
+#include <stdint.h>                             // for uint8_t
+#include "Robotmap.hpp"                         // for Robotmap
+#include "auto/AutoPrograms.hpp"                // for AutoPrograms
+#include "frc/I2C.h"                            // for I2C, I2C::Port, I2C::...
+#include "frc/Timer.h"                          // for Timer
+#include "frc/geometry/Pose2d.h"                // for Pose2d
+#include "frc/geometry/Rotation2d.h"            // for Rotation2d
+#include "networktables/NetworkTableEntry.h"    // for NetworkTableEntry
+#include "subsystems/RJVisionPipeline.hpp"      // for RJVisionPipeline, RJV...
+#include "units/angle.h"                        // for operator""_deg
+#include "units/length.h"                       // for operator""_in, operat...
 
 class Robot : public frc::TimedRobot
 {

@@ -1,6 +1,14 @@
 #include "subsystems/RJVisionPipeline.hpp"
-
-#include <wpi/timestamp.h>
+#include <wpi/timestamp.h>                         // for Now
+#include <cmath>                                   // for pow, tan
+#include "frc/Timer.h"                             // for Timer
+#include "frc/smartdashboard/SmartDashboard.h"     // for SmartDashboard
+#include "networktables/NetworkTable.h"            // for NetworkTable
+#include "networktables/NetworkTableInstance.h"    // for NetworkTableInstance
+#include "networktables/NetworkTableInstance.inc"  // for NetworkTableInstan...
+#include "networktables/NetworkTableType.h"        // for nt
+#include "units/angle.h"                           // for degree_t, radian_t
+#include "units/length.h"                          // for inch_t, operator""_in
 
 using namespace nt; 
 

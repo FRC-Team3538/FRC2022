@@ -1,5 +1,8 @@
 #include "subsystems/Subsystem.hpp"
 
+using namespace ctre::phoenix::motorcontrol::can;
+using namespace ctre::phoenix::motorcontrol;
+
 /*
 Trust me when I say this is a good thing - 
 use coprimes for status frames to minimize collision

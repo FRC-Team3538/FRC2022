@@ -1,11 +1,11 @@
 #pragma once
 
-#include <frc/PneumaticHub.h>
-#include <frc/SensorUtil.h>
-#include <wpi/sendable/Sendable.h>
-#include <wpi/sendable/SendableBuilder.h>
-#include <wpi/sendable/SendableHelper.h>
-#include <wpi/sendable/SendableRegistry.h>
+#include <frc/PneumaticHub.h>             // for PneumaticHub, PneumaticHub:...
+#include <frc/SensorUtil.h>               // for SensorUtil
+#include <stdint.h>                       // for uint32_t
+#include <wpi/sendable/Sendable.h>        // for Sendable
+#include <wpi/sendable/SendableHelper.h>  // for SendableHelper
+namespace wpi { class SendableBuilder; }
 
 namespace RJ {
 

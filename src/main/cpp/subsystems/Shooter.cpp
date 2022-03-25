@@ -1,6 +1,17 @@
 #include "subsystems/Shooter.hpp"
-
 #include <cmath>
+#include <iostream>
+#include "frc/DigitalInput.h"
+#include "frc/Solenoid.h"
+#include "frc/filter/LinearFilter.h"
+#include "frc/smartdashboard/SmartDashboard.h"
+#include "units/angle.h"
+#include "units/angular_velocity.h"
+#include "units/length.h"
+#include "units/math.h"
+#include "wpi/sendable/SendableBuilder.h"
+
+using namespace ctre::phoenix::motorcontrol;
 
 Shooter::Shooter()
 {

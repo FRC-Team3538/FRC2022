@@ -1,24 +1,26 @@
 #pragma once
 
-#include <units/angular_velocity.h>
-#include <units/angle.h>
-#include <units/length.h>
-#include <units/velocity.h>
-#include <units/constants.h>
+#include <frc/DigitalInput.h>                                   // for Digit...
+#include <frc/Solenoid.h>                                       // for Solenoid
+#include <frc/controller/ProfiledPIDController.h>               // for Profi...
+#include <frc/filter/LinearFilter.h>                            // for Linea...
+#include <stdint.h>                                             // for uint8_t
+#include <units/angle.h>                                        // for degree_t
+#include <units/angular_velocity.h>                             // for revol...
+#include <units/length.h>                                       // for inch_t
+#include <wpi/sendable/SendableHelper.h>                        // for Senda...
+#include <string>                                               // for string
+#include "Subsystem.hpp"                                        // for Subsy...
+#include "frc/PneumaticsModuleType.h"                           // for Pneum...
+#include "frc/Timer.h"                                          // for Timer
+#include "frc/trajectory/TrapezoidProfile.h"                    // for Trape...
+#include "units/base.h"                                         // for unit_t
+#include "units/time.h"                                         // for opera...
+#include "units/voltage.h"                                      // for volt_t
+#include "wpi/sendable/Sendable.h"                              // for Sendable
+namespace wpi { class SendableBuilder; }
 
-#include <wpi/numbers>
-
-#include <frc/Solenoid.h>
-#include <frc/controller/ProfiledPIDController.h>
-#include <wpi/sendable/SendableRegistry.h>
-#include <wpi/sendable/SendableBuilder.h>
-#include <wpi/sendable/SendableHelper.h>
-#include <frc/DigitalInput.h>
-#include <frc/filter/LinearFilter.h>
-
-#include "Subsystem.hpp"
-
-#include <iostream>
+using namespace ctre::phoenix::motorcontrol::can;
 
 class Shooter : public Subsystem,
                 public wpi::Sendable,
@@ -55,8 +57,8 @@ public:
     Shooter();
 
     // RJ::Subsystem Interface
-    void ConfigureSystem();
-    void UpdateTelemetry();
+    void ConfigureSystem() override;
+    void UpdateTelemetry() override;
 
     void Periodic();
 

@@ -1,4 +1,18 @@
 #include "lib/pathplanner/GeometryUtil.h"
+#include <cmath>                         // for isfinite, isnan
+#include "frc/geometry/Rotation2d.h"     // for Rotation2d
+#include "frc/geometry/Translation2d.h"  // for Translation2d
+#include "units/acceleration.h"          // for meters_per_second_squared_t
+#include "units/angle.h"                 // for degree_t
+#include "units/angular_acceleration.h"  // for radians_per_second_squared_t
+#include "units/angular_velocity.h"      // for radians_per_second_t
+#include "units/base.h"                  // for unit_t, operator*, operator-
+#include "units/curvature.h"             // for curvature_t
+#include "units/dimensionless.h"         // for scalar_t
+#include "units/length.h"                // for meter_t
+#include "units/math.h"                  // for floor
+#include "units/time.h"                  // for second_t
+#include "units/velocity.h"              // for meters_per_second_t
 
 using namespace pathplanner;
 

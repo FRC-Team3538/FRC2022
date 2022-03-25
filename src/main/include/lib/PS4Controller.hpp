@@ -1,10 +1,9 @@
 #pragma once
 
-#include <frc/PS4Controller.h>
-#include <wpi/sendable/Sendable.h>
-#include <wpi/sendable/SendableBuilder.h>
-#include <wpi/sendable/SendableHelper.h>
-#include <wpi/sendable/SendableRegistry.h>
+#include <frc/PS4Controller.h>            // for PS4Controller
+#include <wpi/sendable/Sendable.h>        // for Sendable
+#include <wpi/sendable/SendableHelper.h>  // for SendableHelper
+namespace wpi { class SendableBuilder; }
 
 namespace RJ {
 

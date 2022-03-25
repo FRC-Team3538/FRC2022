@@ -1,5 +1,8 @@
-
 #include <lib/PneumaticHub.hpp>
+#include "frc/PneumaticHub.h"              // for PneumaticHub
+#include "units/current.h"                 // for ampere_t
+#include "units/pressure.h"                // for pounds_per_square_inch_t
+#include "wpi/sendable/SendableBuilder.h"  // for SendableBuilder
 
 // stuff here eventually
 

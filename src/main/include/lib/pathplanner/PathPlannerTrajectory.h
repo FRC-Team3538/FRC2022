@@ -1,19 +1,17 @@
 #pragma once
 
-#include <frc/geometry/Rotation2d.h>
-#include <frc/geometry/Translation2d.h>
-#include <frc/geometry/Pose2d.h>
-#include <frc/trajectory/Trajectory.h>
-#include <vector>
-#include <units/length.h>
-#include <units/velocity.h>
-#include <units/acceleration.h>
-#include <units/time.h>
-#include <units/angular_velocity.h>
-#include <units/angular_acceleration.h>
-#include <units/area.h>
-#include <units/math.h>
-#include <units/curvature.h>
+#include <frc/geometry/Pose2d.h>         // for Pose2d
+#include <frc/geometry/Rotation2d.h>     // for Rotation2d
+#include <frc/geometry/Translation2d.h>  // for Translation2d
+#include <frc/trajectory/Trajectory.h>   // for Trajectory
+#include <units/acceleration.h>          // for meters_per_second_squared_t
+#include <units/angular_acceleration.h>  // for radians_per_second_squared_t
+#include <units/angular_velocity.h>      // for radians_per_second_t
+#include <units/curvature.h>             // for curvature_t
+#include <units/length.h>                // for operator""_m, meter_t
+#include <units/time.h>                  // for second_t, operator""_s
+#include <units/velocity.h>              // for meters_per_second_t, operato...
+#include <vector>                        // for vector
 
 namespace pathplanner{
     class PathPlannerTrajectory{

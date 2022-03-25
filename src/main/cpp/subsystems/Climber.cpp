@@ -1,4 +1,7 @@
 #include "subsystems/Climber.hpp"
+#include "frc/Solenoid.h"                           // for Solenoid
+#include "frc/smartdashboard/SmartDashboard.h"      // for SmartDashboard
+#include "wpi/sendable/SendableBuilder.h"           // for SendableBuilder
 
 Climber::Climber()
 {

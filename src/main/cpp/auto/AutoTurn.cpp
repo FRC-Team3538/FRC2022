@@ -1,9 +1,19 @@
 #include "auto/AutoTurn.hpp"
-#include "lib/AutoHelper.h"
-
+#include <frc/trajectory/constraint/CentripetalAccelerationConstraint.h>
 #include <frc/trajectory/constraint/DifferentialDriveKinematicsConstraint.h>
 #include <frc/trajectory/constraint/DifferentialDriveVoltageConstraint.h>
-#include <frc/trajectory/constraint/CentripetalAccelerationConstraint.h>
+#include <memory>
+#include "Robotmap.hpp"
+#include "frc/Timer.h"
+#include "frc/smartdashboard/SmartDashboard.h"
+#include "frc/trajectory/Trajectory.h"
+#include "frc/trajectory/TrajectoryConfig.h"
+#include "lib/AutoHelper.h"
+#include "subsystems/Drivetrain.hpp"
+#include "units/acceleration.h"
+#include "units/base.h"
+#include "units/velocity.h"
+#include "units/voltage.h"
 
 // Name for Smart Dash Chooser
 std::string AutoTurn::GetName()

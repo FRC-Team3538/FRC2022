@@ -1,7 +1,23 @@
 #include "lib/pathplanner/PathPlannerTrajectory.h"
-#include "lib/pathplanner/GeometryUtil.h"
-#include "lib/pathplanner/PathPlanner.h"
-#include <math.h>
+#include <stddef.h>                        // for size_t
+#include <memory>                          // for allocator_traits<>::value_...
+#include "frc/geometry/Pose2d.h"           // for Pose2d
+#include "frc/geometry/Rotation2d.h"       // for Rotation2d
+#include "frc/geometry/Translation2d.h"    // for Translation2d
+#include "frc/trajectory/Trajectory.h"     // for Trajectory::State, Trajectory
+#include "lib/pathplanner/GeometryUtil.h"  // for GeometryUtil
+#include "lib/pathplanner/PathPlanner.h"   // for PathPlanner, PathPlanner::...
+#include "units/acceleration.h"            // for meters_per_second_squared_t
+#include "units/angle.h"                   // for degree_t, radian_t, operat...
+#include "units/angular_acceleration.h"    // for radians_per_second_squared_t
+#include "units/angular_velocity.h"        // for radians_per_second_t
+#include "units/area.h"                    // for square_meter_t
+#include "units/base.h"                    // for unit_t, operator*, operator-
+#include "units/curvature.h"               // for curvature_t
+#include "units/length.h"                  // for meter_t, operator""_m
+#include "units/math.h"                    // for abs, sqrt, atan2
+#include "units/time.h"                    // for second_t, operator""_s
+#include "units/velocity.h"                // for meters_per_second_t, opera...
 
 using namespace pathplanner;
 

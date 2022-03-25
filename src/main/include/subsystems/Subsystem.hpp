@@ -1,6 +1,6 @@
 #pragma once
 
-#include <frc/smartdashboard/SmartDashboard.h>
+#include <stdint.h>  // for uint8_t
 #include <ctre/Phoenix.h>
 
 /**

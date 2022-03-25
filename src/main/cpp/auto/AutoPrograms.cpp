@@ -1,15 +1,19 @@
 #include "auto/AutoPrograms.hpp"
-
-// Include all auto programs [List 1 of 3]
-#include "auto/AutoLine.hpp"
-#include "auto/AutoTurn.hpp"
-#include "auto/AutoBackForward.hpp"
-#include "auto/AutoTwoBall.hpp"
-#include "auto/AutoFourBall.hpp"
-#include "auto/AutoFiveBallRed.hpp"
-#include "auto/AutoFiveBallBlue.hpp"
-#include "auto/AutoFiveBallSafe.hpp"
-#include "auto/AutoFiveBallSneaky.hpp"
+#include <stddef.h>                                // for NULL
+#include "auto/AutoBackForward.hpp"                // for AutoBackForward
+#include "auto/AutoFiveBallBlue.hpp"               // for AutoFiveBallBlue
+#include "auto/AutoFiveBallRed.hpp"                // for AutoFiveBallRed
+#include "auto/AutoFiveBallSafe.hpp"               // for AutoFiveBallSafe
+#include "auto/AutoFiveBallSneaky.hpp"             // for AutoFiveBallSneaky
+#include "auto/AutoFourBall.hpp"                   // for AutoFourBall
+#include "auto/AutoInterface.hpp"                  // for AutoInterface
+#include "auto/AutoLine.hpp"                       // for AutoLine
+#include "auto/AutoTurn.hpp"                       // for AutoTurn
+#include "auto/AutoTwoBall.hpp"                    // for AutoTwoBall
+#include "frc/smartdashboard/SendableChooser.h"    // for SendableChooser
+#include "frc/smartdashboard/SendableChooser.inc"  // for SendableChooser::A...
+#include "frc/smartdashboard/SmartDashboard.h"     // for SmartDashboard
+class Robotmap;
 
 
 // Constructor requires a reference to the robot map

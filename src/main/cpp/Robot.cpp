@@ -3,15 +3,34 @@
 // the WPILib BSD license file in the root directory of this project.
 
 #include "Robot.h"
-#include <lib/pathplanner/PathPlanner.h>
-#include <frc/livewindow/LiveWindow.h>
-#include <cmath>
-
-#include <frc/DriverStation.h>
-
-#include <wpi/timestamp.h>
-
-#include <photonlib/PhotonUtils.h>
+#include <bits/std_abs.h>                           // for abs
+#include <frc/DriverStation.h>                      // for DriverStation
+#include <frc/livewindow/LiveWindow.h>              // for LiveWindow
+#include <cmath>                                    // for abs, fabs
+#include <exception>                                // for exception
+#include <string>                                   // for string
+#include "frc/Errors.h"                             // for RuntimeError
+#include "frc/PowerDistribution.h"                  // for PowerDistribution
+#include "frc/RobotBase.h"                          // for StartRobot
+#include "frc/Watchdog.h"                           // for Watchdog
+#include "frc/smartdashboard/SmartDashboard.h"      // for SmartDashboard
+#include "frc/util/Color.h"                         // for Color
+#include "lib/PS4Controller.hpp"                    // for PS4Controller
+#include "lib/PneumaticHub.hpp"                     // for PneumaticHub
+#include "lib/VectorMath.hpp"                       // for VectorMath
+#include "lib/pathplanner/PathPlannerTrajectory.h"  // for pathplanner
+#include "networktables/NetworkTableEntry.inc"      // for NetworkTableEntry...
+#include "rev/ColorSensorV3.h"                      // for ColorSensorV3
+#include "subsystems/Climber.hpp"                   // for Climber, Climber:...
+#include "subsystems/Drivetrain.hpp"                // for Drivetrain
+#include "subsystems/Shooter.hpp"                   // for Shooter, Shooter:...
+#include "units/angular_velocity.h"                 // for operator""_rpm
+#include "units/base.h"                             // for unit_t, operator-
+#include "units/math.h"                             // for abs
+#include "units/pressure.h"                         // for pounds_per_square...
+#include "units/time.h"                             // for operator""_s, sec...
+#include "units/velocity.h"                         // for meters_per_second_t
+#include "units/voltage.h"                          // for operator""_V, volt_t
 
 using namespace pathplanner;
 
