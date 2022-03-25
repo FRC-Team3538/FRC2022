@@ -216,44 +216,38 @@ void Robot::TeleopPeriodic()
     vision::RJVisionPipeline::visionData data = IO.rjVision.Run();
     if (data.filled)
     {
-      // Adjust for Movement
-      VectorMath shotVector = VectorMath{data.distance, (IO.shooter.GetTurretAngle() + data.deltaX)}; // Plane Relative to Robot Direction, where back of the robot is 0 deg
-      // *** NEED ROBOT VELOCITY DATA ***
-      VectorMath robotMoveVector = VectorMath{(IO.drivetrain.GetVelocity() * 1_s), 180.0_deg}; // Assuming about a 1 sec shot time. Maybe add a graph?
-      VectorMath adjustedShotVector = shotVector - robotMoveVector;                            // - robotMoveVector because you want to shoot opposite of movement
+      units::meters_per_second_t driveVel = IO.drivetrain.GetVelocity();
 
-      // Set Turret
-      units::degree_t tol{ntVisionAngleTol.GetDouble(kVisionAngleTolDefault)};
-
-      bool turretAtAngle = IO.shooter.SetTurretAngle(data.turretAngle, 0.75_deg);
-      // bool turretAtAngle = IO.shooter.SetTurretAngle(adjustedShotVector.GetTheta(), 0.5_deg);
-      // bool turretAtAngle = IO.shooter.SetTurretAngle((IO.shooter.GetTurretAngle() + data.deltaX), 1.0_deg);
-
-      // Start Shooter
-      // Shooter::State shotStat = IO.shooter.CalculateShot(adjustedShotVector.GetMagnitude()); // Magnitude from adjusted vector gets us distance
-      Shooter::State shotStat = IO.shooter.CalculateShot(data.distance);
-
-      // std::cout << (IO.shooter.GetTurretAngle() + data.deltaX).value() << std::endl;
-
-      // IO.shooter.SetShooterRPM(shotStat.shooterRPM);
-      //  IO.shooter.SetShooterRPM(shooterTest);
-
-      // Set Hood
-
-      // if (!hoodOS2)
+      // vision::RJVisionPipeline::visionData lookAhead = IO.rjVision.LookAhead(data, prevData);
+      // if (lookAhead.filled)
       // {
-      //   IO.shooter.SetHoodAngle(shotStat.hoodAngle);
-      //   //IO.shooter.SetHoodAngle(Shooter::HoodPosition::Middle);
-      //   hoodOS2 = true;
-      // }
+        // Adjust for Movement
+        VectorMath shotVector = VectorMath{data.distance, data.turretAngle}; // Plane Relative to Robot Direction, where back of the robot is 0 deg
+        VectorMath robotMoveVector = VectorMath{(driveVel * 1_s), 180.0_deg};          // Assuming about a 1 sec shot time. Maybe add a graph?
+        VectorMath adjustedShotVector = shotVector - robotMoveVector;                  // - robotMoveVector because you want to shoot opposite of movement
 
-      // Shoot Maybe
-      shoot = turretAtAngle;
+        // Calculate Turret
+        //std::cout << adjustedShotVector.GetTheta().value() << std::endl;
+        bool turretAtAngle = IO.shooter.SetTurretAngle(adjustedShotVector.GetTheta(), 1.0_deg);
+        // bool turretAtAngle = IO.shooter.SetTurretAngle(data.turretAngle, 1.0_deg);
+
+        // Calculate Shooter
+        Shooter::State shotStat = IO.shooter.CalculateShot(adjustedShotVector.GetMagnitude()); // Magnitude from adjusted vector gets us distance
+
+        IO.shooter.SetShooterRPM(shotStat.shooterRPM);
+
+        // Shoot Maybe
+        if(turretAtAngle)
+          elShoot = true;
+        shoot = elShoot;
+      //}
     }
     double fwd = -deadband(IO.mainController.GetLeftY());
     double rot = -deadband(IO.mainController.GetRightX());
 
     IO.drivetrain.Arcade(fwd, rot);
+
+    prevData = data;
   }
   else if (IO.secondaryController.GetSquareButton())
   {
@@ -274,6 +268,8 @@ void Robot::TeleopPeriodic()
   }
   else
   {
+
+    elShoot = false;
 
     IO.rjVision.SetLED(false);
     IO.rjVision.Reset();
@@ -309,6 +305,7 @@ void Robot::TeleopPeriodic()
     // IO.shooter.SetTurret(units::volt_t{-13.0 * deadband(IO.mainController.GetRightX())});
 
     // IO.shooter.SetTurretAngle(turretAngle, 0.25_deg);
+
     if (!IO.shooter.zeroed)
     {
       if (IO.secondaryController.GetPSButton())
