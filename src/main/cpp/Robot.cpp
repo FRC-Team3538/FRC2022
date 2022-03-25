@@ -3,7 +3,6 @@
 // the WPILib BSD license file in the root directory of this project.
 
 #include "Robot.h"
-#include <bits/std_abs.h>                           // for abs
 #include <frc/DriverStation.h>                      // for DriverStation
 #include <frc/livewindow/LiveWindow.h>              // for LiveWindow
 #include <cmath>                                    // for abs, fabs

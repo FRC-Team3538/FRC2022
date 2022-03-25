@@ -10,10 +10,14 @@
 #include <frc/kinematics/DifferentialDriveKinematics.h>  // for Differential...
 #include <frc/kinematics/DifferentialDriveOdometry.h>    // for Differential...
 #include <frc/motorcontrol/MotorControllerGroup.h>       // for MotorControl...
+#ifndef __FRC_ROBORIO__
 #include <frc/simulation/DifferentialDrivetrainSim.h>    // for Differential...
+#include <frc/system/plant/LinearSystemId.h>             // for LinearSystemId
+#include "frc/system/LinearSystem.h"                     // for LinearSystem
+#include "frc/system/plant/DCMotor.h"                    // for DCMotor
+#endif // __FRC_ROBORIO__
 #include <frc/smartdashboard/Field2d.h>                  // for Field2d
 #include <frc/smartdashboard/SmartDashboard.h>           // for SmartDashboard
-#include <frc/system/plant/LinearSystemId.h>             // for LinearSystemId
 #include <frc/trajectory/Trajectory.h>                   // for Trajectory
 #include <math.h>                                        // for M_PI
 #include <units/angle.h>                                 // for degree_t
@@ -26,8 +30,6 @@
 #include "frc/geometry/Pose2d.h"                         // for Pose2d
 #include "frc/geometry/Rotation2d.h"                     // for Rotation2d
 #include "frc/motorcontrol/MotorControllerGroup.inc"     // for MotorControl...
-#include "frc/system/LinearSystem.h"                     // for LinearSystem
-#include "frc/system/plant/DCMotor.h"                    // for DCMotor
 #include "networktables/NetworkTableEntry.h"             // for NetworkTable...
 #include "units/acceleration.h"                          // for meters_per_s...
 #include "units/angular_acceleration.h"                  // for radians_per_...
@@ -173,6 +175,7 @@ private:
     double cmd_vl = 0.0;
     double cmd_vr = 0.0;
 
+#ifndef __FRC_ROBORIO__
     //
     // Simulation
     //
@@ -187,6 +190,7 @@ private:
         frc::DCMotor::Falcon500(kMotorCount),
         kGearRatio,
         kWheelRadius};
+#endif // __FRC_ROBORIO__
 
     frc::Field2d m_fieldSim;
     frc::FieldObject2d *referencePose;

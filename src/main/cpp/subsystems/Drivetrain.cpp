@@ -216,9 +216,11 @@ void Drivetrain::ResetOdometry(const frc::Pose2d &pose)
 
     // m_poseEstimator.ResetPosition(pose, GetYaw());
 
+#ifndef __FRC_ROBORIO__
     // Simulator
     // Reset the pose of the robot but do not reset the Simulated IMU.
     m_drivetrainSimulator.SetPose({pose.Translation(), pose.Rotation()});
+#endif // __FRC_ROBORIO__
 }
 
 units::meters_per_second_t Drivetrain::GetVelocity()
@@ -267,6 +269,7 @@ bool Drivetrain::TurnRel(double forward, units::degree_t target, units::degree_t
 
 void Drivetrain::SimulationPeriodic()
 {
+#ifndef __FRC_ROBORIO__
     // To update our simulation, we set motor `tage inputs, update the
     // simulation, and write the simulated positions and velocities to our
     // simulated encoder and gyro. We negate the right side so that positive
@@ -300,6 +303,7 @@ void Drivetrain::SimulationPeriodic()
     // TODO(Dereck): CHECK DIRECTION WRT REAL SENSOR
     auto imu_sim = m_imu.GetSimCollection();
     imu_sim.SetRawHeading(m_drivetrainSimulator.GetHeading().Degrees().to<double>());
+#endif // __FRC_ROBORIO__
 }
 
 void Drivetrain::Periodic()
