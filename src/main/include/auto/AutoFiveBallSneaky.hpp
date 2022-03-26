@@ -15,6 +15,7 @@
 #include <wpi/json.h>
 #include <memory>
 #include "lib/csv.h"
+#include <units/time.h>
 
 class AutoFiveBallSneaky : public AutoInterface
 {
@@ -43,6 +44,7 @@ private:
 
     frc::Trajectory m_trajectory_first;
     frc::Trajectory m_trajectory_second;
+    frc::Trajectory m_trajectory_third;
 
     double kVisionAngleTolDefault = 0.5;
     nt::NetworkTableEntry ntVisionAngleTol = frc::SmartDashboard::GetEntry("robot/visionAngleTol");
@@ -52,6 +54,8 @@ private:
 
     bool m_resetDriveState;
     bool m_resetShooterState;
+
+    units::second_t m_hpWaitDuration = 0.0_s;
 
 
 public:

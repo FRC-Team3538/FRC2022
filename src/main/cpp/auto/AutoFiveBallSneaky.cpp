@@ -74,6 +74,9 @@ void AutoFiveBallSneaky::Init()
     m_trajectory_first = rj::AutoHelper::LoadTrajectory("07 - 5 Ball Sneaky 1", &config);
     m_trajectory_second = rj::AutoHelper::LoadTrajectory("07 - 5 Ball Sneaky 2", &config);
 
+    config.SetReversed(true);
+    m_trajectory_third = rj::AutoHelper::LoadTrajectory("07 - 5 Ball Sneaky 3", &config);
+
     std::cout << m_trajectory_first.TotalTime().value() + m_trajectory_second.TotalTime().value() << std::endl;
 
     IO.drivetrain.ResetOdometry(m_trajectory_first.InitialPose());
@@ -134,6 +137,25 @@ void AutoFiveBallSneaky::Run()
         // run second path
         if (FollowTrajectory(m_trajectory_second)) {
             std::cout << "Second path completed in  " << m_driveTimer.Get().value() << "s" << std::endl;
+            NextDriveState();
+        }
+        break;
+    }
+    case 3:
+    {
+        // Wait at human player station
+        if (m_driveTimer.Get() > m_hpWaitDuration)
+        {
+            std::cout << "Finished waiting at HP station in  " << m_driveTimer.Get().value() << "s" << std::endl;
+            NextDriveState();
+        }
+        break;
+    }
+    case 4:
+    {
+        // run second path
+        if (FollowTrajectory(m_trajectory_third)) {
+            std::cout << "Third path completed in  " << m_driveTimer.Get().value() << "s" << std::endl;
             NextDriveState();
             NextShooterState();
         }
