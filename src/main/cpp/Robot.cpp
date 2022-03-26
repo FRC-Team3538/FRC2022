@@ -228,7 +228,7 @@ void Robot::TeleopPeriodic()
       // std::cout << adjustedShotVector.GetTheta().value() << std::endl;
       bool turretAtAngle;
       
-      if(units::math::abs(driveVel) < 7_fps)
+      if(false)//units::math::abs(driveVel) < 7_fps)
         turretAtAngle = IO.shooter.SetTurretAngle(adjustedShotVector.GetTheta(), 1.0_deg);
       else
         turretAtAngle = IO.shooter.SetTurretAngle(data.turretAngle, 1.0_deg);
@@ -237,7 +237,7 @@ void Robot::TeleopPeriodic()
       // Calculate Shooter
       Shooter::State shotStat = IO.shooter.CalculateShot(adjustedShotVector.GetMagnitude()); // Magnitude from adjusted vector gets us distance
 
-      IO.shooter.SetShooterRPM(shotStat.shooterRPM);
+      // IO.shooter.SetShooterRPM(shotStat.shooterRPM);
 
       // Shoot Maybe
       // if(turretAtAngle)
