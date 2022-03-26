@@ -22,7 +22,7 @@ public:
     // Name of this program, used by SmartDash
     static std::string GetName();
 
-private:
+protected:
     // Get a referance to the robotmap
     Robotmap &IO;
 
@@ -53,6 +53,10 @@ private:
 
     bool m_resetShooterState;
     bool m_resetDriveState;
+
+    units::revolutions_per_minute_t m_rpmShot1 = 3075_rpm;
+    units::revolutions_per_minute_t m_rpmShot2 = 2825_rpm;
+    units::revolutions_per_minute_t m_rpmShot3 = 2950_rpm;
 
 
 public:

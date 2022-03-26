@@ -180,7 +180,7 @@ void AutoFiveBallSafe::Run()
             // state entry shit
             IO.shooter.SetIntakeState(Shooter::Position::Deployed);
             IO.shooter.SetIntake(8_V);
-            IO.shooter.SetShooterRPM(3075_rpm);
+            IO.shooter.SetShooterRPM(m_rpmShot1);
             IO.shooter.SetIndexer(3_V);
             IO.shooter.SetFeeder(-2_V);
 
@@ -235,7 +235,7 @@ void AutoFiveBallSafe::Run()
     {
         // wait for second path
         if (m_newShooterState) {
-            IO.shooter.SetShooterRPM(2825_rpm);
+            IO.shooter.SetShooterRPM(m_rpmShot2);
             IO.shooter.SetFeeder(-2_V);
 
             IO.shooter.SetTurretAngle(35_deg, tol);
@@ -284,7 +284,7 @@ void AutoFiveBallSafe::Run()
     {
         // wait for third path
         if (m_newShooterState) {
-            IO.shooter.SetShooterRPM(2950_rpm);
+            IO.shooter.SetShooterRPM(m_rpmShot3);
             IO.shooter.SetFeeder(-2_V);
 
             IO.shooter.SetTurretAngle(35_deg, tol);
