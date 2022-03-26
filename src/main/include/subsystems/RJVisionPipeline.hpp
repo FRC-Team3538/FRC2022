@@ -1,21 +1,17 @@
 #pragma once
 
-#include <iostream>
-#include "frc/smartdashboard/SmartDashboard.h"
-#include "networktables/NetworkTable.h"
-#include "networktables/NetworkTableInstance.h"
-#include "networktables/NetworkTableEntry.h"
-#include <cmath>
-#include <frc/Timer.h>
-#include <units/length.h>
-#include <units/angle.h>
-#include "Subsystem.hpp"
-#include <list>
-
-#include <units/angle.h>
-#include <units/angular_velocity.h>
-
-#include <photonlib/PhotonCamera.h>
+#include <frc/Timer.h>                       // for Timer
+#include <stdint.h>                          // for uint8_t
+#include <units/angle.h>                     // for degree_t, operator""_deg
+#include <units/angular_velocity.h>          // for revolutions_per_minute_t
+#include <units/length.h>                    // for inch_t, operator""_in
+#include <list>                              // for list
+#include <memory>                            // for shared_ptr
+#include "Subsystem.hpp"                     // for Subsystem
+#include "photonlib/PhotonPipelineResult.h"  // for PhotonPipelineResult
+#include "units/base.h"                      // for operator*
+#include "units/time.h"                      // for second_t, millisecond_t
+namespace nt { class NetworkTable; }
 
 namespace vision
 {
@@ -55,11 +51,11 @@ namespace vision
         // Init Stuff
         RJVisionPipeline() = delete;
         RJVisionPipeline(FilterType filter = FilterType::EMAWithSpinup);
-        void ConfigureSystem();
+        void ConfigureSystem() override;
 
         // Periodic
         void Periodic();
-        void UpdateTelemetry();
+        void UpdateTelemetry() override;
 
         // Setter
         RJVisionPipeline::visionData Run();

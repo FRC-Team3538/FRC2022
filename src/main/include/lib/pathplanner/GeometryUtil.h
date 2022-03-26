@@ -1,16 +1,15 @@
 #pragma once
 
-#include <frc/geometry/Rotation2d.h>
-#include <frc/geometry/Translation2d.h>
-#include <units/time.h>
-#include <units/velocity.h>
-#include <units/acceleration.h>
-#include <units/length.h>
-#include <units/angle.h>
-#include <units/angular_velocity.h>
-#include <units/angular_acceleration.h>
-#include <units/math.h>
-#include <units/curvature.h>
+#include <frc/geometry/Rotation2d.h>     // for Rotation2d
+#include <frc/geometry/Translation2d.h>  // for Translation2d
+#include <units/acceleration.h>          // for meters_per_second_squared_t
+#include <units/angle.h>                 // for degree_t
+#include <units/angular_acceleration.h>  // for radians_per_second_squared_t
+#include <units/angular_velocity.h>      // for radians_per_second_t
+#include <units/curvature.h>             // for curvature_t
+#include <units/length.h>                // for meter_t
+#include <units/time.h>                  // for second_t
+#include <units/velocity.h>              // for meters_per_second_t
 
 namespace pathplanner {
     class GeometryUtil {

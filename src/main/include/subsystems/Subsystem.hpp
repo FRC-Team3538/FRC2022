@@ -1,7 +1,21 @@
 #pragma once
 
-#include <frc/smartdashboard/SmartDashboard.h>
+#include <stdint.h>  // for uint8_t
 #include <ctre/Phoenix.h>
+
+#include "ctre/phoenix/motorcontrol/IMotorController.h"
+
+namespace ctre {
+namespace phoenix {
+namespace motorcontrol {
+namespace can {
+class WPI_TalonFX;
+}  // namespace can
+}  // namespace motorcontrol
+}  // namespace phoenix
+}  // namespace ctre
+
+using namespace ctre::phoenix::motorcontrol::can;
 
 /**
  * Subsystem Interface

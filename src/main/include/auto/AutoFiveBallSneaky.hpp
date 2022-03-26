@@ -1,20 +1,12 @@
 #pragma once
 
-#include <string>
-
-#include <frc/Timer.h>
-
-#include <units/velocity.h>
-
-#include "AutoInterface.hpp"
-#include "Robotmap.hpp"
-#include <frc/trajectory/Trajectory.h>
-#include <frc/trajectory/TrajectoryGenerator.h>
-#include <frc/trajectory/TrajectoryConfig.h>
-#include <frc/trajectory/constraint/CentripetalAccelerationConstraint.h>
-#include <wpi/json.h>
-#include <memory>
-#include "lib/csv.h"
+#include <frc/Timer.h>                          // for Timer
+#include <frc/trajectory/Trajectory.h>          // for Trajectory
+#include <string>                               // for string
+#include "AutoInterface.hpp"                    // for AutoInterface
+#include "frc/smartdashboard/SmartDashboard.h"  // for SmartDashboard
+#include "networktables/NetworkTableEntry.h"    // for NetworkTableEntry
+class Robotmap;  // lines 10-10
 
 class AutoFiveBallSneaky : public AutoInterface
 {
@@ -47,7 +39,6 @@ private:
     double kVisionAngleTolDefault = 0.5;
     nt::NetworkTableEntry ntVisionAngleTol = frc::SmartDashboard::GetEntry("robot/visionAngleTol");
 
-    units::radian_t turretTarget;
     int m_shotCount;
 
     bool m_resetDriveState;

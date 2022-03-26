@@ -2,6 +2,22 @@
 
 #include <cmath>
 
+#include "frc/DigitalInput.h"
+#include "frc/Solenoid.h"
+#include "frc/filter/LinearFilter.h"
+#include "frc/smartdashboard/SmartDashboard.h"
+#include "units/angle.h"
+#include "units/angular_velocity.h"
+#include "units/length.h"
+#include "units/math.h"
+#include "wpi/sendable/SendableBuilder.h"
+#include "ctre/phoenix/motorcontrol/ControlMode.h"
+#include "ctre/phoenix/motorcontrol/NeutralMode.h"
+#include "ctre/phoenix/motorcontrol/StatusFrame.h"
+#include "ctre/phoenix/motorcontrol/SupplyCurrentLimitConfiguration.h"
+
+using namespace ctre::phoenix::motorcontrol;
+
 Shooter::Shooter()
 {
     // Factory Defaults

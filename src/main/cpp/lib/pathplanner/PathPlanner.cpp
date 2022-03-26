@@ -1,14 +1,20 @@
 #include "lib/pathplanner/PathPlanner.h"
-#include <frc/geometry/Translation2d.h>
-#include <frc/geometry/Rotation2d.h>
-#include <frc/Filesystem.h>
-#include <wpi/SmallString.h>
-#include <wpi/raw_istream.h>
-#include <wpi/json.h>
-#include <units/length.h>
-#include <units/angle.h>
-#include <units/velocity.h>
-#include <vector>
+#include <frc/Filesystem.h>              // for GetDeployDirectory
+#include <frc/geometry/Rotation2d.h>     // for Rotation2d
+#include <frc/geometry/Translation2d.h>  // for Translation2d
+#include <units/angle.h>                 // for degree_t
+#include <units/length.h>                // for meter_t
+#include <units/velocity.h>              // for meters_per_second_t, operato...
+#include <wpi/json.h>                    // for json::value_type, json, json...
+#include <wpi/raw_istream.h>             // for raw_fd_istream, raw_istream
+#include <algorithm>                     // for max
+#include <memory>                        // for allocator_traits<>::value_type
+#include <stdexcept>                     // for runtime_error
+#include <system_error>                  // for error_code
+#include <vector>                        // for vector
+#include "units/acceleration.h"          // for meters_per_second_squared_t
+#include "units/base.h"                  // for operator+=, operator-
+#include "units/time.h"                  // for second_t
 
 using namespace pathplanner;
 

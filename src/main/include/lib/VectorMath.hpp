@@ -1,9 +1,9 @@
 #pragma once
 
-#include <units/angle.h>
-#include <units/length.h>
-#include <cmath>
-#include <frc/geometry/Pose2d.h>
+#include <units/angle.h>   // for degree_t
+#include <units/length.h>  // for inch_t
+#include <cmath>           // for M_PI
+namespace frc { class Translation2d; }
 
 // leave this for wandows
 #ifndef M_PI

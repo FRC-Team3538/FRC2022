@@ -1,20 +1,10 @@
 #pragma once
 
-#include <string>
-
-#include <frc/Timer.h>
-
-#include <units/velocity.h>
-
-#include "AutoInterface.hpp"
-#include "Robotmap.hpp"
-#include <frc/trajectory/Trajectory.h>
-#include <frc/trajectory/TrajectoryGenerator.h>
-#include <frc/trajectory/TrajectoryConfig.h>
-#include <frc/trajectory/constraint/CentripetalAccelerationConstraint.h>
-#include <wpi/json.h>
-#include <memory>
-#include "lib/csv.h"
+#include <frc/Timer.h>                  // for Timer
+#include <frc/trajectory/Trajectory.h>  // for Trajectory
+#include <string>                       // for string
+#include "AutoInterface.hpp"            // for AutoInterface
+class Robotmap;
 
 class AutoTwoBall : public AutoInterface
 {

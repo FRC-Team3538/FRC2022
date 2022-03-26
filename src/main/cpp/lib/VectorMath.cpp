@@ -1,4 +1,8 @@
 #include <lib/VectorMath.hpp>
+#include "frc/geometry/Translation2d.h"  // for Translation2d
+#include "units/angle.h"                 // for degree_t, operator""_deg
+#include "units/base.h"                  // for operator*, operator+, operator-
+#include "units/length.h"                // for inch_t, operator""_in
 
 VectorMath::VectorMath()
 {

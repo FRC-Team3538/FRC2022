@@ -4,11 +4,39 @@
 
 #include "subsystems/Drivetrain.hpp"
 
-#include <frc/RobotController.h>
+#include <frc/Timer.h>                                       // for Timer
 
-#include <iostream>
+#include "frc/controller/PIDController.h"                    // for PIDContr...
+#include "frc/controller/RamseteController.h"                // for RamseteC...
+#include "frc/controller/SimpleMotorFeedforward.h"           // for SimpleMo...
+#include "frc/geometry/Translation2d.h"                      // for Translat...
+#include "frc/kinematics/ChassisSpeeds.h"                    // for ChassisS...
+#include "frc/kinematics/DifferentialDriveKinematics.h"      // for Differen...
+#include "frc/kinematics/DifferentialDriveOdometry.h"        // for Differen...
+#include "frc/kinematics/DifferentialDriveWheelSpeeds.h"     // for Differen...
+#include "frc/motorcontrol/MotorControllerGroup.h"           // for MotorCon...
+#include "frc/simulation/DifferentialDrivetrainSim.h"        // for Differen...
+#include "frc/smartdashboard/Field2d.h"                      // for Field2d
+#include "frc/smartdashboard/FieldObject2d.h"                // for FieldObj...
+#include "frc/smartdashboard/SmartDashboard.h"               // for SmartDas...
+#include "frc/trajectory/Trajectory.h"                       // for Trajecto...
+#include "networktables/NetworkTableEntry.inc"               // for NetworkT...
+#include "units/angle.h"                                     // for degree_t
+#include "units/angular_velocity.h"                          // for radians_...
+#include "units/curvature.h"                                 // for curvature_t
+#include "units/length.h"                                    // for meter_t
+#include "units/math.h"                                      // for abs
+#include "units/velocity.h"                                  // for meters_p...
+#include "units/voltage.h"                                   // for volt_t
+#include "wpi/sendable/SendableBuilder.h"                    // for Sendable...
+#include "ctre/phoenix/motorcontrol/ControlMode.h"
+#include "ctre/phoenix/motorcontrol/FeedbackDevice.h"
+#include "ctre/phoenix/motorcontrol/NeutralMode.h"
+#include "ctre/phoenix/motorcontrol/StatusFrame.h"
+#include "ctre/phoenix/motorcontrol/TalonFXSimCollection.h"
+#include "ctre/phoenix/sensors/BasePigeonSimCollection.h"
 
-#include <frc/Timer.h>
+using namespace ctre::phoenix::motorcontrol;
 
 Drivetrain::Drivetrain()
 {
@@ -196,9 +224,11 @@ void Drivetrain::ResetOdometry(const frc::Pose2d &pose)
 
     // m_poseEstimator.ResetPosition(pose, GetYaw());
 
+#ifndef __FRC_ROBORIO__
     // Simulator
     // Reset the pose of the robot but do not reset the Simulated IMU.
     m_drivetrainSimulator.SetPose({pose.Translation(), pose.Rotation()});
+#endif // __FRC_ROBORIO__
 }
 
 units::meters_per_second_t Drivetrain::GetVelocity()
@@ -247,6 +277,7 @@ bool Drivetrain::TurnRel(double forward, units::degree_t target, units::degree_t
 
 void Drivetrain::SimulationPeriodic()
 {
+#ifndef __FRC_ROBORIO__
     // To update our simulation, we set motor `tage inputs, update the
     // simulation, and write the simulated positions and velocities to our
     // simulated encoder and gyro. We negate the right side so that positive
@@ -280,6 +311,7 @@ void Drivetrain::SimulationPeriodic()
     // TODO(Dereck): CHECK DIRECTION WRT REAL SENSOR
     auto imu_sim = m_imu.GetSimCollection();
     imu_sim.SetRawHeading(m_drivetrainSimulator.GetHeading().Degrees().to<double>());
+#endif // __FRC_ROBORIO__
 }
 
 void Drivetrain::Periodic()

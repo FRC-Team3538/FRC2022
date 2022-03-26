@@ -1,6 +1,8 @@
 #pragma once
 
-#include "AutoFiveBallSafe.hpp"
+#include <string>                // for string
+#include "AutoFiveBallSafe.hpp"  // for AutoFiveBallSafe
+class Robotmap;
 
 class AutoFiveBallBlue : public AutoFiveBallSafe
 {

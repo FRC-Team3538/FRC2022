@@ -1,14 +1,24 @@
 #include "auto/AutoFiveBallSafe.hpp"
-
-#include "lib/AutoHelper.h"
-
+#include <frc/trajectory/constraint/CentripetalAccelerationConstraint.h>
 #include <frc/trajectory/constraint/DifferentialDriveKinematicsConstraint.h>
 #include <frc/trajectory/constraint/DifferentialDriveVoltageConstraint.h>
-#include <frc/trajectory/constraint/CentripetalAccelerationConstraint.h>
-
 #include <units/acceleration.h>
-
 #include <iostream>
+#include "Robotmap.hpp"
+#include "frc/Timer.h"
+#include "frc/trajectory/Trajectory.h"
+#include "frc/trajectory/TrajectoryConfig.h"
+#include "lib/AutoHelper.h"
+#include "networktables/NetworkTableEntry.inc"
+#include "subsystems/Drivetrain.hpp"
+#include "subsystems/RJVisionPipeline.hpp"
+#include "subsystems/Shooter.hpp"
+#include "units/angle.h"
+#include "units/angular_velocity.h"
+#include "units/base.h"
+#include "units/time.h"
+#include "units/velocity.h"
+#include "units/voltage.h"
 
 // Name for Smart Dash Chooser
 std::string AutoFiveBallSafe::GetName()

@@ -1,5 +1,6 @@
-#include <frc/trajectory/Trajectory.h>
-#include <frc/trajectory/TrajectoryConfig.h>
+#include <frc/trajectory/Trajectory.h>  // for Trajectory
+#include <string>                       // for string
+namespace frc { class TrajectoryConfig; }
 
 namespace rj {
 class AutoHelper {

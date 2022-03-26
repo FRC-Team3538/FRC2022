@@ -4,34 +4,52 @@
 
 #pragma once
 
-#include <frc/motorcontrol/MotorControllerGroup.h>
-#include <frc/controller/PIDController.h>
-#include <frc/controller/SimpleMotorFeedforward.h>
-#include <frc/kinematics/DifferentialDriveKinematics.h>
-#include <frc/kinematics/DifferentialDriveOdometry.h>
-#include <frc/simulation/DifferentialDrivetrainSim.h>
-#include <frc/smartdashboard/Field2d.h>
-#include <frc/smartdashboard/SmartDashboard.h>
-#include <wpi/sendable/SendableRegistry.h>
-#include <wpi/sendable/SendableBuilder.h>
-#include <wpi/sendable/SendableHelper.h>
-#include <frc/system/plant/LinearSystemId.h>
-#include <frc/trajectory/Trajectory.h>
-#include <frc/controller/RamseteController.h>
-// #include <frc/ADIS16470_IMU.h>
-#include <units/angle.h>
-#include <units/angular_velocity.h>
-#include <units/length.h>
-#include <units/velocity.h>
-#include <units/voltage.h>
-#include <wpi/numbers>
-#include <math.h>
-#include <frc/estimator/DifferentialDrivePoseEstimator.h>
-#include <frc/smartdashboard/SmartDashboard.h>
-#include <networktables/NetworkTableInstance.h>
+#include <frc/controller/PIDController.h>                   // for PIDContro...
+#include <frc/controller/RamseteController.h>               // for RamseteCo...
+#include <frc/controller/SimpleMotorFeedforward.h>          // for SimpleMot...
+#include <frc/kinematics/DifferentialDriveKinematics.h>     // for Different...
+#include <frc/kinematics/DifferentialDriveOdometry.h>       // for Different...
+#include <frc/motorcontrol/MotorControllerGroup.h>          // for MotorCont...
+#include <frc/simulation/DifferentialDrivetrainSim.h>       // for Different...
+#include <frc/smartdashboard/Field2d.h>                     // for Field2d
+#include <frc/smartdashboard/SmartDashboard.h>              // for SmartDash...
+#include <frc/system/plant/LinearSystemId.h>                // for LinearSys...
+#include <frc/trajectory/Trajectory.h>                      // for Trajectory
+#include <math.h>                                           // for M_PI
+#include <units/angle.h>                                    // for degree_t
+#include <units/angular_velocity.h>                         // for radians_p...
+#include <units/length.h>                                   // for meter_t
+#include <units/velocity.h>                                 // for meters_pe...
+#include <units/voltage.h>                                  // for volt_t
+#include <wpi/sendable/SendableHelper.h>                    // for SendableH...
 
-#include "Subsystem.hpp"
-#include "lib/VectorMath.hpp"
+#include "Subsystem.hpp"                                    // for Subsystem
+#include "frc/geometry/Pose2d.h"                            // for Pose2d
+#include "frc/geometry/Rotation2d.h"                        // for Rotation2d
+#include "frc/motorcontrol/MotorControllerGroup.inc"        // for MotorCont...
+#include "frc/system/LinearSystem.h"                        // for LinearSystem
+#include "frc/system/plant/DCMotor.h"                       // for DCMotor
+#include "networktables/NetworkTableEntry.h"                // for NetworkTa...
+#include "units/acceleration.h"                             // for meters_pe...
+#include "units/angular_acceleration.h"                     // for radians_p...
+#include "units/base.h"                                     // for unit_t
+#include "units/time.h"                                     // for second_t
+#include "wpi/sendable/Sendable.h"                          // for Sendable
+#include "ctre/phoenix/motorcontrol/IMotorController.h"
+#include "ctre/phoenix/motorcontrol/can/WPI_TalonFX.h"
+#include "ctre/phoenix/sensors/SensorVelocityMeasPeriod.h"
+#include "ctre/phoenix/sensors/WPI_Pigeon2.h"
+
+namespace frc {
+class FieldObject2d;
+struct DifferentialDriveWheelSpeeds;
+}  // namespace frc
+namespace wpi {
+class SendableBuilder;
+}  // namespace wpi
+
+using namespace ctre::phoenix::motorcontrol::can;
+using namespace ctre::phoenix::sensors;
 
 // leave this for wandows
 #ifndef M_PI
@@ -50,7 +68,7 @@ public:
 
     void InitSendable(wpi::SendableBuilder &builder) override;
 
-    void ConfigureSystem();
+    void ConfigureSystem() override;
 
     void Arcade(double forward, double rotate);
     void SetSpeeds(const frc::DifferentialDriveWheelSpeeds &speeds);
@@ -70,7 +88,7 @@ public:
 
     void SimulationPeriodic();
     void Periodic();
-    void UpdateTelemetry();
+    void UpdateTelemetry() override;
     void SetBrakeMode();
     void SetCoastMode();
 
@@ -165,6 +183,7 @@ private:
     double cmd_vl = 0.0;
     double cmd_vr = 0.0;
 
+#ifndef __FRC_ROBORIO__
     //
     // Simulation
     //
@@ -179,6 +198,7 @@ private:
         frc::DCMotor::Falcon500(kMotorCount),
         kGearRatio,
         kWheelRadius};
+#endif // __FRC_ROBORIO__
 
     frc::Field2d m_fieldSim;
     frc::FieldObject2d *referencePose;

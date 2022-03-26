@@ -1,20 +1,10 @@
 #pragma once
 
-#include <string>
-
-#include <frc/Timer.h>
-
-#include <units/velocity.h>
-
-#include "AutoInterface.hpp"
-#include "Robotmap.hpp"
-#include <frc/trajectory/Trajectory.h>
-#include <frc/trajectory/TrajectoryGenerator.h>
-#include <frc/trajectory/TrajectoryConfig.h>
-#include <frc/trajectory/constraint/CentripetalAccelerationConstraint.h>
-#include <wpi/json.h>
-#include <memory>
-#include "lib/csv.h"
+#include <frc/Timer.h>                  // for Timer
+#include <frc/trajectory/Trajectory.h>  // for Trajectory
+#include <string>                       // for string
+#include "AutoInterface.hpp"            // for AutoInterface
+class Robotmap;  // lines 8-8
 
 class AutoFourBall : public AutoInterface
 {
@@ -34,8 +24,6 @@ private:
 
     frc::Trajectory m_trajectory_first;
     frc::Trajectory m_trajectory_second;
-
-    units::time::second_t startPathTime;
 
 public:
     // Constructor requires a reference to the RobotMap

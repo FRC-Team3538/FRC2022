@@ -1,15 +1,19 @@
 #include "lib/AutoHelper.h"
-
-#include <frc/Filesystem.h>
-#include <wpi/fs.h>
-#include <wpi/SmallString.h>
-
-#include <lib/pathplanner/PathPlanner.h>
-
-#include <frc/trajectory/TrajectoryGenerator.h>
-#include <frc/trajectory/TrajectoryParameterizer.h>
-
-#include <iostream>
+#include <frc/trajectory/TrajectoryGenerator.h>      // for TrajectoryGenera...
+#include <frc/trajectory/TrajectoryParameterizer.h>  // for TrajectoryParame...
+#include <lib/pathplanner/PathPlanner.h>             // for PathPlanner
+#include <cstddef>                                   // for size_t
+#include <iostream>                                  // for operator<<, endl
+#include <vector>                                    // for vector
+#include "frc/geometry/Pose2d.h"                     // for Pose2d
+#include "frc/geometry/Rotation2d.h"                 // for Rotation2d
+#include "frc/trajectory/Trajectory.h"               // for Trajectory
+#include "frc/trajectory/TrajectoryConfig.h"         // for TrajectoryConfig
+#include "lib/pathplanner/PathPlannerTrajectory.h"   // for PathPlannerTraje...
+#include "units/angle.h"                             // for operator""_rad
+#include "units/base.h"                              // for unit_t, operator*
+#include "units/curvature.h"                         // for curvature_t
+#include "units/time.h"                              // for second_t
 
 namespace rj
 {

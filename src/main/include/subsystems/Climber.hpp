@@ -1,21 +1,23 @@
 #pragma once
-#include <units/angular_velocity.h>
-#include <units/angle.h>
-#include <units/length.h>
-#include <units/velocity.h>
-#include <units/constants.h>
 
-#include <wpi/numbers>
+#include <frc/DigitalInput.h>                           // for DigitalInput
+#include <frc/Solenoid.h>                               // for Solenoid
+#include <stdint.h>                                     // for uint8_t
+#include <wpi/sendable/SendableHelper.h>                // for SendableHelper
+#include <string>                                       // for string
 
-#include <frc/Solenoid.h>
-#include <frc/controller/ProfiledPIDController.h>
-#include <wpi/sendable/SendableRegistry.h>
-#include <wpi/sendable/SendableBuilder.h>
-#include <wpi/sendable/SendableHelper.h>
-#include <frc/Solenoid.h>
-#include <frc/DigitalInput.h>
+#include "Subsystem.hpp"                                // for Subsystem
+#include "frc/PneumaticsModuleType.h"                   // for PneumaticsMod...
+#include "units/voltage.h"                              // for volt_t
+#include "wpi/sendable/Sendable.h"                      // for Sendable
+#include "ctre/phoenix/motorcontrol/IMotorController.h"
+#include "ctre/phoenix/motorcontrol/can/WPI_TalonFX.h"
 
-#include "Subsystem.hpp"
+namespace wpi {
+class SendableBuilder;
+}  // namespace wpi
+
+using namespace ctre::phoenix::motorcontrol::can;
 
 class Climber : public Subsystem,
                 public wpi::Sendable,
@@ -33,8 +35,8 @@ public:
 
     Climber();
 
-    void ConfigureSystem();
-    void UpdateTelemetry();
+    void ConfigureSystem() override;
+    void UpdateTelemetry() override;
 
     // *** SETTERS ***
 
