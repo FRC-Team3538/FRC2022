@@ -36,41 +36,7 @@ AutoTwoBall::~AutoTwoBall() {}
 void AutoTwoBall::NextState()
 {
     m_state++;
-
-    switch (m_state)
-    {
-    case 1:
-    {
-        IO.shooter.SetHoodAngle(Shooter::HoodPosition::Middle);
-        IO.shooter.SetIntakeState(Shooter::Position::Deployed);
-        IO.shooter.SetIntake(8_V);
-        IO.shooter.SetShooterRPM(2700_rpm);
-        IO.shooter.SetIndexer(4_V);
-        IO.shooter.SetFeeder(-2_V);
-
-        break;
-    }
-    case 2:
-    {
-        IO.drivetrain.Arcade(0.0, 0.0);
-        IO.shooter.SetFeeder(4_V);
-        break;
-    }
-    case 3:
-    {
-        IO.shooter.SetIntakeState(Shooter::Position::Stowed);
-        IO.shooter.SetIntake(0_V);
-        IO.shooter.SetShooterRPM(0_rpm);
-        IO.shooter.SetIndexer(0_V);
-        IO.shooter.SetFeeder(0_V);
-        break;
-    }
-    default:
-    {
-        break;
-    }
-    }
-
+    IO.drivetrain.Arcade(0.0, 0.0);
     m_autoTimer.Reset();
     m_autoTimer.Start();
 }
@@ -103,19 +69,32 @@ void AutoTwoBall::Run()
     {
     case 0:
     {
-        NextState();
+        IO.drivetrain.Arcade(0.2, 0.0);
+
+        IO.shooter.SetIntakeState(Shooter::Position::Deployed);
+        IO.shooter.SetIntake(8_V);
+        IO.shooter.SetShooterRPM(2950_rpm);
+        IO.shooter.SetIndexer(3_V);
+        IO.shooter.SetFeeder(-2_V);
+
+        //  auto reference = m_trajectory.Sample(m_autoTimer.Get());
+        //  IO.drivetrain.Drive(reference);
+        //  if (m_autoTimer.Get() > m_trajectory.TotalTime() + 1.5_s)
+
+        if (m_autoTimer.Get() > 2.0_s)
+        {
+            NextState();
+        }
 
         break;
     }
     case 1:
     {
-        IO.shooter.SetHoodAngle();
+        IO.drivetrain.Arcade(0.0, 0.0);
 
-        auto reference = m_trajectory.Sample(m_autoTimer.Get());
+        IO.shooter.SetFeeder(4_V);
 
-        IO.drivetrain.Drive(reference);
-
-        if (m_autoTimer.Get() > m_trajectory.TotalTime() + 1.5_s)
+        if (m_autoTimer.Get() > 4.0_s)
         {
             NextState();
         }
@@ -123,10 +102,15 @@ void AutoTwoBall::Run()
     }
     case 2:
     {
-        if (IO.shooter.Shoot())
-        {
-            NextState();
-        }
+        IO.drivetrain.Arcade(0.0, 0.0);
+
+        IO.shooter.SetIntakeState(Shooter::Position::Stowed);
+        IO.shooter.SetIntake(0_V);
+        IO.shooter.SetShooterRPM(0_rpm);
+        IO.shooter.SetIndexer(0_V);
+        IO.shooter.SetFeeder(0_V);
+
+        NextState();
         break;
     }
     default:
