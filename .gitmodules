@@ -1,0 +1,3 @@
+[submodule "raspi/picocolorsensor"]
+	path = raspi/picocolorsensor
+	url = https://github.com/ThadHouse/picocolorsensor.git
