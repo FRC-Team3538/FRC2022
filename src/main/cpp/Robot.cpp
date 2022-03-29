@@ -220,7 +220,10 @@ void Robot::TeleopPeriodic()
 
     climberTimerOS = false;
     manualJog = false;
-    IO.shooter.SetIntakeState(Shooter::Position::Deployed);
+    
+    // Disable Intake Deploy While shooting
+    // IO.shooter.SetIntakeState(Shooter::Position::Deployed);
+    
     intakeTimer.Start();
     intakeTimer.Reset();
 
@@ -479,7 +482,7 @@ void Robot::TeleopPeriodic()
   double opL2 = IO.secondaryController.IsConnected() ? deadband((IO.secondaryController.GetL2Axis() + 1.0) / 2.0) : 0.0;
   double opR2 = IO.secondaryController.IsConnected() ? deadband((IO.secondaryController.GetR2Axis() + 1.0) / 2.0) : 0.0;
 
-  auto intakeCmd = ((opR2 - opL2 + drR2 - drL2) + (double)IO.mainController.GetR1Button()) * 13.0_V;
+  auto intakeCmd = ((opR2 - opL2 + drR2 - drL2)) * 13.0_V; // + (double)IO.mainController.GetR1Button()) * 13.0_V;
   IO.shooter.SetIntake(intakeCmd);
 
   // Deploy Intake
