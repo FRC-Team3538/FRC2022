@@ -19,6 +19,8 @@
 #include "subsystems/RJVisionPipeline.hpp"      // for RJVisionPipeline, RJV...
 #include "units/angle.h"                        // for operator""_deg
 #include "units/length.h"                       // for operator""_in, operat...
+#include "lib/Logging.h"
+#include "frc/DataLogManager.h"
 
 class Robot : public frc::TimedRobot
 {
