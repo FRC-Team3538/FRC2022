@@ -1,20 +1,20 @@
 #include "auto/AutoPrograms.hpp"
-#include <stddef.h>                                // for NULL
-#include "auto/AutoBackForward.hpp"                // for AutoBackForward
-#include "auto/AutoFiveBallBlue.hpp"               // for AutoFiveBallBlue
-#include "auto/AutoFiveBallRed.hpp"                // for AutoFiveBallRed
-#include "auto/AutoFiveBallSafe.hpp"               // for AutoFiveBallSafe
-#include "auto/AutoFiveBallSneaky.hpp"             // for AutoFiveBallSneaky
-#include "auto/AutoFourBall.hpp"                   // for AutoFourBall
-#include "auto/AutoInterface.hpp"                  // for AutoInterface
-#include "auto/AutoLine.hpp"                       // for AutoLine
-#include "auto/AutoTurn.hpp"                       // for AutoTurn
-#include "auto/AutoTwoBall.hpp"                    // for AutoTwoBall
-#include "frc/smartdashboard/SendableChooser.h"    // for SendableChooser
-#include "frc/smartdashboard/SendableChooser.inc"  // for SendableChooser::A...
-#include "frc/smartdashboard/SmartDashboard.h"     // for SmartDashboard
+#include <stddef.h>                    // for NULL
+#include "auto/AutoBackForward.hpp"    // for AutoBackForward
+#include "auto/AutoFiveBallBlue.hpp"   // for AutoFiveBallBlue
+#include "auto/AutoFiveBallRed.hpp"    // for AutoFiveBallRed
+#include "auto/AutoFiveBallSafe.hpp"   // for AutoFiveBallSafe
+#include "auto/AutoFiveBallSneaky.hpp" // for AutoFiveBallSneaky
+#include "auto/AutoFourBall.hpp"       // for AutoFourBall
+#include "auto/AutoInterface.hpp"      // for AutoInterface
+#include "auto/AutoLine.hpp"           // for AutoLine
+#include "auto/AutoTurn.hpp"           // for AutoTurn
+#include "auto/AutoTwoBall.hpp"        // for AutoTwoBall
+#include "auto/AutoBilliard.hpp"
+#include "frc/smartdashboard/SendableChooser.h"   // for SendableChooser
+#include "frc/smartdashboard/SendableChooser.inc" // for SendableChooser::A...
+#include "frc/smartdashboard/SmartDashboard.h"    // for SmartDashboard
 class Robotmap;
-
 
 // Constructor requires a reference to the robot map
 AutoPrograms::AutoPrograms(Robotmap &IO) : IO(IO)
@@ -28,6 +28,7 @@ AutoPrograms::AutoPrograms(Robotmap &IO) : IO(IO)
     m_chooser.AddOption(AutoFiveBallBlue::GetName(), AutoFiveBallBlue::GetName());
     m_chooser.AddOption(AutoFiveBallSafe::GetName(), AutoFiveBallSafe::GetName());
     m_chooser.AddOption(AutoFiveBallSneaky::GetName(), AutoFiveBallSneaky::GetName());
+    m_chooser.AddOption(Billiard::GetName(), Billiard::GetName());
 
     // Test programs
     m_chooser.AddOption(AutoBackForward::GetName(), AutoBackForward::GetName());
@@ -44,8 +45,7 @@ void AutoPrograms::Init()
     delete m_autoProgram;
     m_autoProgram = NULL;
 
-     
-    //Create the Selected auto program [List 3 of 3]
+    // Create the Selected auto program [List 3 of 3]
     if (name == AutoLine::GetName())
     {
         m_autoProgram = new AutoLine(IO);
@@ -62,7 +62,7 @@ void AutoPrograms::Init()
     {
         m_autoProgram = new AutoFiveBallRed(IO);
     }
-     else if (name == AutoFiveBallBlue::GetName())
+    else if (name == AutoFiveBallBlue::GetName())
     {
         m_autoProgram = new AutoFiveBallBlue(IO);
     }
@@ -74,11 +74,15 @@ void AutoPrograms::Init()
     {
         m_autoProgram = new AutoFiveBallSneaky(IO);
     }
+    else if (name == Billiard::GetName())
+    {
+        m_autoProgram = new Billiard(IO);
+    }
     else if (name == AutoBackForward::GetName())
     {
         m_autoProgram = new AutoBackForward(IO);
     }
-    else if (name == AutoTurn::GetName()) 
+    else if (name == AutoTurn::GetName())
     {
         m_autoProgram = new AutoTurn(IO);
     }
