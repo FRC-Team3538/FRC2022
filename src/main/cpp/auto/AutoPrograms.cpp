@@ -1,8 +1,6 @@
 #include "auto/AutoPrograms.hpp"
 #include <stddef.h>                    // for NULL
 #include "auto/AutoBackForward.hpp"    // for AutoBackForward
-#include "auto/AutoFiveBallBlue.hpp"   // for AutoFiveBallBlue
-#include "auto/AutoFiveBallRed.hpp"    // for AutoFiveBallRed
 #include "auto/AutoFiveBallSafe.hpp"   // for AutoFiveBallSafe
 #include "auto/AutoFiveBallSneaky.hpp" // for AutoFiveBallSneaky
 #include "auto/AutoFourBall.hpp"       // for AutoFourBall
@@ -24,8 +22,6 @@ AutoPrograms::AutoPrograms(Robotmap &IO) : IO(IO)
     m_chooser.AddOption(AutoLine::GetName(), AutoLine::GetName());
     m_chooser.AddOption(AutoTwoBall::GetName(), AutoTwoBall::GetName());
     m_chooser.AddOption(AutoFourBall::GetName(), AutoFourBall::GetName());
-    m_chooser.AddOption(AutoFiveBallRed::GetName(), AutoFiveBallRed::GetName());
-    m_chooser.AddOption(AutoFiveBallBlue::GetName(), AutoFiveBallBlue::GetName());
     m_chooser.AddOption(AutoFiveBallSafe::GetName(), AutoFiveBallSafe::GetName());
     m_chooser.AddOption(AutoFiveBallSneaky::GetName(), AutoFiveBallSneaky::GetName());
     m_chooser.AddOption(Billiard::GetName(), Billiard::GetName());
@@ -57,14 +53,6 @@ void AutoPrograms::Init()
     else if (name == AutoFourBall::GetName())
     {
         m_autoProgram = new AutoFourBall(IO);
-    }
-    else if (name == AutoFiveBallRed::GetName())
-    {
-        m_autoProgram = new AutoFiveBallRed(IO);
-    }
-    else if (name == AutoFiveBallBlue::GetName())
-    {
-        m_autoProgram = new AutoFiveBallBlue(IO);
     }
     else if (name == AutoFiveBallSafe::GetName())
     {
