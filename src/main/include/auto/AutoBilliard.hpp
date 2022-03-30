@@ -1,7 +1,6 @@
 #pragma once
 
 #include <frc/Timer.h>                  // for Timer
-#include <frc/trajectory/Trajectory.h>  // for Trajectory
 #include <string>                       // for string
 #include "AutoInterface.hpp"            // for AutoInterface
 class Robotmap;

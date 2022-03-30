@@ -1,19 +1,19 @@
 #include "lib/AutoHelper.h"
 #include <frc/trajectory/TrajectoryGenerator.h>      // for TrajectoryGenera...
 #include <frc/trajectory/TrajectoryParameterizer.h>  // for TrajectoryParame...
-#include <lib/pathplanner/PathPlanner.h>             // for PathPlanner
+#include <frc/trajectory/Trajectory.h>               // for Trajectory
 #include <cstddef>                                   // for size_t
 #include <iostream>                                  // for operator<<, endl
 #include <vector>                                    // for vector
 #include "frc/geometry/Pose2d.h"                     // for Pose2d
 #include "frc/geometry/Rotation2d.h"                 // for Rotation2d
-#include "frc/trajectory/Trajectory.h"               // for Trajectory
 #include "frc/trajectory/TrajectoryConfig.h"         // for TrajectoryConfig
-#include "lib/pathplanner/PathPlannerTrajectory.h"   // for PathPlannerTraje...
 #include "units/angle.h"                             // for operator""_rad
 #include "units/base.h"                              // for unit_t, operator*
 #include "units/curvature.h"                         // for curvature_t
 #include "units/time.h"                              // for second_t
+#include "pathplanner/lib/PathPlanner.h"
+#include "pathplanner/lib/PathPlannerTrajectory.h"
 
 namespace rj
 {
@@ -25,6 +25,7 @@ namespace rj
         pathplanner::PathPlannerTrajectory pp_traj = pathplanner::PathPlanner::loadPath(name, config->MaxVelocity(), config->MaxAcceleration(), config->IsReversed());
 
         std::vector<frc::TrajectoryGenerator::PoseWithCurvature> path;
+        path.reserve(pp_traj.numStates());
 
         for (int ind = 0; ind < pp_traj.numStates(); ind++)
         {
@@ -61,11 +62,15 @@ namespace rj
         std::size_t segments = path.size() / 250;
         for (size_t segment = 0; segment < segments; segment++) {
             std::vector<frc::TrajectoryGenerator::PoseWithCurvature> current_path;
-            current_path.reserve(250);
+            current_path.reserve(251);
 
             bool invert = segment % 2 == 1;
 
-            for (int i = 0; i < 250; i++) {
+            for (int i = 0; i < 251; i++) {
+                // avoid off-by-one
+                if (i == 250 && segment == segments - 1) {
+                    continue;
+                }
                 current_path.push_back(path[i + segment * 250]);
             }
 
@@ -77,10 +82,6 @@ namespace rj
         }
 
         std::cout << "total time: " << final_trajectory.TotalTime().value() << std::endl;
-        // for (units::second_t time = 0_s; time < final_trajectory.TotalTime(); time = time + 0.02_s) {
-        //     auto reference = final_trajectory.Sample(time);
-        //     std::cout << reference.t.value() << ", " << reference.pose.Translation().X().value() << ", " << reference.pose.Translation().Y().value() << ", " << reference.pose.Rotation().Radians().value() << ", " << reference.curvature.value() << ", " << reference.velocity.value() << ", " << reference.acceleration.value() << std::endl;
-        // }
 
         return final_trajectory;
     }
