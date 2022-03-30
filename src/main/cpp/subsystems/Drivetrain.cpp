@@ -49,10 +49,10 @@ Drivetrain::Drivetrain()
     m_driveR2.ConfigFactoryDefault();
 
     m_driveL0.ConfigSelectedFeedbackSensor(FeedbackDevice::IntegratedSensor);
-    m_driveL0.SetStatusFramePeriod(ctre::phoenix::motorcontrol::StatusFrameEnhanced::Status_3_Quadrature, 18);
+    // m_driveL0.SetStatusFramePeriod(ctre::phoenix::motorcontrol::StatusFrameEnhanced::Status_3_Quadrature, 18);
 
     m_driveR0.ConfigSelectedFeedbackSensor(FeedbackDevice::IntegratedSensor);
-    m_driveR0.SetStatusFramePeriod(ctre::phoenix::motorcontrol::StatusFrameEnhanced::Status_3_Quadrature, 18);
+    // m_driveR0.SetStatusFramePeriod(ctre::phoenix::motorcontrol::StatusFrameEnhanced::Status_3_Quadrature, 18);
 
     // SetInverted on individual motors rather than the group so that
     // Encoders and LED's are also inverted as expected.
@@ -98,8 +98,35 @@ Drivetrain::Drivetrain()
     SetStatusFrames(m_driveR1, 250);
     SetStatusFrames(m_driveR2, 250);
 
-    // m_driveL0.SetStatusFramePeriod(ctre::phoenix::motorcontrol::StatusFrameEnhanced::Status_3_Quadrature, 18);
-    // m_driveR0.SetStatusFramePeriod(ctre::phoenix::motorcontrol::StatusFrameEnhanced::Status_3_Quadrature, 18);
+    m_driveL0.SetStatusFramePeriod(ctre::phoenix::motorcontrol::StatusFrameEnhanced::Status_1_General, 20, 50);
+    m_driveR0.SetStatusFramePeriod(ctre::phoenix::motorcontrol::StatusFrameEnhanced::Status_1_General, 20, 50);
+
+    m_driveL0.SetStatusFramePeriod(ctre::phoenix::motorcontrol::StatusFrameEnhanced::Status_2_Feedback0, 20, 50);
+    m_driveR0.SetStatusFramePeriod(ctre::phoenix::motorcontrol::StatusFrameEnhanced::Status_2_Feedback0, 20, 50);
+
+    m_driveL0.SetStatusFramePeriod(ctre::phoenix::motorcontrol::StatusFrameEnhanced::Status_3_Quadrature, 20, 50);
+    m_driveR0.SetStatusFramePeriod(ctre::phoenix::motorcontrol::StatusFrameEnhanced::Status_3_Quadrature, 20, 50);
+
+    m_driveL0.ConfigVelocityMeasurementPeriod(ctre::phoenix::sensors::SensorVelocityMeasPeriod::Period_50Ms, 50);
+    m_driveL1.ConfigVelocityMeasurementPeriod(ctre::phoenix::sensors::SensorVelocityMeasPeriod::Period_50Ms, 50);
+    m_driveL2.ConfigVelocityMeasurementPeriod(ctre::phoenix::sensors::SensorVelocityMeasPeriod::Period_50Ms, 50);
+    m_driveR0.ConfigVelocityMeasurementPeriod(ctre::phoenix::sensors::SensorVelocityMeasPeriod::Period_50Ms, 50);
+    m_driveR1.ConfigVelocityMeasurementPeriod(ctre::phoenix::sensors::SensorVelocityMeasPeriod::Period_50Ms, 50);
+    m_driveR2.ConfigVelocityMeasurementPeriod(ctre::phoenix::sensors::SensorVelocityMeasPeriod::Period_50Ms, 50);
+
+    m_driveL0.ConfigVelocityMeasurementWindow(4, 50);
+    m_driveL1.ConfigVelocityMeasurementWindow(4, 50);
+    m_driveL2.ConfigVelocityMeasurementWindow(4, 50);
+    m_driveR0.ConfigVelocityMeasurementWindow(4, 50);
+    m_driveR1.ConfigVelocityMeasurementWindow(4, 50);
+    m_driveR2.ConfigVelocityMeasurementWindow(4, 50);
+
+    m_driveL0.Config_kP(0, 0.043815, 50);
+    m_driveL1.Config_kP(0, 0.043815, 50);
+    m_driveL2.Config_kP(0, 0.043815, 50);
+    m_driveR0.Config_kP(0, 0.043815, 50);
+    m_driveR1.Config_kP(0, 0.043815, 50);
+    m_driveR2.Config_kP(0, 0.043815, 50);
 
     referencePose = m_fieldSim.GetObject("reference");
 }
@@ -125,22 +152,30 @@ void Drivetrain::SetSpeeds(const frc::DifferentialDriveWheelSpeeds &speeds)
     auto leftRate = -m_driveL0.GetSelectedSensorVelocity() * kDPP * 10.0;
     auto rightRate = m_driveR0.GetSelectedSensorVelocity() * kDPP * 10.0;
 
-    double leftOutput = m_leftPIDController.Calculate(
-        leftRate.value(),
-        speeds.left.to<double>());
+    // convert from meters per second to ticks per 100ms
+    auto leftSpeed = speeds.left * (0.1_s / kDPP);
+    auto rightSpeed = speeds.right * (0.1_s / kDPP);
 
-    double rightOutput = m_rightPIDController.Calculate(
-        rightRate.value(),
-        speeds.right.to<double>());
+    auto left_ff = leftFeedforward / 12_V;
+    auto right_ff = rightFeedforward / 12_V;
 
-    m_leftGroup.SetVoltage(units::volt_t{leftOutput} + leftFeedforward);
-    m_rightGroup.SetVoltage(units::volt_t{rightOutput} + rightFeedforward);
+    m_driveL0.Set(ctre::phoenix::motorcontrol::TalonFXControlMode::Velocity, leftSpeed.value(), ctre::phoenix::motorcontrol::DemandType::DemandType_ArbitraryFeedForward, left_ff.value());
+    m_driveL1.Set(ctre::phoenix::motorcontrol::TalonFXControlMode::Velocity, leftSpeed.value(), ctre::phoenix::motorcontrol::DemandType::DemandType_ArbitraryFeedForward, left_ff.value());
+    m_driveL2.Set(ctre::phoenix::motorcontrol::TalonFXControlMode::Velocity, leftSpeed.value(), ctre::phoenix::motorcontrol::DemandType::DemandType_ArbitraryFeedForward, left_ff.value());
+    m_driveR0.Set(ctre::phoenix::motorcontrol::TalonFXControlMode::Velocity, rightSpeed.value(), ctre::phoenix::motorcontrol::DemandType::DemandType_ArbitraryFeedForward, right_ff.value());
+    m_driveR1.Set(ctre::phoenix::motorcontrol::TalonFXControlMode::Velocity, rightSpeed.value(), ctre::phoenix::motorcontrol::DemandType::DemandType_ArbitraryFeedForward, right_ff.value());
+    m_driveR2.Set(ctre::phoenix::motorcontrol::TalonFXControlMode::Velocity, rightSpeed.value(), ctre::phoenix::motorcontrol::DemandType::DemandType_ArbitraryFeedForward, right_ff.value());
 }
 
 void Drivetrain::Drive(units::meters_per_second_t xSpeed,
                        units::radians_per_second_t rot)
 {
     SetSpeeds(m_kinematics.ToWheelSpeeds({xSpeed, 0_mps, rot}));
+}
+
+void Drivetrain::Drive(frc::ChassisSpeeds &speeds)
+{
+    SetSpeeds(m_kinematics.ToWheelSpeeds(speeds));
 }
 
 void Drivetrain::Drive(const frc::Trajectory::State &target)
@@ -155,7 +190,7 @@ void Drivetrain::Drive(const frc::Trajectory::State &target)
     cmd_vx = speeds.vx.value();
     cmd_vw = speeds.omega.value();
 
-    Drive(speeds.vx, speeds.omega);
+    Drive(speeds);
 }
 
 frc::Pose2d Drivetrain::GetPose() const

@@ -74,6 +74,7 @@ public:
     void SetSpeeds(const frc::DifferentialDriveWheelSpeeds &speeds);
     void Drive(units::meters_per_second_t xSpeed,
                units::radians_per_second_t rot);
+    void Drive(frc::ChassisSpeeds &speeds);
     bool TurnRel(double forward, units::degree_t target, units::degree_t tolerance);
     void Drive(const frc::Trajectory::State& target);
 
@@ -98,7 +99,7 @@ private:
     /***************************************************************************/
     // Characterization Values
 
-    static constexpr units::meter_t kTrackWidth = 0.79237_m;
+    static constexpr units::meter_t kTrackWidth = 0.78107_m;
     static constexpr units::meter_t kWheelRadius = 1.95_in;
 
     static constexpr double kGearRatio = (60.0 / 11.0) * (54.0 / 38.0);
@@ -107,15 +108,16 @@ private:
 
     // Made these slightly more obscure to support use in calculating kMaxSpeedLinear/Angular at compile time.
     static constexpr auto kMaxVoltage = 12.0_V;
-    static constexpr auto kStatic = 0.66366_V;
-    static constexpr auto kVlinear = 2.5434_V / 1_mps;
-    static constexpr auto kAlinear = 0.37885_V / 1_mps_sq;
-    static constexpr auto kVangular = 2.8388_V / 1_rad_per_s;
-    static constexpr auto kAangular = 0.09634_V / 1_rad_per_s_sq;
+    static constexpr auto kStatic = 0.68798_V;
+    static constexpr auto kVlinear = 2.643_V / 1_mps;
+    static constexpr auto kAlinear = 0.16209_V / 1_mps_sq;
+    static constexpr auto kVangular = 2.7351_V / 1_rad_per_s;
+    static constexpr auto kAangular = 0.035228_V / 1_rad_per_s_sq;
 
     // Velocity Control PID (Is this really required ???)
-    frc2::PIDController m_leftPIDController{0.89223, 0.0, 0.0}; //{0.89223, 0.0, 0.0};
-    frc2::PIDController m_rightPIDController{0.89223, 0.0, 0.0}; //{0.89223, 0.0, 0.0};
+    // these are updated w/ the latest sysid data, BUT are untested
+    frc2::PIDController m_leftPIDController{5.7845, 0.0, 0.0}; //{0.89223, 0.0, 0.0};
+    frc2::PIDController m_rightPIDController{5.7845, 0.0, 0.0}; //{0.89223, 0.0, 0.0};
 
     // Average Battery Resistance (Simulation)
     static constexpr auto kBatteryResistance = 0.03;

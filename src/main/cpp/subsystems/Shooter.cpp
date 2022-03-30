@@ -69,8 +69,9 @@ Shooter::Shooter()
     shooterB.SetStatusFramePeriod(ctre::phoenix::motorcontrol::StatusFrameEnhanced::Status_3_Quadrature, 18);
 
     // turret.SetStatusFramePeriod(StatusFrameEnhanced::Status_1_General, 10, 50);
-    turret.SetStatusFramePeriod(StatusFrameEnhanced::Status_13_Base_PIDF0, 18, 50);
-    turret.SetStatusFramePeriod(ctre::phoenix::motorcontrol::StatusFrameEnhanced::Status_3_Quadrature, 18);
+    turret.SetStatusFramePeriod(StatusFrameEnhanced::Status_1_General, 20, 50);
+    turret.SetStatusFramePeriod(StatusFrameEnhanced::Status_2_Feedback0, 20, 50);
+    turret.SetStatusFramePeriod(StatusFrameEnhanced::Status_3_Quadrature, 20, 50);
 
     turret.SetSelectedSensorPosition(0.0);
     turret.SetInverted(true);
