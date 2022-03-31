@@ -78,6 +78,7 @@ public:
     void SetShooter(units::volt_t targetVolts);
     void SetShooterRPM(units::revolutions_per_minute_t targetRPM);
     void SetShooterRPM();
+    void SetShooterRatio(double ratio);
 
     void SetTurret(units::volt_t targetVolts);
     bool SetTurretAngle(units::degree_t targetAngle, units::degree_t tol);
@@ -155,4 +156,8 @@ private:
 
     frc::LinearFilter<units::angular_velocity::revolutions_per_minute_t> filter = frc::LinearFilter<units::angular_velocity::revolutions_per_minute_t>::HighPass(0.1, 0.02_s);
     units::angular_velocity::revolutions_per_minute_t m_latestFilterResult;
+
+    // Ratio between top and bottom wheels
+    // note: this must be 1.0 if they are linked with belts !!!!
+    double shooter_ratio = 1.0;
 };

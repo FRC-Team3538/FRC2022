@@ -158,12 +158,17 @@ void Shooter::SetShooterRPM(units::revolutions_per_minute_t targetRPM)
     }
 
     shooterA.Set(ControlMode::Velocity, targetRPM.value() / kTicks2RPM);
-    shooterB.Set(ControlMode::Velocity, targetRPM.value() / kTicks2RPM);
+    shooterB.Set(ControlMode::Velocity, targetRPM.value() / kTicks2RPM * shooter_ratio);
 }
 
 void Shooter::SetShooterRPM()
 {
     SetShooterRPM(cmd_shooterRPM);
+}
+
+void Shooter::SetShooterRatio(double ratio)
+{
+    shooter_ratio = ratio;
 }
 
 void Shooter::SetTurret(units::volt_t voltage)

@@ -69,6 +69,8 @@ void Robot::RobotInit()
 
   ntShooterRPM.ForceSetDouble(ntShooterRPM.GetDouble(kShooterRPMDefault));
   ntShooterRPM.SetPersistent();
+  ntShooterRatio.ForceSetDouble(ntShooterRatio.GetDouble(kShooterRatioDefault));
+  ntShooterRatio.SetPersistent();
   ntFeederVoltage.ForceSetDouble(ntFeederVoltage.GetDouble(kFeederVoltageDefault));
   ntFeederVoltage.SetPersistent();
   ntIndexerVoltage.ForceSetDouble(ntIndexerVoltage.GetDouble(kIndexerVoltageDefault));
@@ -284,19 +286,19 @@ void Robot::TeleopPeriodic()
     {
       //std::cout << data.turretAngle.value() << std::endl;
 
-      units::meters_per_second_t driveVel = IO.drivetrain.GetVelocity();
+      //units::meters_per_second_t driveVel = IO.drivetrain.GetVelocity();
 
       // vision::RJVisionPipeline::visionData lookAhead = IO.rjVision.LookAhead(data, prevData);
       // if (lookAhead.filled)
       // {
         // Adjust for Movement
-        VectorMath shotVector = VectorMath{data.distance, data.turretAngle}; // Plane Relative to Robot Direction, where back of the robot is 0 deg
-        VectorMath robotMoveVector = VectorMath{(driveVel * 1_s), 180.0_deg};          // Assuming about a 1 sec shot time. Maybe add a graph?
-        VectorMath adjustedShotVector = shotVector - robotMoveVector;                  // - robotMoveVector because you want to shoot opposite of movement
+        //VectorMath shotVector = VectorMath{data.distance, data.turretAngle}; // Plane Relative to Robot Direction, where back of the robot is 0 deg
+        //VectorMath robotMoveVector = VectorMath{(driveVel * 1_s), 180.0_deg};          // Assuming about a 1 sec shot time. Maybe add a graph?
+        //VectorMath adjustedShotVector = shotVector - robotMoveVector;                  // - robotMoveVector because you want to shoot opposite of movement
 
         // Calculate Turret
         //std::cout << adjustedShotVector.GetTheta().value() << std::endl;
-        bool turretAtAngle = IO.shooter.SetTurretAngle(data.turretAngle, 0.5_deg);
+        //bool turretAtAngle = IO.shooter.SetTurretAngle(data.turretAngle, 0.5_deg);
     }
     double fwd = -deadband(IO.mainController.GetLeftY());
     double rot = -deadband(IO.mainController.GetRightX());
@@ -401,6 +403,7 @@ void Robot::TeleopPeriodic()
   // *** SHOOTER ***
   //
   auto s = units::revolutions_per_minute_t{ntShooterRPM.GetDouble(kShooterRPMDefault)};
+  IO.shooter.SetShooterRatio(ntShooterRatio.GetDouble(kShooterRPMDefault));
 
   switch (IO.secondaryController.GetPOV())
   {
@@ -452,6 +455,7 @@ void Robot::TeleopPeriodic()
     break;
   }
 
+  // Custom Preset
   if (IO.secondaryController.GetOptionsButtonPressed())
   {
     IO.shooter.SetShooterRPM(s);

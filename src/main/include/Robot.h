@@ -79,8 +79,11 @@ private:
   static constexpr double kVisionAngleTolDefault = 0.5;
   nt::NetworkTableEntry ntVisionAngleTol = frc::SmartDashboard::GetEntry("robot/visionAngleTol");
   
-  static constexpr double kShooterRPMDefault = 3500;
+  static constexpr double kShooterRPMDefault = 2950;
   nt::NetworkTableEntry ntShooterRPM = frc::SmartDashboard::GetEntry("robot/shooterRPM");
+  
+  static constexpr double kShooterRatioDefault = 1.0;
+  nt::NetworkTableEntry ntShooterRatio = frc::SmartDashboard::GetEntry("robot/ShooterRatio");
 
   static constexpr double kFeederVoltageDefault = 2.0;
   nt::NetworkTableEntry ntFeederVoltage = frc::SmartDashboard::GetEntry("robot/feederVoltage");
