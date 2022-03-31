@@ -308,7 +308,7 @@ void Robot::TeleopPeriodic()
 
         // Calculate Turret
         //std::cout << adjustedShotVector.GetTheta().value() << std::endl;
-        //bool turretAtAngle = IO.shooter.SetTurretAngle(data.turretAngle, 0.5_deg);
+        bool turretAtAngle = IO.shooter.SetTurretAngle(data.turretAngle, 1.0_deg);
     }
     double fwd = -deadband(IO.mainController.GetLeftY());
     double rot = -deadband(IO.mainController.GetRightX());
