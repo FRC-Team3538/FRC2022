@@ -77,6 +77,16 @@ void Robot::RobotInit()
   ntIndexerVoltage.SetPersistent();
   ntTurretTargetAng.ForceSetDouble(ntTurretTargetAng.GetDouble(kTurretTargetAngDefault));
   ntTurretTargetAng.SetPersistent();
+  
+  // Presets
+  ntPresetLeft.ForceSetDouble(ntPresetLeft.GetDouble(kPresetLeftDefault));
+  ntPresetLeft.SetPersistent();
+  ntPresetRight.ForceSetDouble(ntPresetRight.GetDouble(kPresetRightDefault));
+  ntPresetRight.SetPersistent();
+  ntPresetDown.ForceSetDouble(ntPresetDown.GetDouble(kPresetDownDefault));
+  ntPresetDown.SetPersistent();
+  ntPresetUp.ForceSetDouble(ntPresetUp.GetDouble(kPresetUpDefault));
+  ntPresetUp.SetPersistent();
 
   // Logging Stuff
 #ifdef LOGGER
@@ -405,14 +415,19 @@ void Robot::TeleopPeriodic()
   auto s = units::revolutions_per_minute_t{ntShooterRPM.GetDouble(kShooterRPMDefault)};
   IO.shooter.SetShooterRatio(ntShooterRatio.GetDouble(kShooterRPMDefault));
 
+  auto rpmUp = units::revolutions_per_minute_t{ntPresetUp.GetDouble(kPresetUpDefault)};
+  auto rpmRight = units::revolutions_per_minute_t{ntPresetRight.GetDouble(kPresetRightDefault)};
+  auto rpmDown = units::revolutions_per_minute_t{ntPresetDown.GetDouble(kPresetDownDefault)};
+  auto rpmLeft = units::revolutions_per_minute_t{ntPresetLeft.GetDouble(kPresetLeftDefault)};
+
   switch (IO.secondaryController.GetPOV())
   {
   case -1:
     hoodOS = false;
     break;
   case 0:
-    // FENDER
-    IO.shooter.SetShooterRPM(3500_rpm);
+    // Launchpad
+    IO.shooter.SetShooterRPM(rpmUp);
     m_csmode = ClimberShooterMode::Shooter;
     if (!hoodOS)
     {
@@ -422,8 +437,8 @@ void Robot::TeleopPeriodic()
     break;
 
   case 90:
-    // MIDFIELD
-    IO.shooter.SetShooterRPM(2750_rpm);
+    // Wall 
+    IO.shooter.SetShooterRPM(rpmRight);
     m_csmode = ClimberShooterMode::Shooter;
     if (!hoodOS)
     {
@@ -433,8 +448,8 @@ void Robot::TeleopPeriodic()
     break;
 
   case 180:
-    // LAUNCHPAD
-    IO.shooter.SetShooterRPM(1000_rpm);
+    // Fender
+    IO.shooter.SetShooterRPM(rpmDown);
     m_csmode = ClimberShooterMode::Shooter;
     if (!hoodOS)
     {
@@ -445,7 +460,7 @@ void Robot::TeleopPeriodic()
 
   case 270:
     // TARMAC
-    IO.shooter.SetShooterRPM(2950_rpm);
+    IO.shooter.SetShooterRPM(rpmLeft);
     m_csmode = ClimberShooterMode::Shooter;
     if (!hoodOS)
     {

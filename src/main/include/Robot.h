@@ -94,6 +94,16 @@ private:
   static constexpr double kTurretTargetAngDefault = 0.0;
   nt::NetworkTableEntry ntTurretTargetAng = frc::SmartDashboard::GetEntry("robot/turretTargetAng");
 
+  // Presets
+  static constexpr double kPresetLeftDefault = 2950.0;
+  nt::NetworkTableEntry ntPresetLeft = frc::SmartDashboard::GetEntry("robot/Preset/Tarmac");
+  static constexpr double kPresetRightDefault = 2750.0;
+  nt::NetworkTableEntry ntPresetRight = frc::SmartDashboard::GetEntry("robot/Preset/Wall");
+  static constexpr double kPresetDownDefault = 1000.0;
+  nt::NetworkTableEntry ntPresetDown = frc::SmartDashboard::GetEntry("robot/Preset/Fender");
+  static constexpr double kPresetUpDefault = 3500.0;
+  nt::NetworkTableEntry ntPresetUp = frc::SmartDashboard::GetEntry("robot/Preset/Launchpad");
+
   //----------- rev color sensor stuff ----------
   rev::ColorSensorV3 colorSensor{frc::I2C::Port::kMXP};
 
