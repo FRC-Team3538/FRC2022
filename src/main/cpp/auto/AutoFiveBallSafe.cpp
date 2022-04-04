@@ -19,6 +19,7 @@
 #include "units/time.h"
 #include "units/velocity.h"
 #include "units/voltage.h"
+#include <frc/DriverStation.h>
 
 // Name for Smart Dash Chooser
 std::string AutoFiveBallSafe::GetName()
@@ -81,9 +82,19 @@ void AutoFiveBallSafe::Init()
     config.AddConstraint(frc::DifferentialDriveKinematicsConstraint{IO.drivetrain.GetKinematics(), maxLinearVel});
     config.SetReversed(false);
 
-    m_trajectory_first = rj::AutoHelper::LoadTrajectory("06 - 5 Ball Safe 1", &config);
-    m_trajectory_second = rj::AutoHelper::LoadTrajectory("06 - 5 Ball Safe 2", &config);
-    m_trajectory_third = rj::AutoHelper::LoadTrajectory("06 - 5 Ball Safe 3", &config);
+    if (frc::DriverStation::GetAlliance() == frc::DriverStation::Alliance::kBlue)
+    {
+        m_trajectory_first = rj::AutoHelper::LoadTrajectory("06 - 5 Ball Safe Blue 1", &config);
+        m_trajectory_second = rj::AutoHelper::LoadTrajectory("06 - 5 Ball Safe Blue 2", &config);
+        m_trajectory_third = rj::AutoHelper::LoadTrajectory("06 - 5 Ball Safe Blue 3", &config);
+    }
+    // Default station in DS is Red 1, so red paths should be default behavior.
+    else
+    {
+        m_trajectory_first = rj::AutoHelper::LoadTrajectory("06 - 5 Ball Safe 1", &config);
+        m_trajectory_second = rj::AutoHelper::LoadTrajectory("06 - 5 Ball Safe 2", &config);
+        m_trajectory_third = rj::AutoHelper::LoadTrajectory("06 - 5 Ball Safe 3", &config);
+    }
 
     std::cout << m_trajectory_first.TotalTime().value() + m_trajectory_second.TotalTime().value() + m_trajectory_third.TotalTime().value() << std::endl;
 
