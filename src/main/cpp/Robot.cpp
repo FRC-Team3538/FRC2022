@@ -253,7 +253,7 @@ void Robot::TeleopPeriodic()
     {
       // Calculate Turret
       auto turretOK = IO.shooter.SetTurretAngle(data.turretAngle, 1.0_deg);
-      auto flywheelOK = units::math::abs(IO.shooter.GetShooterRPM() - rpmRight) < 50_rpm;
+      auto flywheelOK = units::math::abs(IO.shooter.GetShooterRPM() - rpmRight) < 100_rpm;
       shoot = turretOK && flywheelOK;
     }
 
