@@ -130,6 +130,7 @@ void Robot::RobotPeriodic()
   IO.rjVision.Periodic();
   frc::SmartDashboard::PutNumber("robot/MatchTime", frc::DriverStation::GetMatchTime());
   frc::SmartDashboard::PutNumber("robot/PressureHigh", IO.ph.GetPressure(0).value());
+  frc::SmartDashboard::PutNumber("robot/ShooterRPM", IO.shooter.GetShooterRPM().value());
   if (!IO.shooter.zeroed)
     IO.shooter.SetBlinkyZeroThing();
 
