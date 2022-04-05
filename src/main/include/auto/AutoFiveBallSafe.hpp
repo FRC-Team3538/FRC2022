@@ -46,9 +46,9 @@ protected:
     bool m_resetShooterState;
     bool m_resetDriveState;
 
-    units::revolutions_per_minute_t m_rpmShot1 = 3075_rpm;
-    units::revolutions_per_minute_t m_rpmShot2 = 2825_rpm;
-    units::revolutions_per_minute_t m_rpmShot3 = 2950_rpm;
+    units::revolutions_per_minute_t m_rpmShot1 = 4000_rpm;//3075_rpm;
+    units::revolutions_per_minute_t m_rpmShot2 = 4000_rpm;//2825_rpm;
+    units::revolutions_per_minute_t m_rpmShot3 = 4000_rpm;//2950_rpm;
 
 
 public:

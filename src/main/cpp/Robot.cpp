@@ -141,7 +141,7 @@ void Robot::RobotPeriodic()
 
     IO.rjVision.SetLED(new_flag);
   }
-
+  IO.shooter.SetShooterRatio(ntShooterRatio.GetDouble(kShooterRPMDefault));
   if (localization_flag_entry.GetBoolean(false))
   {
 
@@ -220,100 +220,56 @@ void Robot::TeleopPeriodic()
 {
   bool shoot = false;
 
+  // Drive 
+  double fwd = -deadband(IO.mainController.GetLeftY());
+  double rot = -deadband(IO.mainController.GetRightX());
+  IO.drivetrain.Arcade(fwd, rot);
+
+
+  // Shooter Presets
+  auto s = units::revolutions_per_minute_t{ntShooterRPM.GetDouble(kShooterRPMDefault)};
+  auto rpmUp = units::revolutions_per_minute_t{ntPresetUp.GetDouble(kPresetUpDefault)};
+  auto rpmRight = units::revolutions_per_minute_t{ntPresetRight.GetDouble(kPresetRightDefault)};
+  auto rpmDown = units::revolutions_per_minute_t{ntPresetDown.GetDouble(kPresetDownDefault)};
+  auto rpmLeft = units::revolutions_per_minute_t{ntPresetLeft.GetDouble(kPresetLeftDefault)};
+
   //
   // *** VISION AND DRIVING ***
   //
   if (IO.mainController.GetR1Button() || IO.secondaryController.GetCircleButton()) // || IO.secondaryController.GetTriangleButton())
   {
+    // *** Automatic Aim and Shoot ***
+
     if (IO.shooter.GetShooterRPM() < 250.0_rpm)
     {
-      IO.shooter.SetShooterRPM(2800_rpm);
+      IO.shooter.SetShooterRPM(rpmRight); // Tarmac
     }
 
     climberTimerOS = false;
     manualJog = false;
-    
-    // Disable Intake Deploy While shooting
-    // IO.shooter.SetIntakeState(Shooter::Position::Deployed);
-    
-    intakeTimer.Start();
-    intakeTimer.Reset();
-
-    if (!hoodOS2)
-    {
-      IO.shooter.SetHoodAngle(Shooter::HoodPosition::Middle);
-      hoodOS2 = true;
-    }
 
     vision::RJVisionPipeline::visionData data = IO.rjVision.Run();
     if (data.filled)
     {
-
-      units::meters_per_second_t driveVel = IO.drivetrain.GetVelocity();
-
-      // vision::RJVisionPipeline::visionData lookAhead = IO.rjVision.LookAhead(data, prevData);
-      // if (lookAhead.filled)
-      // {
-      // Adjust for Movement
-      VectorMath shotVector = VectorMath{data.distance, data.turretAngle};  // Plane Relative to Robot Direction, where back of the robot is 0 deg
-      VectorMath robotMoveVector = VectorMath{(driveVel * 1_s), 180.0_deg}; // Assuming about a 1 sec shot time. Maybe add a graph?
-      VectorMath adjustedShotVector = shotVector - robotMoveVector;         // - robotMoveVector because you want to shoot opposite of movement
-
       // Calculate Turret
-      // std::cout << adjustedShotVector.GetTheta().value() << std::endl;
-      bool turretAtAngle;
-      
-      if(false)//units::math::abs(driveVel) < 7_fps)
-        turretAtAngle = IO.shooter.SetTurretAngle(adjustedShotVector.GetTheta(), 1.0_deg);
-      else
-        turretAtAngle = IO.shooter.SetTurretAngle(data.turretAngle, 1.0_deg);
-      // bool turretAtAngle = IO.shooter.SetTurretAngle(data.turretAngle, 1.0_deg);
-
-      // Calculate Shooter
-      Shooter::State shotStat = IO.shooter.CalculateShot(adjustedShotVector.GetMagnitude()); // Magnitude from adjusted vector gets us distance
-
-      // IO.shooter.SetShooterRPM(shotStat.shooterRPM);
-
-      // Shoot Maybe
-      // if(turretAtAngle)
-      //   elShoot = true;
-      shoot = turretAtAngle && (units::math::abs(shotStat.shooterRPM - IO.shooter.GetShooterRPM()) < 150.0_rpm);
-      //}
+      auto turretOK = IO.shooter.SetTurretAngle(data.turretAngle, 1.0_deg);
+      auto flywheelOK = units::math::abs(IO.shooter.GetShooterRPM() - rpmRight) < 50_rpm;
+      shoot = turretOK && flywheelOK;
     }
-    double fwd = -deadband(IO.mainController.GetLeftY());
-    double rot = -deadband(IO.mainController.GetRightX());
-
-    IO.drivetrain.Arcade(fwd, rot);
 
     prevData = data;
   }
   else if (IO.secondaryController.GetSquareButton())
   {
+    // *** Automatic Aim but no shoot ***
+
     climberTimerOS = false;
     manualJog = false;
     vision::RJVisionPipeline::visionData data = IO.rjVision.Run();
     if (data.filled)
     {
-      //std::cout << data.turretAngle.value() << std::endl;
-
-      //units::meters_per_second_t driveVel = IO.drivetrain.GetVelocity();
-
-      // vision::RJVisionPipeline::visionData lookAhead = IO.rjVision.LookAhead(data, prevData);
-      // if (lookAhead.filled)
-      // {
-        // Adjust for Movement
-        //VectorMath shotVector = VectorMath{data.distance, data.turretAngle}; // Plane Relative to Robot Direction, where back of the robot is 0 deg
-        //VectorMath robotMoveVector = VectorMath{(driveVel * 1_s), 180.0_deg};          // Assuming about a 1 sec shot time. Maybe add a graph?
-        //VectorMath adjustedShotVector = shotVector - robotMoveVector;                  // - robotMoveVector because you want to shoot opposite of movement
-
-        // Calculate Turret
-        //std::cout << adjustedShotVector.GetTheta().value() << std::endl;
-        bool turretAtAngle = IO.shooter.SetTurretAngle(data.turretAngle, 1.0_deg);
+        IO.shooter.SetTurretAngle(data.turretAngle, 1.0_deg);
     }
-    double fwd = -deadband(IO.mainController.GetLeftY());
-    double rot = -deadband(IO.mainController.GetRightX());
-
-    IO.drivetrain.Arcade(fwd, rot);
   }
   else
   {
@@ -394,31 +350,11 @@ void Robot::TeleopPeriodic()
     // IO.shooter.SetTurretAngle(units::degree_t{ntTurretTargetAng.GetDouble(kTurretTargetAngDefault)}, units::degree_t{0.5});
 
     hoodOS2 = false;
-
-    double fwd = -deadband(IO.mainController.GetLeftY());
-    // double rot = 0.0;
-    double rot = -deadband(IO.mainController.GetRightX());
-
-    // Sniper Mode
-    if (IO.mainController.GetR3Button())
-    {
-      fwd *= 0.3;
-      rot *= 0.3;
-    }
-
-    IO.drivetrain.Arcade(fwd, rot);
   }
 
   //
   // *** SHOOTER ***
   //
-  auto s = units::revolutions_per_minute_t{ntShooterRPM.GetDouble(kShooterRPMDefault)};
-  IO.shooter.SetShooterRatio(ntShooterRatio.GetDouble(kShooterRPMDefault));
-
-  auto rpmUp = units::revolutions_per_minute_t{ntPresetUp.GetDouble(kPresetUpDefault)};
-  auto rpmRight = units::revolutions_per_minute_t{ntPresetRight.GetDouble(kPresetRightDefault)};
-  auto rpmDown = units::revolutions_per_minute_t{ntPresetDown.GetDouble(kPresetDownDefault)};
-  auto rpmLeft = units::revolutions_per_minute_t{ntPresetLeft.GetDouble(kPresetLeftDefault)};
 
   switch (IO.secondaryController.GetPOV())
   {

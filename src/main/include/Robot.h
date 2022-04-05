@@ -95,10 +95,10 @@ private:
   nt::NetworkTableEntry ntTurretTargetAng = frc::SmartDashboard::GetEntry("robot/turretTargetAng");
 
   // Presets
-  static constexpr double kPresetLeftDefault = 2950.0;
-  nt::NetworkTableEntry ntPresetLeft = frc::SmartDashboard::GetEntry("robot/Preset/Tarmac");
-  static constexpr double kPresetRightDefault = 2750.0;
-  nt::NetworkTableEntry ntPresetRight = frc::SmartDashboard::GetEntry("robot/Preset/Wall");
+  static constexpr double kPresetLeftDefault = 4500.0;
+  nt::NetworkTableEntry ntPresetLeft = frc::SmartDashboard::GetEntry("robot/Preset/Wall");
+  static constexpr double kPresetRightDefault = 3850.0;
+  nt::NetworkTableEntry ntPresetRight = frc::SmartDashboard::GetEntry("robot/Preset/Tarmac");
   static constexpr double kPresetDownDefault = 1000.0;
   nt::NetworkTableEntry ntPresetDown = frc::SmartDashboard::GetEntry("robot/Preset/Fender");
   static constexpr double kPresetUpDefault = 3500.0;
