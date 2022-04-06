@@ -4,6 +4,24 @@
 
 #pragma once
 
+
+// #include <frc/ADIS16470_IMU.h>
+#include "ctre/phoenix/motorcontrol/can/WPI_TalonFX.h"
+#include "ctre/phoenix/motorcontrol/IMotorController.h"
+#include "ctre/phoenix/sensors/SensorVelocityMeasPeriod.h"
+#include "ctre/phoenix/sensors/WPI_Pigeon2.h"
+#include "frc/geometry/Pose2d.h"                            // for Pose2d
+#include "frc/geometry/Rotation2d.h"                        // for Rotation2d
+#include "frc/motorcontrol/MotorControllerGroup.inc"        // for MotorCont...
+#include "frc/system/LinearSystem.h"                        // for LinearSystem
+#include "frc/system/plant/DCMotor.h"                       // for DCMotor
+#include "networktables/NetworkTableEntry.h"                // for NetworkTa...
+#include "Subsystem.hpp"                                    // for Subsystem
+#include "units/acceleration.h"                             // for meters_pe...
+#include "units/angular_acceleration.h"                     // for radians_p...
+#include "units/base.h"                                     // for unit_t
+#include "units/time.h"                                     // for second_t
+#include "wpi/sendable/Sendable.h"                          // for Sendable
 #include <frc/controller/PIDController.h>                   // for PIDContro...
 #include <frc/controller/RamseteController.h>               // for RamseteCo...
 #include <frc/controller/SimpleMotorFeedforward.h>          // for SimpleMot...
@@ -14,31 +32,19 @@
 #include <frc/smartdashboard/Field2d.h>                     // for Field2d
 #include <frc/smartdashboard/SmartDashboard.h>              // for SmartDash...
 #include <frc/system/plant/LinearSystemId.h>                // for LinearSys...
-#include <frc/trajectory/Trajectory.h>                      // for Trajectory
+#include <frc/trajectory/Trajectory.h>
+#include <lib/frc/estimator/DifferentialDrivePoseEstimator.h>
 #include <math.h>                                           // for M_PI
+#include <networktables/NetworkTableInstance.h>
 #include <units/angle.h>                                    // for degree_t
 #include <units/angular_velocity.h>                         // for radians_p...
 #include <units/length.h>                                   // for meter_t
 #include <units/velocity.h>                                 // for meters_pe...
 #include <units/voltage.h>                                  // for volt_t
+#include <wpi/numbers>
+#include <wpi/sendable/SendableBuilder.h>
 #include <wpi/sendable/SendableHelper.h>                    // for SendableH...
-
-#include "Subsystem.hpp"                                    // for Subsystem
-#include "frc/geometry/Pose2d.h"                            // for Pose2d
-#include "frc/geometry/Rotation2d.h"                        // for Rotation2d
-#include "frc/motorcontrol/MotorControllerGroup.inc"        // for MotorCont...
-#include "frc/system/LinearSystem.h"                        // for LinearSystem
-#include "frc/system/plant/DCMotor.h"                       // for DCMotor
-#include "networktables/NetworkTableEntry.h"                // for NetworkTa...
-#include "units/acceleration.h"                             // for meters_pe...
-#include "units/angular_acceleration.h"                     // for radians_p...
-#include "units/base.h"                                     // for unit_t
-#include "units/time.h"                                     // for second_t
-#include "wpi/sendable/Sendable.h"                          // for Sendable
-#include "ctre/phoenix/motorcontrol/IMotorController.h"
-#include "ctre/phoenix/motorcontrol/can/WPI_TalonFX.h"
-#include "ctre/phoenix/sensors/SensorVelocityMeasPeriod.h"
-#include "ctre/phoenix/sensors/WPI_Pigeon2.h"
+#include <wpi/sendable/SendableRegistry.h>
 
 namespace frc {
 class FieldObject2d;
@@ -164,12 +170,12 @@ private:
     //
     frc::DifferentialDriveKinematics m_kinematics{kTrackWidth};
     frc::DifferentialDriveOdometry m_odometry{GetYaw()};
-    // frc::DifferentialDrivePoseEstimator m_poseEstimator{
-    //     GetYaw(), 
-    //     frc::Pose2d{}, 
-    //     {0.002, 0.002, 0.0001, 0.5, 0.5},
-    //     {0.005, 0.005, 0.0001},
-    //     {0.2, 0.2, 0.1}};
+    frc::DifferentialDrivePoseEstimator m_poseEstimator{
+        GetYaw(), 
+        frc::Pose2d{}, 
+        {0.002, 0.002, 0.0001, 0.5, 0.5},
+        {0.005, 0.005, 0.0001},
+        {0.2, 0.2, 0.1}};
     frc::SimpleMotorFeedforward<units::meters> m_feedforward{kStatic, kVlinear, kAlinear};
     frc::RamseteController m_ramsete{units::unit_t<frc::RamseteController::b_unit>{2.0},
                                      units::unit_t<frc::RamseteController::zeta_unit>{0.7}};
@@ -204,6 +210,7 @@ private:
 
     frc::Field2d m_fieldSim;
     frc::FieldObject2d *referencePose;
+    frc::FieldObject2d *pose_estimate;
 
     frc::PIDController m_yawPID{0.25, 0.0, 0.05};
 
