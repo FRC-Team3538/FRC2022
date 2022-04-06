@@ -169,11 +169,11 @@ void AutoFiveBallSneaky::Run()
             // state entry shit
             IO.shooter.SetIntakeState(Shooter::Position::Deployed);
             IO.shooter.SetIntake(8_V);
-            IO.shooter.SetShooterRPM(3000_rpm);
-            IO.shooter.SetIndexer(3_V);
+            IO.shooter.SetShooterRPM(0_rpm);
+            IO.shooter.SetIndexer(5_V);
             IO.shooter.SetFeeder(-2_V);
 
-            IO.shooter.SetTurretAngle(20_deg, tol);
+            IO.shooter.SetTurretAngle(0_deg, tol);
 
             IO.rjVision.SetLED(true);
         }
@@ -184,7 +184,8 @@ void AutoFiveBallSneaky::Run()
     {
         // aim at target
         if (m_newShooterState) {
-            IO.shooter.SetIndexer(0_V);
+            IO.shooter.SetIntakeState(Shooter::Position::Stowed);
+            IO.shooter.SetShooterRPM(4550_rpm);
         }
 
         if (FindVisionTarget() || m_shooterTimer.Get() > 2_s)
@@ -201,8 +202,8 @@ void AutoFiveBallSneaky::Run()
         if (m_newShooterState)
         {
             IO.shooter.ResetEdgeDetector();
-            IO.shooter.SetFeeder(4_V);
-            IO.shooter.SetIndexer(3_V);
+            IO.shooter.SetFeeder(5_V);
+            IO.shooter.SetIndexer(5_V);
         }
 
         FindVisionTarget();
@@ -224,6 +225,8 @@ void AutoFiveBallSneaky::Run()
     {
         // wait for second path
         if (m_newShooterState) {
+            IO.shooter.SetIntakeState(Shooter::Position::Deployed);
+            IO.shooter.SetShooterRPM(0_rpm);
             IO.shooter.SetFeeder(-2_V);
 
             IO.shooter.SetTurretAngle(-75_deg, tol);
@@ -235,8 +238,8 @@ void AutoFiveBallSneaky::Run()
     {
         // aim at target
         if (m_newShooterState) {
-            IO.shooter.SetShooterRPM(3100_rpm);
-            IO.shooter.SetIndexer(0_V);
+            IO.shooter.SetIntakeState(Shooter::Position::Stowed);
+            IO.shooter.SetShooterRPM(4500_rpm);
         }
 
         if (FindVisionTarget() || m_shooterTimer.Get() > 2_s)
@@ -252,8 +255,8 @@ void AutoFiveBallSneaky::Run()
         // shoot 3 balls
         if (m_newShooterState)
         {
-            IO.shooter.SetFeeder(4_V);
-            IO.shooter.SetIndexer(3_V);
+            IO.shooter.SetFeeder(5_V);
+            IO.shooter.SetIndexer(5_V);
         }
     
         if (IO.shooter.Shoot_EdgeDetector())

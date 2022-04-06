@@ -194,7 +194,7 @@ void AutoFiveBallSafe::Run()
             IO.shooter.SetIndexer(3_V);
             IO.shooter.SetFeeder(-2_V);
 
-            IO.shooter.SetTurretAngle(20_deg, tol);
+            IO.shooter.SetTurretAngle(0_deg, tol);
 
             IO.rjVision.SetLED(true);
         }
