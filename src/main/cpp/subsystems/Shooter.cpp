@@ -1,6 +1,7 @@
 #include "subsystems/Shooter.hpp"
 
 #include <cmath>
+#include <wpi/DataLog.h>
 
 #include "frc/DigitalInput.h"
 #include "frc/Solenoid.h"
@@ -169,6 +170,16 @@ void Shooter::SetShooterRPM()
 void Shooter::SetShooterRatio(double ratio)
 {
     shooter_ratio = ratio;
+}
+
+void Shooter::SetTurretCoastMode()
+{
+    turret.SetNeutralMode(ctre::phoenix::motorcontrol::NeutralMode::Coast);
+}
+
+void Shooter::SetTurretBrakeMode()
+{
+    turret.SetNeutralMode(ctre::phoenix::motorcontrol::NeutralMode::Brake);
 }
 
 void Shooter::SetTurret(units::volt_t voltage)
@@ -551,4 +562,59 @@ void Shooter::InitSendable(wpi::SendableBuilder &builder)
     */
 
     builder.AddDoubleProperty("shooter/hp_filter_result", [this] { return m_latestFilterResult.value(); }, nullptr);
+}
+
+void Shooter::LogDataEntries(wpi::log::DataLog &log)
+{
+    log.AppendDouble(GetDataEntry("Shooter/cmd/shooterRPM"), cmd_shooterRPM.value(), 0);
+
+    FalconEntryHelper(log, intake, "intake");
+    FalconEntryHelper(log, indexerA, "indexerA");
+    FalconEntryHelper(log, feeder, "feeder");
+    FalconEntryHelper(log, shooterA, "shooterA");
+    FalconEntryHelper(log, shooterB, "shooterB");
+    FalconEntryHelper(log, turret, "turret");
+    // FalconEntryHelper(log, hood, "hood");
+
+    // Shooter PID
+    log.AppendDouble(GetDataEntry("Shooter/shooter/kP"), shooterSlotConfig.kP, 0);
+    log.AppendDouble(GetDataEntry("Shooter/shooter/kI"), shooterSlotConfig.kI, 0);
+    log.AppendDouble(GetDataEntry("Shooter/shooter/kD"), shooterSlotConfig.kD, 0);
+    log.AppendDouble(GetDataEntry("Shooter/shooter/kF"), shooterSlotConfig.kF, 0);
+    log.AppendDouble(GetDataEntry("Shooter/shooter/kIZ"), shooterSlotConfig.integralZone, 0);
+    log.AppendDouble(GetDataEntry("Shooter/shooter/kMaxError"), shooterSlotConfig.allowableClosedloopError, 0);
+    log.AppendDouble(GetDataEntry("Shooter/shooter/kMaxIntegral"), shooterSlotConfig.maxIntegralAccumulator, 0);
+
+    // Pneumatics
+    log.AppendBoolean(GetDataEntry("Shooter/intake/sol"), deployPiston.Get(), 0);
+
+    log.AppendDouble(GetDataEntry("Shooter/shooter/hp_filter_result"), m_latestFilterResult.value(), 0);
+}
+
+void Shooter::RegisterDataEntries(wpi::log::DataLog &log)
+{
+    RegisterDataEntry(log, "Shooter/cmd/shooterRPM", "double");
+
+    FalconEntryStartHelper(log, "Shooter/intake");
+    FalconEntryStartHelper(log, "Shooter/indexerA");
+    FalconEntryStartHelper(log, "Shooter/feeder");
+    FalconEntryStartHelper(log, "Shooter/shooterA");
+    FalconEntryStartHelper(log, "Shooter/shooterB");
+    FalconEntryStartHelper(log, "Shooter/turret");
+    // FalconEntryStartHelper(log, "Shooter/hood");
+    
+    
+    // Shooter PID
+    RegisterDataEntry(log, "Shooter/shooter/kP", "double");
+    RegisterDataEntry(log, "Shooter/shooter/kI", "double");
+    RegisterDataEntry(log, "Shooter/shooter/kD", "double");
+    RegisterDataEntry(log, "Shooter/shooter/kF", "double");
+    RegisterDataEntry(log, "Shooter/shooter/kIZ", "double");
+    RegisterDataEntry(log, "Shooter/shooter/kMaxError", "double");
+    RegisterDataEntry(log, "Shooter/shooter/kMaxIntegral", "double");
+
+    // Pneumatics
+    RegisterDataEntry(log, "Shooter/intake/sol", "boolean");
+
+    RegisterDataEntry(log, "Shooter/shooter/hp_filter_result", "double");
 }

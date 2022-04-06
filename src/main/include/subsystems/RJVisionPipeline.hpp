@@ -67,6 +67,9 @@ namespace vision
         void SetFilterType(FilterType setFilter);
         void SetTurretAngle(units::degree_t turretAngle);
 
+        void RegisterDataEntries(wpi::log::DataLog &log);
+        void LogDataEntries(wpi::log::DataLog &log);
+
     private:
         units::degree_t turretAngle;
         units::inch_t estDist = 0.0_in;

@@ -67,6 +67,9 @@ public:
     void ConfigureSystem() override;
     void UpdateTelemetry() override;
 
+    void RegisterDataEntries(wpi::log::DataLog &log);
+    void LogDataEntries(wpi::log::DataLog &log);
+
     void Periodic();
 
     // *** SETTERS ***
@@ -80,6 +83,8 @@ public:
     void SetShooterRPM();
     void SetShooterRatio(double ratio);
 
+    void SetTurretCoastMode();
+    void SetTurretBrakeMode();
     void SetTurret(units::volt_t targetVolts);
     bool SetTurretAngle(units::degree_t targetAngle, units::degree_t tol);
     void ZeroTurret(bool negative);

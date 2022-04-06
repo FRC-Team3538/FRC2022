@@ -12,6 +12,21 @@
 #include <vector>                           // for vector
 #include "frc/Watchdog.h"                   // for Watchdog
 #include "units/time.h"                     // for second_t
+#include <subsystems/Drivetrain.hpp>
+#include <subsystems/Shooter.hpp>
+#include <subsystems/RJVisionPipeline.hpp>
+#include <subsystems/Climber.hpp>
+#include <vector>
+#include <functional>
+
+#include <lib/PS4Controller.hpp>
+
+#include <lib/PneumaticHub.hpp>
+
+#include <frc/PowerDistribution.h>
+#include <frc/TimedRobot.h>
+#include <unordered_map>
+
 class Subsystem;
 
 class Robotmap
@@ -39,8 +54,12 @@ public:
 
     void UpdateSmartDash();
     void ConfigureSystem();
+    void RegisterDataEntries(wpi::log::DataLog &log);
+    void LogDataEntries(wpi::log::DataLog &log);
     void watchDog();
 
     // SmartDash Cycler
     size_t telemetryCt = 0;
+
+    std::unordered_map<std::string_view, int> data_entries;
 };

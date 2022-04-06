@@ -38,6 +38,8 @@
 
 using namespace ctre::phoenix::motorcontrol;
 
+#include <wpi/DataLog.h>
+
 Drivetrain::Drivetrain()
 {
     // Motor Configuration
@@ -522,4 +524,87 @@ void Drivetrain::InitSendable(wpi::SendableBuilder &builder)
     builder.AddDoubleProperty("traj/v", [this] { return reference.velocity.value(); }, nullptr);
     builder.AddDoubleProperty("traj/a", [this] { return reference.acceleration.value(); }, nullptr);
 
+}
+
+void Drivetrain::RegisterDataEntries(wpi::log::DataLog &log)
+{
+    RegisterDataEntry(log, "Drive/cmd/fwd", "double");
+    RegisterDataEntry(log, "Drive/cmd/rot", "double");
+    RegisterDataEntry(log, "Drive/cmd/vx", "double");
+    RegisterDataEntry(log, "Drive/cmd/vw", "double");
+    RegisterDataEntry(log, "Drive/cmd/vl", "double");
+    RegisterDataEntry(log, "Drive/cmd/vr", "double");
+
+    FalconEntryStartHelper(log, "Drive/left1");
+    FalconEntryStartHelper(log, "Drive/left2");
+    FalconEntryStartHelper(log, "Drive/left3");
+    FalconEntryStartHelper(log, "Drive/right1");
+    FalconEntryStartHelper(log, "Drive/right2");
+    FalconEntryStartHelper(log, "Drive/right3");
+
+    RegisterDataEntry(log, "Drive/IMU/yaw", "double");
+    RegisterDataEntry(log, "Drive/pose/x", "double");
+    RegisterDataEntry(log, "Drive/pose/y", "double");
+    RegisterDataEntry(log, "Drive/pose/yaw", "double");
+
+    RegisterDataEntry(log, "Drive/YawPID/kP", "double");
+    RegisterDataEntry(log, "Drive/YawPID/kI", "double");
+    RegisterDataEntry(log, "Drive/YawPID/kD", "double");
+    RegisterDataEntry(log, "Drive/YawPID/kSP", "double");
+
+    RegisterDataEntry(log, "Drive/DrivePID/kP", "double");
+    RegisterDataEntry(log, "Drive/DrivePID/kI", "double");
+    RegisterDataEntry(log, "Drive/DrivePID/kD", "double");
+
+    RegisterDataEntry(log, "Drive/traj/t", "double");
+    RegisterDataEntry(log, "Drive/traj/x", "double");
+    RegisterDataEntry(log, "Drive/traj/y", "double");
+    RegisterDataEntry(log, "Drive/traj/theta", "double");
+    RegisterDataEntry(log, "Drive/traj/k", "double");
+    RegisterDataEntry(log, "Drive/traj/v", "double");
+    RegisterDataEntry(log, "Drive/traj/a", "double");
+}
+
+void Drivetrain::LogDataEntries(wpi::log::DataLog &log)
+{
+    log.AppendDouble(GetDataEntry("Drive/cmd/fwd"), cmd_fwd, 0);
+    log.AppendDouble(GetDataEntry("Drive/cmd/rot"), cmd_rot, 0);
+
+    log.AppendDouble(GetDataEntry("Drive/cmd/vx"), cmd_vx, 0);
+    log.AppendDouble(GetDataEntry("Drive/cmd/vw"), cmd_vw, 0);
+
+    log.AppendDouble(GetDataEntry("Drive/cmd/vl"), cmd_vl, 0);
+    log.AppendDouble(GetDataEntry("Drive/cmd/vr"), cmd_vr, 0);
+
+    FalconEntryHelper(log, m_driveL0, "Drive/left1");
+    FalconEntryHelper(log, m_driveL1, "Drive/left2");
+    FalconEntryHelper(log, m_driveL2, "Drive/left3");
+    FalconEntryHelper(log, m_driveR0, "Drive/right1");
+    FalconEntryHelper(log, m_driveR1, "Drive/right2");
+    FalconEntryHelper(log, m_driveR2, "Drive/right3");
+
+    auto yaw =  GetYaw();
+    log.AppendDouble(GetDataEntry("Drive/IMU/yaw"), frc::Rotation2d(yaw.Cos(), yaw.Sin()).Radians().value(), 0);
+
+    auto pose = GetPose();
+    log.AppendDouble(GetDataEntry("Drive/pose/x"), pose.X().value(), 0);
+    log.AppendDouble(GetDataEntry("Drive/pose/y"), pose.Y().value(), 0);
+    log.AppendDouble(GetDataEntry("Drive/pose/yaw"), pose.Rotation().Radians().value(), 0);
+
+    log.AppendDouble(GetDataEntry("Drive/YawPID/kP"), m_yawPID.GetP(), 0);
+    log.AppendDouble(GetDataEntry("Drive/YawPID/kI"), m_yawPID.GetI(), 0);
+    log.AppendDouble(GetDataEntry("Drive/YawPID/kD"), m_yawPID.GetD(), 0);
+    log.AppendDouble(GetDataEntry("Drive/YawPID/kSP"), m_yawPID.GetSetpoint(), 0);
+
+    log.AppendDouble(GetDataEntry("Drive/DrivePID/kP"), m_leftPIDController.GetP(), 0);
+    log.AppendDouble(GetDataEntry("Drive/DrivePID/kI"), m_leftPIDController.GetI(), 0);
+    log.AppendDouble(GetDataEntry("Drive/DrivePID/kD"), m_leftPIDController.GetD(), 0);
+
+    log.AppendDouble(GetDataEntry("Drive/traj/t"), reference.t.value(), 0);
+    log.AppendDouble(GetDataEntry("Drive/traj/x"), reference.pose.X().value(), 0);
+    log.AppendDouble(GetDataEntry("Drive/traj/y"), reference.pose.Y().value(), 0);
+    log.AppendDouble(GetDataEntry("Drive/traj/theta"), reference.pose.Rotation().Radians().value(), 0);
+    log.AppendDouble(GetDataEntry("Drive/traj/k"), reference.curvature.value(), 0);
+    log.AppendDouble(GetDataEntry("Drive/traj/v"), reference.velocity.value(), 0);
+    log.AppendDouble(GetDataEntry("Drive/traj/a"), reference.acceleration.value(), 0);
 }

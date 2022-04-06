@@ -32,6 +32,8 @@
 #include "units/time.h"                             // for operator""_s, sec...
 #include "units/velocity.h"                         // for meters_per_second_t
 #include "units/voltage.h"                          // for operator""_V, volt_t
+#include <wpi/timestamp.h>
+#include <iostream>
 
 using namespace pathplanner;
 
@@ -91,6 +93,7 @@ void Robot::RobotInit()
   // Logging Stuff
 #ifdef LOGGER
   frc::DataLogManager::LogNetworkTables(true);
+  IO.RegisterDataEntries(log);
   // arg bool - log joystick data if true
   frc::DriverStation::StartDataLog(log, true);
 #endif // LOGGER
@@ -99,24 +102,6 @@ void Robot::RobotInit()
   {
     IO.shooter.ZeroTurret();
   }
-
-  // led1.SetWriteBufferMode(frc::SerialPort::WriteBufferMode::kFlushOnAccess);
-  // led2.SetWriteBufferMode(frc::SerialPort::WriteBufferMode::kFlushOnAccess);
-  // led3.SetWriteBufferMode(frc::SerialPort::WriteBufferMode::kFlushOnAccess);
-  // led4.SetWriteBufferMode(frc::SerialPort::WriteBufferMode::kFlushOnAccess);
-  // led5.SetWriteBufferMode(frc::SerialPort::WriteBufferMode::kFlushOnAccess);
-
-  // led1.SetWriteBufferSize(64);
-  // led2.SetWriteBufferSize(64);
-  // led3.SetWriteBufferSize(64);
-  // led4.SetWriteBufferSize(64);
-  // led5.SetWriteBufferSize(64);
-
-  // led1.EnableTermination();
-  // led2.EnableTermination();
-  // led3.EnableTermination();
-  // led4.EnableTermination();
-  // led5.EnableTermination();
 
   localization_flag_entry.SetDefaultBoolean(false);
 }
@@ -197,6 +182,14 @@ void Robot::RobotPeriodic()
 
     // }
   }
+
+  // Logging Stuff
+#ifdef LOGGER
+  uint64_t t0 = wpi::Now();
+  IO.LogDataEntries(log);
+  uint64_t t1 = wpi::Now();
+  // std::cout << "time to log: " << t1 - t0 << "us" << std::endl;
+#endif // LOGGER
 }
 
 void Robot::AutonomousInit()
@@ -204,6 +197,7 @@ void Robot::AutonomousInit()
   autoprograms.Init();
   IO.drivetrain.SetBrakeMode();
   IO.rjVision.SetLED(false);
+  IO.shooter.SetTurretBrakeMode();
 }
 
 void Robot::AutonomousPeriodic()
@@ -215,6 +209,7 @@ void Robot::TeleopInit()
 {
   IO.drivetrain.SetBrakeMode();
   IO.rjVision.SetLED(false);
+  IO.shooter.SetTurretBrakeMode();
 }
 
 void Robot::TeleopPeriodic()
@@ -584,6 +579,7 @@ void Robot::DisabledPeriodic()
   if (brakeTimer.Get() > 3.0_s)
   {
     IO.drivetrain.SetCoastMode();
+    IO.shooter.SetTurretCoastMode();
     IO.rjVision.SetLED(false);
   }
 }

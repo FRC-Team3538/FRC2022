@@ -1,15 +1,16 @@
 #include "subsystems/RJVisionPipeline.hpp"
 
-#include <wpi/timestamp.h>                         // for Now
-#include <cmath>                                   // for pow, tan
 
-#include "frc/Timer.h"                             // for Timer
 #include "frc/smartdashboard/SmartDashboard.h"     // for SmartDashboard
+#include "frc/Timer.h"                             // for Timer
 #include "networktables/NetworkTable.h"            // for NetworkTable
 #include "networktables/NetworkTableInstance.h"    // for NetworkTableInstance
 #include "networktables/NetworkTableInstance.inc"  // for NetworkTableInstan...
 #include "units/angle.h"                           // for degree_t, radian_t
 #include "units/length.h"                          // for inch_t, operator""_in
+#include <cmath>                                   // for pow, tan
+#include <wpi/DataLog.h>
+#include <wpi/timestamp.h>                         // for Now
 
 using namespace nt; 
 
@@ -295,4 +296,17 @@ namespace vision
     {
         turretAngle = angle;
     }
+
+    void RJVisionPipeline::RegisterDataEntries(wpi::log::DataLog &log)
+    {
+        RegisterDataEntry(log, "dx", "double");
+        RegisterDataEntry(log, "Vision Dist", "double");
+    }
+    
+    void RJVisionPipeline::LogDataEntries(wpi::log::DataLog &log)
+    {
+        log.AppendDouble(GetDataEntry("dx"), dx, 0);
+        log.AppendDouble(GetDataEntry("Vision Dist"), estDist.value(), 0);
+    }
+    
 } // namespace vision
