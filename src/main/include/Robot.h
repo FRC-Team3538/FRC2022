@@ -21,6 +21,7 @@
 #include "units/length.h"                       // for operator""_in, operat...
 #include "lib/Logging.h"
 #include "frc/DataLogManager.h"
+#include <iostream>
 
 class Robot : public frc::TimedRobot
 {

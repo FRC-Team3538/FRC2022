@@ -4,34 +4,34 @@
 
 #include "Robot.h"
 
-#include <frc/DriverStation.h>                      // for DriverStation
-#include <frc/livewindow/LiveWindow.h>              // for LiveWindow
-#include <cmath>                                    // for abs, fabs
-#include <exception>                                // for exception
-#include <string>                                   // for string
+#include <frc/DriverStation.h>         // for DriverStation
+#include <frc/livewindow/LiveWindow.h> // for LiveWindow
+#include <cmath>                       // for abs, fabs
+#include <exception>                   // for exception
+#include <string>                      // for string
 
-#include "frc/Errors.h"                             // for RuntimeError
-#include "frc/PowerDistribution.h"                  // for PowerDistribution
-#include "frc/RobotBase.h"                          // for StartRobot
-#include "frc/Watchdog.h"                           // for Watchdog
-#include "frc/smartdashboard/SmartDashboard.h"      // for SmartDashboard
-#include "frc/util/Color.h"                         // for Color
-#include "lib/PS4Controller.hpp"                    // for PS4Controller
-#include "lib/PneumaticHub.hpp"                     // for PneumaticHub
-#include "lib/VectorMath.hpp"                       // for VectorMath
-#include "lib/pathplanner/PathPlannerTrajectory.h"  // for pathplanner
-#include "networktables/NetworkTableEntry.inc"      // for NetworkTableEntry...
-#include "rev/ColorSensorV3.h"                      // for ColorSensorV3
-#include "subsystems/Climber.hpp"                   // for Climber, Climber:...
-#include "subsystems/Drivetrain.hpp"                // for Drivetrain
-#include "subsystems/Shooter.hpp"                   // for Shooter, Shooter:...
-#include "units/angular_velocity.h"                 // for operator""_rpm
-#include "units/base.h"                             // for unit_t, operator-
-#include "units/math.h"                             // for abs
-#include "units/pressure.h"                         // for pounds_per_square...
-#include "units/time.h"                             // for operator""_s, sec...
-#include "units/velocity.h"                         // for meters_per_second_t
-#include "units/voltage.h"                          // for operator""_V, volt_t
+#include "frc/Errors.h"                            // for RuntimeError
+#include "frc/PowerDistribution.h"                 // for PowerDistribution
+#include "frc/RobotBase.h"                         // for StartRobot
+#include "frc/Watchdog.h"                          // for Watchdog
+#include "frc/smartdashboard/SmartDashboard.h"     // for SmartDashboard
+#include "frc/util/Color.h"                        // for Color
+#include "lib/PS4Controller.hpp"                   // for PS4Controller
+#include "lib/PneumaticHub.hpp"                    // for PneumaticHub
+#include "lib/VectorMath.hpp"                      // for VectorMath
+#include "lib/pathplanner/PathPlannerTrajectory.h" // for pathplanner
+#include "networktables/NetworkTableEntry.inc"     // for NetworkTableEntry...
+#include "rev/ColorSensorV3.h"                     // for ColorSensorV3
+#include "subsystems/Climber.hpp"                  // for Climber, Climber:...
+#include "subsystems/Drivetrain.hpp"               // for Drivetrain
+#include "subsystems/Shooter.hpp"                  // for Shooter, Shooter:...
+#include "units/angular_velocity.h"                // for operator""_rpm
+#include "units/base.h"                            // for unit_t, operator-
+#include "units/math.h"                            // for abs
+#include "units/pressure.h"                        // for pounds_per_square...
+#include "units/time.h"                            // for operator""_s, sec...
+#include "units/velocity.h"                        // for meters_per_second_t
+#include "units/voltage.h"                         // for operator""_V, volt_t
 
 using namespace pathplanner;
 
@@ -205,6 +205,7 @@ void Robot::TeleopInit()
 {
   IO.drivetrain.SetBrakeMode();
   IO.rjVision.SetLED(false);
+  IO.drivetrain.ResetOdometry(frc::Pose2d(150_in, 159.5_in, frc::Rotation2d(180.0_deg)));  // FOR TESTING!!! REMOVE IF I FORGOR
 }
 
 void Robot::TeleopPeriodic()
@@ -223,10 +224,10 @@ void Robot::TeleopPeriodic()
 
     climberTimerOS = false;
     manualJog = false;
-    
+
     // Disable Intake Deploy While shooting
     // IO.shooter.SetIntakeState(Shooter::Position::Deployed);
-    
+
     intakeTimer.Start();
     intakeTimer.Reset();
 
@@ -253,8 +254,8 @@ void Robot::TeleopPeriodic()
       // Calculate Turret
       // std::cout << adjustedShotVector.GetTheta().value() << std::endl;
       bool turretAtAngle;
-      
-      if(false)//units::math::abs(driveVel) < 7_fps)
+
+      if (false) // units::math::abs(driveVel) < 7_fps)
         turretAtAngle = IO.shooter.SetTurretAngle(adjustedShotVector.GetTheta(), 1.0_deg);
       else
         turretAtAngle = IO.shooter.SetTurretAngle(data.turretAngle, 1.0_deg);
@@ -269,6 +270,15 @@ void Robot::TeleopPeriodic()
       // if(turretAtAngle)
       //   elShoot = true;
       shoot = turretAtAngle && (units::math::abs(shotStat.shooterRPM - IO.shooter.GetShooterRPM()) < 150.0_rpm);
+
+      // if(turretAtAngle)
+      // {
+      //   VectorMath robotPos = VectorMath{data.distance, (IO.drivetrain.GetPose().Rotation().Degrees() + data.turretAngle + 180.0_deg)};
+
+      //   frc::Pose2d robotPosition = frc::Pose2d(frc::Translation2d(robotPos.GetX(), robotPos.GetY()), IO.drivetrain.GetPose().Rotation());
+      //   IO.drivetrain.ResetOdometry(robotPosition);
+      // }
+
       //}
     }
     double fwd = -deadband(IO.mainController.GetLeftY());
@@ -285,9 +295,9 @@ void Robot::TeleopPeriodic()
     vision::RJVisionPipeline::visionData data = IO.rjVision.Run();
     if (data.filled)
     {
-      //std::cout << data.turretAngle.value() << std::endl;
+      // std::cout << data.turretAngle.value() << std::endl;
 
-      //units::meters_per_second_t driveVel = IO.drivetrain.GetVelocity();
+      // units::meters_per_second_t driveVel = IO.drivetrain.GetVelocity();
 
       // vision::RJVisionPipeline::visionData lookAhead = IO.rjVision.LookAhead(data, prevData);
       // if (lookAhead.filled)
@@ -321,14 +331,19 @@ void Robot::TeleopPeriodic()
     VectorMath robotLocation = VectorMath{IO.drivetrain.GetPose().Translation()};
     units::degree_t robotAngle = IO.drivetrain.GetPose().Rotation().Degrees();
 
+    std::cout << robotAngle.value() << ", ";
+    std::cout << robotLocation.GetX().value() << ", " << robotLocation.GetY().value() << ", ";
+
     units::degree_t turretAngle = -((robotAngle - 180.0_deg) - (hubLocation - robotLocation).GetTheta()); // Get the Estimated Turret Angle
 
-    if (turretAngle > 180_deg)
+    std::cout << turretAngle.value() << std::endl;
+
+    while (turretAngle > 180_deg)
     {
       turretAngle -= 360_deg;
     }
 
-    if (turretAngle < -180_deg)
+    while (turretAngle < -180_deg)
     {
       turretAngle += 360_deg;
     }
@@ -378,7 +393,8 @@ void Robot::TeleopPeriodic()
     }
     else
     {
-      IO.shooter.SetTurretAngle(0.0_deg, 1_deg);
+      IO.shooter.SetTurretAngle(turretAngle, 0.25_deg);
+      // IO.shooter.SetTurretAngle(0.0_deg, 1_deg);
       climberTimerOS = false;
     }
 
@@ -503,7 +519,7 @@ void Robot::TeleopPeriodic()
   //
 
   // if intaking balls and color sensor is connected
-  if (false)//(units::math::abs(intakeCmd) > 0.0_V && colorSensor.IsConnected())
+  if (false) //(units::math::abs(intakeCmd) > 0.0_V && colorSensor.IsConnected())
   {
 
     // If a ball is present
