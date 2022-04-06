@@ -28,15 +28,20 @@ namespace vision
         // table->PutNumber("ledMode", 1.0);
         table->PutNumber("pipeline", 0.0);
         table->PutNumber("camMode", 0.0);
-        // camera.SetPipelineIndex(0);
-        // camera.SetDriverMode(false);
+        camera.SetPipelineIndex(0);
+        camera.SetDriverMode(false);
     }
 
     void RJVisionPipeline::Periodic()
     {
-        dx = -(table->GetNumber("tx", 0.0));
-        dy = table->GetNumber("ty", 0.0);
-        tv = table->GetNumber("tv", 0.0);
+        auto result = camera.GetLatestResult();
+        auto target = result.GetBestTarget();
+        dx = -target.GetYaw();
+        dy = target.GetPitch();
+        tv = result.HasTargets();
+        // dx = -(table->GetNumber("tx", 0.0));
+        // dy = table->GetNumber("ty", 0.0);
+        // tv = table->GetNumber("tv", 0.0);
 
         alpha = frc::SmartDashboard::GetNumber("ALPHA", 0.2);
         N = frc::SmartDashboard::GetNumber("N", 10);
@@ -187,7 +192,8 @@ namespace vision
         RJVisionPipeline::photonVisionResult result;
 
         result.read_time = units::microsecond_t{(double) wpi::Now()};
-        // result.base_result = camera.GetLatestResult();
+        result.base_result = camera.GetLatestResult();
+
         return result;
     }
 
@@ -271,20 +277,20 @@ namespace vision
     {
         if (enable)
         {
-            // camera.SetLEDMode(photonlib::LEDMode::kOn);
+            camera.SetLEDMode(photonlib::LEDMode::kOn);
             table->PutNumber("ledMode", 3.0); // Force On
         }
         else
         {
-            // camera.SetLEDMode(photonlib::LEDMode::kOff);
+            camera.SetLEDMode(photonlib::LEDMode::kOff);
             table->PutNumber("ledMode", 1.0); // Force Off
         }
     }
 
     void RJVisionPipeline::TakeSnapshot(uint8_t numberOfSnaps)
     {
-        // camera.TakeInputSnapshot();
-        // camera.TakeOutputSnapshot();
+        camera.TakeInputSnapshot();
+        camera.TakeOutputSnapshot();
         table->PutNumber("snapshot", (double)numberOfSnaps);
         // snapTime = units::second_t{(double)numberOfSnaps / 2.0};
         // snapShotTimer.Reset();
@@ -294,5 +300,15 @@ namespace vision
     void RJVisionPipeline::SetTurretAngle(units::degree_t angle)
     {
         turretAngle = angle;
+    }
+    void RJVisionPipeline::AddSimulationTarget(frc::Pose2d targetPose, units::meter_t target_elevation, units::meter_t target_width, units::meter_t target_height)
+    {
+        simVision.AddSimVisionTarget(photonlib::SimVisionTarget{targetPose, target_elevation, target_width, target_height});
+    }
+
+    void RJVisionPipeline::Simulate(frc::Transform2d newCameraTransform, frc::Pose2d robotPose)
+    {
+        simVision.MoveCamera(newCameraTransform, 31_in, 33_deg);
+        simVision.ProcessFrame(robotPose);
     }
 } // namespace vision

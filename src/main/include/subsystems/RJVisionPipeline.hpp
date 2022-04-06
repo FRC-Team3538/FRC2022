@@ -1,17 +1,28 @@
 #pragma once
 
+
+#include "frc/smartdashboard/SmartDashboard.h"
+#include "networktables/NetworkTable.h"
+#include "networktables/NetworkTableEntry.h"
+#include "networktables/NetworkTableInstance.h"
+#include "photonlib/PhotonPipelineResult.h"  // for PhotonPipelineResult
+#include "Subsystem.hpp"                     // for Subsystem
+#include "subsystems/Shooter.hpp"
+#include "units/base.h"                      // for operator*
+#include "units/time.h"                      // for second_t, millisecond_t
+#include <cmath>
 #include <frc/Timer.h>                       // for Timer
+#include <iostream>
+#include <list>                              // for list
+#include <memory>                            // for shared_ptr
+#include <photonlib/PhotonCamera.h>
+#include <photonlib/SimVisionSystem.h>
 #include <stdint.h>                          // for uint8_t
 #include <units/angle.h>                     // for degree_t, operator""_deg
 #include <units/angular_velocity.h>          // for revolutions_per_minute_t
 #include <units/length.h>                    // for inch_t, operator""_in
-#include <list>                              // for list
-#include <memory>                            // for shared_ptr
-#include "Subsystem.hpp"                     // for Subsystem
-#include "photonlib/PhotonPipelineResult.h"  // for PhotonPipelineResult
-#include "units/base.h"                      // for operator*
-#include "units/time.h"                      // for second_t, millisecond_t
 namespace nt { class NetworkTable; }
+
 
 namespace vision
 {
@@ -67,12 +78,13 @@ namespace vision
         void SetFilterType(FilterType setFilter);
         void SetTurretAngle(units::degree_t turretAngle);
 
+        void AddSimulationTarget(frc::Pose2d targetPose, units::meter_t target_elevation, units::meter_t target_width, units::meter_t target_height);
+        void Simulate(frc::Transform2d newCameraTransform, frc::Pose2d robotPose);
+
     private:
         units::degree_t turretAngle;
         units::inch_t estDist = 0.0_in;
 
-        // TODO: ensure correctness @Jordan
-        // photonlib::PhotonCamera camera{""};
         std::shared_ptr<nt::NetworkTable> table;
         double dy, dx, tv;
         frc::Timer lightOn;
@@ -111,5 +123,13 @@ namespace vision
 
         frc::Timer spinUpTimer;
         bool spinUpOS = false;
+
+        // TODO: ensure correctness @Jordan
+        photonlib::PhotonCamera camera{""};
+        photonlib::SimVisionSystem simVision{
+            "photonVision", 67.65_deg, 33_deg, 
+            frc::Transform2d{}, 31_in, 6_m, 
+            320, 240, 10
+        };
     };
 } // namespace vision

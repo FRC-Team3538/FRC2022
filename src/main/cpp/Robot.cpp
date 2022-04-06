@@ -165,7 +165,8 @@ void Robot::RobotPeriodic()
     //   auto turret_to_robot = frc::Transform2d{frc::Translation2d{turret_to_center_robot_distance, 0_in}, frc::Rotation2d{}};
     //   auto camera_to_robot = camera_to_turret + turret_to_facing_robot_north + turret_to_robot;
 
-    //   auto distance = photonlib::PhotonUtils::CalculateDistanceToTarget(camera_height, target_height, camera_pitch, target_pitch);
+
+    //   auto distance = photonlib::PhotonUtils::CalculateDistanceToTarget(camera_height, target_elevation, camera_pitch, target_pitch);
     //   auto camera_to_target_translation = photonlib::PhotonUtils::EstimateCameraToTargetTranslation(distance, target_yaw);
     //   // I don't know exactly why turret_facing needs to be negative but it does.
     //   auto camera_to_target_transform = photonlib::PhotonUtils::EstimateCameraToTarget(camera_to_target_translation, hub_edge_facing_robot, frc::Rotation2d{-turret_facing});
@@ -298,7 +299,7 @@ void Robot::TeleopPeriodic()
 
         // Calculate Turret
         //std::cout << adjustedShotVector.GetTheta().value() << std::endl;
-        //bool turretAtAngle = IO.shooter.SetTurretAngle(data.turretAngle, 0.5_deg);
+        IO.shooter.SetTurretAngle(data.turretAngle, 0.5_deg);
     }
     double fwd = -deadband(IO.mainController.GetLeftY());
     double rot = -deadband(IO.mainController.GetRightX());
@@ -636,11 +637,54 @@ void Robot::DisabledPeriodic()
   }
 }
 
-void Robot::SimulationInit() {}
+void Robot::SimulationInit() {
+  // Add sim targets, 8 placed around the hub?
+  IO.rjVision.AddSimulationTarget(
+    center_hub + frc::Transform2d{frc::Translation2d{}, frc::Rotation2d{0_deg}} 
+      + frc::Transform2d{frc::Translation2d{hub_upper_radius, 0_ft}, frc::Rotation2d{}}, 
+    target_elevation, 40_in, 3_in);
+  IO.rjVision.AddSimulationTarget(
+    center_hub + frc::Transform2d{frc::Translation2d{}, frc::Rotation2d{45_deg}} 
+      + frc::Transform2d{frc::Translation2d{hub_upper_radius, 0_ft}, frc::Rotation2d{}}, 
+    target_elevation, 40_in, 3_in);
+  IO.rjVision.AddSimulationTarget(
+    center_hub + frc::Transform2d{frc::Translation2d{}, frc::Rotation2d{90_deg}} 
+      + frc::Transform2d{frc::Translation2d{hub_upper_radius, 0_ft}, frc::Rotation2d{}}, 
+    target_elevation, 40_in, 3_in);
+  IO.rjVision.AddSimulationTarget(
+    center_hub + frc::Transform2d{frc::Translation2d{}, frc::Rotation2d{135_deg}} 
+      + frc::Transform2d{frc::Translation2d{hub_upper_radius, 0_ft}, frc::Rotation2d{}}, 
+    target_elevation, 40_in, 3_in);
+  IO.rjVision.AddSimulationTarget(
+    center_hub + frc::Transform2d{frc::Translation2d{}, frc::Rotation2d{180_deg}} 
+      + frc::Transform2d{frc::Translation2d{hub_upper_radius, 0_ft}, frc::Rotation2d{}}, 
+    target_elevation, 40_in, 3_in);
+  IO.rjVision.AddSimulationTarget(
+    center_hub + frc::Transform2d{frc::Translation2d{}, frc::Rotation2d{225_deg}} 
+      + frc::Transform2d{frc::Translation2d{hub_upper_radius, 0_ft}, frc::Rotation2d{}}, 
+    target_elevation, 40_in, 3_in);
+  IO.rjVision.AddSimulationTarget(
+    center_hub + frc::Transform2d{frc::Translation2d{}, frc::Rotation2d{270_deg}} 
+      + frc::Transform2d{frc::Translation2d{hub_upper_radius, 0_ft}, frc::Rotation2d{}}, 
+    target_elevation, 40_in, 3_in);
+  IO.rjVision.AddSimulationTarget(
+    center_hub + frc::Transform2d{frc::Translation2d{}, frc::Rotation2d{315_deg}} 
+      + frc::Transform2d{frc::Translation2d{hub_upper_radius, 0_ft}, frc::Rotation2d{}}, 
+    target_elevation, 40_in, 3_in);
+}
 
 void Robot::SimulationPeriodic()
 {
   IO.drivetrain.SimulationPeriodic();
+
+  auto turret_heading = IO.shooter.GetTurretAngle();
+
+  // negative because we're going backward
+  auto camera_to_turret = frc::Transform2d{frc::Translation2d{-camera_to_center_turret_distance, 0_in}, frc::Rotation2d{}};
+  auto turret_to_facing_robot_north = frc::Transform2d{frc::Translation2d{}, frc::Rotation2d{180_deg - turret_heading}};
+
+  auto camera_to_robot = camera_to_turret + turret_to_facing_robot_north + turret_to_robot;
+  IO.rjVision.Simulate(camera_to_robot.Inverse(), IO.drivetrain.GetPose());
 }
 
 void Robot::TestInit()
