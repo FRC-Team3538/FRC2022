@@ -106,11 +106,11 @@ private:
   // frc::SerialPort led4{9600, frc::SerialPort::Port::kOnboard};
   // frc::SerialPort led5{9600, frc::SerialPort::Port::kMXP};
 
-  static constexpr auto camera_height = 31_in;
+  static constexpr auto camera_height = 31_in; // TODO: 40.63_in on NEW SHOOTER
   static constexpr auto target_elevation = 103.25_in;
   static constexpr auto camera_pitch = 33_deg;
 
-  static constexpr auto camera_to_center_turret_distance = 8.356_in * -1;
+  static constexpr auto camera_to_center_turret_distance = 8.356_in * -1; // TODO: +2.89_in on NEW SHOOTER
   static constexpr auto turret_to_center_robot_distance = 2_in;
 
   // negative because the camera points away from the turret
