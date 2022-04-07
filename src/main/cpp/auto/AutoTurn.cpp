@@ -49,7 +49,8 @@ void AutoTurn::Init()
     config.AddConstraint(frc::DifferentialDriveKinematicsConstraint{IO.drivetrain.GetKinematics(), maxLinearVel});
     config.SetReversed(false);
 
-    m_trajectory = rj::AutoHelper::LoadTrajectory("92 - Turning Left and Right", &config);
+    auto trajectories = rj::AutoHelper::LoadTrajectorySplit("92 - Turning Left and Right", &config);
+    m_trajectory = trajectories[0] + trajectories[1];
 
     m_autoTimer.Reset();
     m_autoTimer.Start();

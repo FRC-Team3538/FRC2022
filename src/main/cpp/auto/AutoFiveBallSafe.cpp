@@ -81,9 +81,11 @@ void AutoFiveBallSafe::Init()
     config.AddConstraint(frc::DifferentialDriveKinematicsConstraint{IO.drivetrain.GetKinematics(), maxLinearVel});
     config.SetReversed(false);
 
-    m_trajectory_first = rj::AutoHelper::LoadTrajectory("06 - 5 Ball Safe 1", &config);
-    m_trajectory_second = rj::AutoHelper::LoadTrajectory("06 - 5 Ball Safe 2", &config);
-    m_trajectory_third = rj::AutoHelper::LoadTrajectory("06 - 5 Ball Safe 3", &config);
+    auto trajectories = rj::AutoHelper::LoadTrajectorySplit("06 - 5 Ball Safe", &config);
+
+    m_trajectory_first = trajectories[0];
+    m_trajectory_second = trajectories[1] + trajectories[2];
+    m_trajectory_third = trajectories[3];
 
     std::cout << m_trajectory_first.TotalTime().value() + m_trajectory_second.TotalTime().value() + m_trajectory_third.TotalTime().value() << std::endl;
 

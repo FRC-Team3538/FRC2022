@@ -50,7 +50,9 @@ void AutoBackForward::Init()
     config.AddConstraint(frc::DifferentialDriveKinematicsConstraint{IO.drivetrain.GetKinematics(), maxLinearVel});
     config.SetReversed(false);
 
-    m_trajectory = rj::AutoHelper::LoadTrajectory("90 - Forward Backward", &config);
+    auto trajectories = rj::AutoHelper::LoadTrajectorySplit("90 - Forward Backward", &config);
+
+    m_trajectory = trajectories[0] + trajectories[1];
 
     m_autoTimer.Reset();
     m_autoTimer.Start();

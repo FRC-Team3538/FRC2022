@@ -85,19 +85,19 @@ void AutoFiveBallSneaky::Init()
     if (frc::DriverStation::GetAlliance() == frc::DriverStation::Alliance::kBlue)
     {
         // TODO clone sneaky path
-        m_trajectories = rj::AutoHelper::LoadTrajectorySplit("07 - 5 Ball Sneaky", &config);
+        auto trajectories = rj::AutoHelper::LoadTrajectorySplit("07 - 5 Ball Sneaky", &config);
 
-        m_trajectory_first = m_trajectories[0];
-        m_trajectory_second = m_trajectories[1];
-        m_trajectory_third = m_trajectories[2] + m_trajectories[3];
+        m_trajectory_first = trajectories[0];
+        m_trajectory_second = trajectories[1];
+        m_trajectory_third = trajectories[2] + trajectories[3];
     }
     else
     {
-        m_trajectories = rj::AutoHelper::LoadTrajectorySplit("07 - 5 Ball Sneaky", &config);
+        auto trajectories = rj::AutoHelper::LoadTrajectorySplit("07 - 5 Ball Sneaky", &config);
 
-        m_trajectory_first = m_trajectories[0];
-        m_trajectory_second = m_trajectories[1];
-        m_trajectory_third = m_trajectories[2] + m_trajectories[3];
+        m_trajectory_first = trajectories[0];
+        m_trajectory_second = trajectories[1];
+        m_trajectory_third = trajectories[2] + trajectories[3];
     }
 
     IO.drivetrain.ResetOdometry(m_trajectory_first.InitialPose());

@@ -54,7 +54,7 @@ void AutoTwoBall::Init()
     config.AddConstraint(frc::DifferentialDriveKinematicsConstraint{IO.drivetrain.GetKinematics(), maxLinearVel});
     config.SetReversed(false);
 
-    m_trajectory = rj::AutoHelper::LoadTrajectory("02 - Two Ball", &config);
+    m_trajectory = rj::AutoHelper::LoadTrajectorySplit("02 - Two Ball", &config)[0];
 
     m_autoTimer.Reset();
     m_autoTimer.Start();

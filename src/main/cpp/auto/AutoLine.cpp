@@ -50,7 +50,7 @@ void AutoLine::Init()
     config.AddConstraint(frc::DifferentialDriveKinematicsConstraint{IO.drivetrain.GetKinematics(), maxLinearVel});
     config.SetReversed(false);
 
-    m_trajectory = rj::AutoHelper::LoadTrajectory("01 - Line", &config);
+    m_trajectory = rj::AutoHelper::LoadTrajectorySplit("01 - Line", &config)[0];
 
     m_autoTimer.Reset();
     m_autoTimer.Start();

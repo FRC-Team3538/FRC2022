@@ -105,8 +105,10 @@ void AutoFourBall::Init()
     config.AddConstraint(frc::DifferentialDriveKinematicsConstraint{IO.drivetrain.GetKinematics(), maxLinearVel});
     config.SetReversed(false);
 
-    m_trajectory_first = rj::AutoHelper::LoadTrajectory("04 - Four Ball Pt 1", &config);
-    m_trajectory_second = rj::AutoHelper::LoadTrajectory("04 - Four Ball Pt 2", &config);
+    auto trajectories = rj::AutoHelper::LoadTrajectorySplit("04 - Four Ball", &config);
+
+    m_trajectory_first = trajectories[0];
+    m_trajectory_second = trajectories[1] + trajectories[2];
 
     IO.drivetrain.ResetOdometry(m_trajectory_first.InitialPose());
 
