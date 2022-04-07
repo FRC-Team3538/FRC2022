@@ -58,7 +58,7 @@ namespace vision
 
         RJVisionPipeline::visionData telemetry;
 
-        if (tv != 0.0)
+        if (tv)
         {
             switch (filter)
             {
@@ -87,6 +87,7 @@ namespace vision
                     yList.push_back(dy);
                     telemetry.filled = false;
                 }
+                //std::cout << "AHHHHHHHH" << std::endl;
             }
             break;
 
@@ -264,12 +265,12 @@ namespace vision
         // For now, the assumption is that the dy remains accurate despite the dx changing
         // Might need to change that for rootin, tootin, scootin, n shootin
 
-        deltaX *= deltaX < 0.0_deg ? -1.0 : 1.0;
+        deltaX *= deltaX > 0.0_deg ? -1.0 : 1.0;
 
-        deltaY += units::degree_t{-0.007 + (0.0564 * pow(deltaX.value(), 1)) + (-0.01538 * pow(deltaX.value(), 2)) + (0.0003375 * pow(deltaX.value(), 3))};
+        deltaY += units::degree_t{0.007776 + (-0.0281 * pow(deltaX.value(), 1)) + (-0.002974 * pow(deltaX.value(), 2)) + (-0.00027083 * pow(deltaX.value(), 3))};
 
         units::inch_t dist = deltaH / (tan((deltaY.value() + cameraAngle.value()) * (3.1415 / 180.0)));
-        estDist = dist + 17.0_in;
+        estDist = dist;
         return estDist;
     }
 

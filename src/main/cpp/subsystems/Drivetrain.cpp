@@ -198,6 +198,7 @@ frc::Pose2d Drivetrain::GetPose() const
 {
     if (localization_flag_entry.GetBoolean(false) )
     {
+        //std::cout << units::inch_t{m_poseEstimator.GetEstimatedPosition().X()}.value() << ", " << m_poseEstimator.GetEstimatedPosition().Rotation().Degrees().value() << std::endl;
         return m_poseEstimator.GetEstimatedPosition();
     }
     else 

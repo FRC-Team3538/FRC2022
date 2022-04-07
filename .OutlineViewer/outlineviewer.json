@@ -1,7 +1,7 @@
 {
   "NetworkTables Settings": {
     "mode": "Client",
-    "serverTeam": "10.35.38.2"
+    "serverTeam": "10.83.32.2"
   },
   "SmartDashboard": {
     "open": true,
@@ -10,6 +10,12 @@
     }
   },
   "limelight": {
+    "open": true
+  },
+  "photonvision": {
+    "gloworm": {
+      "open": true
+    },
     "open": true
   }
 }

@@ -86,7 +86,8 @@ namespace vision
         units::inch_t estDist = 0.0_in;
 
         std::shared_ptr<nt::NetworkTable> table;
-        double dy, dx, tv;
+        double dy, dx;
+        bool tv;
         frc::Timer lightOn;
 
         bool turretAngleOS = false;
@@ -100,10 +101,10 @@ namespace vision
         units::second_t snapTime;
 
         // Angle of elevation of camera
-        const units::degree_t cameraAngle = 33.0_deg;
+        const units::degree_t cameraAngle = 35.0_deg; //33
 
         // Distance between camera lens and vision target midpoint
-        const units::inch_t deltaH = 68.0_in;
+        const units::inch_t deltaH = 61.0_in; //68
 
         // Filter Stuff
         std::list<double> xList;
@@ -125,7 +126,7 @@ namespace vision
         bool spinUpOS = false;
 
         // TODO: ensure correctness @Jordan
-        photonlib::PhotonCamera camera{""};
+        photonlib::PhotonCamera camera{"gloworm"};
         photonlib::SimVisionSystem simVision{
             "photonVision", 67.65_deg, 33_deg, 
             frc::Transform2d{}, 31_in, 6_m, 

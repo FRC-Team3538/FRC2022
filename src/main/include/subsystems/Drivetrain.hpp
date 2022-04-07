@@ -45,6 +45,7 @@
 #include <wpi/sendable/SendableBuilder.h>
 #include <wpi/sendable/SendableHelper.h>                    // for SendableH...
 #include <wpi/sendable/SendableRegistry.h>
+#include <iostream>
 
 namespace frc {
 class FieldObject2d;

@@ -46,6 +46,7 @@ public:
 
 private:
 
+  void visionLocalize();
   double deadband(double val, double min = 0.10, double max = 1.0);
 
   Robotmap IO;
