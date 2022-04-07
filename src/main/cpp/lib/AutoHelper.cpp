@@ -149,7 +149,6 @@ namespace rj
                     break;
                 }
                 current_path.push_back(path[i]);
-                std::cout << path[i].first.X().value() << "," << path[i].first.Y().value() << "," << path[i].first.Rotation().Radians().value() << "," << path[i].second.value() << std::endl;
             }
 
             // final waypoint
@@ -157,8 +156,6 @@ namespace rj
             {
                 break;
             }
-            std::cout << "st: " << current_path[0].first.X().value() << "," << current_path[0].first.Y().value() << " -> " << current_path[current_path.size() - 1].first.X().value() << "," << current_path[current_path.size() - 1].first.Y().value() << std::endl;
-            std::cout << "reversed: " << (config->IsReversed() ^ invert) << std::endl;
             auto current_traj = frc::TrajectoryParameterizer::TimeParameterizeTrajectory(current_path, config->Constraints(), config->StartVelocity(), config->EndVelocity(), config->MaxVelocity(), config->MaxAcceleration(), config->IsReversed() ^ invert);
 
             std::cout << "time for segment: " << current_traj.TotalTime().value() << std::endl;
