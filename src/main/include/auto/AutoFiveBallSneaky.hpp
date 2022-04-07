@@ -35,6 +35,10 @@ private:
 
     frc::Trajectory m_trajectory_first;
     frc::Trajectory m_trajectory_second;
+    frc::Trajectory m_trajectory_third;
+
+    units::second_t m_hpWaitTime = 1.0_s;
+    units::second_t m_shooterTimeout = 1.0_s;
 
     double kVisionAngleTolDefault = 0.5;
     nt::NetworkTableEntry ntVisionAngleTol = frc::SmartDashboard::GetEntry("robot/visionAngleTol");

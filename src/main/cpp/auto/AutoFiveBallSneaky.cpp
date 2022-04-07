@@ -19,6 +19,7 @@
 #include "units/time.h"
 #include "units/velocity.h"
 #include "units/voltage.h"
+#include <frc/DriverStation.h>
 
 // Name for Smart Dash Chooser
 std::string AutoFiveBallSneaky::GetName()
@@ -81,8 +82,23 @@ void AutoFiveBallSneaky::Init()
     config.AddConstraint(frc::DifferentialDriveKinematicsConstraint{IO.drivetrain.GetKinematics(), maxLinearVel});
     config.SetReversed(false);
 
-    m_trajectory_first = rj::AutoHelper::LoadTrajectory("07 - 5 Ball Sneaky 1", &config);
-    m_trajectory_second = rj::AutoHelper::LoadTrajectory("07 - 5 Ball Sneaky 2", &config);
+    if (frc::DriverStation::GetAlliance() == frc::DriverStation::Alliance::kBlue)
+    {
+        // TODO clone sneaky paths
+        m_trajectory_first = rj::AutoHelper::LoadTrajectory("07 - 5 Ball Sneaky 1", &config);
+        m_trajectory_second = rj::AutoHelper::LoadTrajectory("07 - 5 Ball Sneaky 2", &config);
+
+        config.SetReversed(true);
+        m_trajectory_third = rj::AutoHelper::LoadTrajectory("07 - 5 Ball Sneaky 3", &config);
+    }
+    else
+    {
+        m_trajectory_first = rj::AutoHelper::LoadTrajectory("07 - 5 Ball Sneaky 1", &config);
+        m_trajectory_second = rj::AutoHelper::LoadTrajectory("07 - 5 Ball Sneaky 2", &config);
+
+        config.SetReversed(true);
+        m_trajectory_third = rj::AutoHelper::LoadTrajectory("07 - 5 Ball Sneaky 3", &config);
+    }
 
     std::cout << m_trajectory_first.TotalTime().value() + m_trajectory_second.TotalTime().value() << std::endl;
 
@@ -145,6 +161,30 @@ void AutoFiveBallSneaky::Run()
         if (FollowTrajectory(m_trajectory_second)) {
             std::cout << "Second path completed in  " << m_driveTimer.Get().value() << "s" << std::endl;
             NextDriveState();
+        }
+        break;
+    }
+    case 3:
+    {
+        // wait for a configurable period
+        if (m_newDriveState) {
+            IO.drivetrain.Arcade(0.0, 0.0);
+        }
+
+        if (m_driveTimer.Get() > m_hpWaitTime)
+        {
+            std::cout << "Wait @ HP completed in  " << m_driveTimer.Get().value() << "s" << std::endl;
+            NextDriveState();
+        }
+
+        break;
+    }
+    case 4:
+    {
+        // run third path
+        if (FollowTrajectory(m_trajectory_third)) {
+            std::cout << "Third path completed in  " << m_driveTimer.Get().value() << "s" << std::endl;
+            NextDriveState();
             NextShooterState();
         }
         break;
@@ -188,7 +228,7 @@ void AutoFiveBallSneaky::Run()
             IO.shooter.SetShooterRPM(4550_rpm);
         }
 
-        if (FindVisionTarget() || m_shooterTimer.Get() > 2_s)
+        if (FindVisionTarget() || m_shooterTimer.Get() > m_shooterTimeout)
         {
             std::cout << "Aim phase completed in  " << m_shooterTimer.Get().value() << "s" << std::endl;
             NextShooterState();
@@ -213,7 +253,7 @@ void AutoFiveBallSneaky::Run()
             m_shotCount += 1;
         }
 
-        if (m_shotCount >= 2 || m_shooterTimer.Get() > 2_s) {
+        if (m_shotCount >= 2 || m_shooterTimer.Get() > m_shooterTimeout) {
             std::cout << "Shot phase completed in  " << m_shooterTimer.Get().value() << "s" << std::endl;
             NextDriveState();
             NextShooterState();
@@ -242,7 +282,7 @@ void AutoFiveBallSneaky::Run()
             IO.shooter.SetShooterRPM(4500_rpm);
         }
 
-        if (FindVisionTarget() || m_shooterTimer.Get() > 2_s)
+        if (FindVisionTarget() || m_shooterTimer.Get() > m_shooterTimeout)
         {
             std::cout << "Aim phase completed in  " << m_shooterTimer.Get().value() << "s" << std::endl;
             NextShooterState();
@@ -264,9 +304,8 @@ void AutoFiveBallSneaky::Run()
             m_shotCount += 1;
         }
 
-        if (m_shotCount >= 5 || m_shooterTimer.Get() > 2_s) {
+        if (m_shotCount >= 5 || m_shooterTimer.Get() > m_shooterTimeout) {
             std::cout << "Shot phase completed in  " << m_shooterTimer.Get().value() << "s" << std::endl;
-            NextDriveState();
             NextShooterState();
         }
 
@@ -291,7 +330,7 @@ void AutoFiveBallSneaky::Run()
     }
 
     if (m_resetDriveState) {
-        m_resetDriveState = false;
+        m_newDriveState = false;
     }
 }
 
