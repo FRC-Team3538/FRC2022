@@ -20,6 +20,23 @@ using namespace pathplanner;
 
 double PathPlanner::resolution = 0.004;
 
+wpi::json PathPlanner::loadConfig(std::string name)
+{
+    std::string filePath = frc::filesystem::GetDeployDirectory() + "/pathplanner/" + name + ".path";
+
+    std::error_code error_code;
+    wpi::raw_fd_istream input{filePath, error_code};
+
+    if(error_code){
+        throw std::runtime_error(("Cannot open file: " + filePath));
+    }
+
+    wpi::json json;
+    input >> json;
+
+    return json;
+}
+
 PathPlannerTrajectory PathPlanner::loadPath(std::string name, units::meters_per_second_t maxVel, units::meters_per_second_squared_t maxAccel, bool reversed){
     std::string line;
 

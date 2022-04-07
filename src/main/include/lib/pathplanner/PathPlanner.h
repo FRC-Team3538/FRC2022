@@ -11,6 +11,8 @@ namespace pathplanner{
         public:
             static double resolution;
 
+            static wpi::json loadConfig(std::string name);
+
             static pathplanner::PathPlannerTrajectory loadPath(std::string name, units::meters_per_second_t maxVel, units::meters_per_second_squared_t maxAccel, bool reversed);
 
             static pathplanner::PathPlannerTrajectory loadPath(std::string name, units::meters_per_second_t maxVel, units::meters_per_second_squared_t maxAccel){
