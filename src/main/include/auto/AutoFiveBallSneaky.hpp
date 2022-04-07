@@ -33,6 +33,8 @@ private:
     bool FollowTrajectory(frc::Trajectory &trajectory);
     bool FindVisionTarget();
 
+    std::vector<frc::Trajectory> m_trajectories;
+
     frc::Trajectory m_trajectory_first;
     frc::Trajectory m_trajectory_second;
     frc::Trajectory m_trajectory_third;

@@ -84,23 +84,21 @@ void AutoFiveBallSneaky::Init()
 
     if (frc::DriverStation::GetAlliance() == frc::DriverStation::Alliance::kBlue)
     {
-        // TODO clone sneaky paths
-        m_trajectory_first = rj::AutoHelper::LoadTrajectory("07 - 5 Ball Sneaky 1", &config);
-        m_trajectory_second = rj::AutoHelper::LoadTrajectory("07 - 5 Ball Sneaky 2", &config);
+        // TODO clone sneaky path
+        m_trajectories = rj::AutoHelper::LoadTrajectorySplit("07 - 5 Ball Sneaky", &config);
 
-        config.SetReversed(true);
-        m_trajectory_third = rj::AutoHelper::LoadTrajectory("07 - 5 Ball Sneaky 3", &config);
+        m_trajectory_first = m_trajectories[0];
+        m_trajectory_second = m_trajectories[1];
+        m_trajectory_third = m_trajectories[2] + m_trajectories[3];
     }
     else
     {
-        m_trajectory_first = rj::AutoHelper::LoadTrajectory("07 - 5 Ball Sneaky 1", &config);
-        m_trajectory_second = rj::AutoHelper::LoadTrajectory("07 - 5 Ball Sneaky 2", &config);
+        m_trajectories = rj::AutoHelper::LoadTrajectorySplit("07 - 5 Ball Sneaky", &config);
 
-        config.SetReversed(true);
-        m_trajectory_third = rj::AutoHelper::LoadTrajectory("07 - 5 Ball Sneaky 3", &config);
+        m_trajectory_first = m_trajectories[0];
+        m_trajectory_second = m_trajectories[1];
+        m_trajectory_third = m_trajectories[2] + m_trajectories[3];
     }
-
-    std::cout << m_trajectory_first.TotalTime().value() + m_trajectory_second.TotalTime().value() << std::endl;
 
     IO.drivetrain.ResetOdometry(m_trajectory_first.InitialPose());
 
