@@ -12,14 +12,15 @@
 #include "units/base.h"                              // for unit_t, operator*
 #include "units/curvature.h"                         // for curvature_t
 #include "units/time.h"                              // for second_t
-#include "pathplanner/lib/PathPlanner.h"
-#include "pathplanner/lib/PathPlannerTrajectory.h"
+#include "lib/pathplanner/PathPlanner.h"
+#include "lib/pathplanner/PathPlannerTrajectory.h"
+#include "wpi/json.h"
 
 namespace rj
 {
 
     frc::Trajectory AutoHelper::LoadTrajectory(std::string name, frc::TrajectoryConfig *config)
-    {
+    {        
         // velocity, accel don't matter
         // but let's use the configured ones anyway
         pathplanner::PathPlannerTrajectory pp_traj = pathplanner::PathPlanner::loadPath(name, config->MaxVelocity(), config->MaxAcceleration(), config->IsReversed());
@@ -84,6 +85,90 @@ namespace rj
         std::cout << "total time: " << final_trajectory.TotalTime().value() << std::endl;
 
         return final_trajectory;
+    }
+
+    std::vector<frc::Trajectory> AutoHelper::LoadTrajectorySplit(std::string name, frc::TrajectoryConfig *config)
+    {
+        wpi::json pp_config = pathplanner::PathPlanner::loadConfig(name);
+
+        // velocity, accel don't matter
+        // but let's use the configured ones anyway
+        pathplanner::PathPlannerTrajectory pp_traj = pathplanner::PathPlanner::loadPath(name, config->MaxVelocity(), config->MaxAcceleration(), config->IsReversed());
+
+        std::vector<frc::TrajectoryGenerator::PoseWithCurvature> path;
+        path.reserve(pp_traj.numStates());
+
+        for (int ind = 0; ind < pp_traj.numStates(); ind++)
+        {
+            auto pp_state = pp_traj.getState(ind);
+
+            frc::Rotation2d heading_diff;
+            if (ind == pp_traj.numStates() - 1)
+            {
+                // Last point is special, use the previous point instead
+                heading_diff = pp_traj.getState(ind)->pose.Rotation() - pp_traj.getState(ind - 1)->pose.Rotation();
+            }
+            else
+            {
+                // Find the heading delta towards the next point.
+                heading_diff = pp_traj.getState(ind + 1)->pose.Rotation() - pp_state->pose.Rotation();
+            }
+
+            int curv_sign = 0;
+
+            if (heading_diff.Radians() > 0_rad)
+            {
+                curv_sign = 1;
+            }
+            else if (heading_diff.Radians() < 0_rad)
+            {
+                curv_sign = -1;
+            }
+
+            path.push_back(frc::TrajectoryGenerator::PoseWithCurvature{pp_state->pose, pp_state->curvature * curv_sign});
+        }
+
+        std::vector<frc::Trajectory> trajectories;
+        trajectories.reserve(path.size() / 250);
+        std::size_t current_segment = 0;
+        bool invert = false;
+        std::vector<frc::TrajectoryGenerator::PoseWithCurvature> current_path;
+        current_path.reserve(251);
+        
+        // handle all but final segment
+        for (wpi::json::reference waypoint : pp_config.at("waypoints"))
+        {
+            current_path.clear();
+            bool reverse_here = waypoint.at("isReversal");
+            invert = invert ^ reverse_here;
+
+            for (int i = 250 * current_segment; i < 250 * (current_segment + 1) + 1; i++)
+            {
+                if (i >= path.size())
+                {
+                    break;
+                }
+                current_path.push_back(path[i]);
+                std::cout << path[i].first.X().value() << "," << path[i].first.Y().value() << "," << path[i].first.Rotation().Radians().value() << "," << path[i].second.value() << std::endl;
+            }
+
+            // final waypoint
+            if (current_path.size() == 0)
+            {
+                break;
+            }
+            std::cout << "st: " << current_path[0].first.X().value() << "," << current_path[0].first.Y().value() << " -> " << current_path[current_path.size() - 1].first.X().value() << "," << current_path[current_path.size() - 1].first.Y().value() << std::endl;
+            std::cout << "reversed: " << (config->IsReversed() ^ invert) << std::endl;
+            auto current_traj = frc::TrajectoryParameterizer::TimeParameterizeTrajectory(current_path, config->Constraints(), config->StartVelocity(), config->EndVelocity(), config->MaxVelocity(), config->MaxAcceleration(), config->IsReversed() ^ invert);
+
+            std::cout << "time for segment: " << current_traj.TotalTime().value() << std::endl;
+
+            trajectories.push_back(current_traj);
+
+            current_segment += 1;
+        }
+
+        return trajectories;
     }
 
 }
