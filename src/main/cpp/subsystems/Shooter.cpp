@@ -568,12 +568,12 @@ void Shooter::LogDataEntries(wpi::log::DataLog &log)
 {
     log.AppendDouble(GetDataEntry("Shooter/cmd/shooterRPM"), cmd_shooterRPM.value(), 0);
 
-    FalconEntryHelper(log, intake, "intake");
-    FalconEntryHelper(log, indexerA, "indexerA");
-    FalconEntryHelper(log, feeder, "feeder");
-    FalconEntryHelper(log, shooterA, "shooterA");
-    FalconEntryHelper(log, shooterB, "shooterB");
-    FalconEntryHelper(log, turret, "turret");
+    FalconEntryHelper(log, intake, "Shooter/intake");
+    FalconEntryHelper(log, indexerA, "Shooter/indexerA");
+    FalconEntryHelper(log, feeder, "Shooter/feeder");
+    FalconEntryHelper(log, shooterA, "Shooter/shooterA");
+    FalconEntryHelper(log, shooterB, "Shooter/shooterB");
+    FalconEntryHelper(log, turret, "Shooter/turret");
     // FalconEntryHelper(log, hood, "hood");
 
     // Shooter PID

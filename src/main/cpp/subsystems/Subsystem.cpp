@@ -36,12 +36,12 @@ void Subsystem::SetStatusFrames(WPI_TalonFX &talon, uint8_t framePeriod)
     talon.SetStatusFramePeriod(StatusFrameEnhanced::Status_Brushless_Current, 211, 50);
 }
 
-void Subsystem::RegisterDataEntry(wpi::log::DataLog &log, std::string_view entry_name, std::string_view type, std::string_view metadata, int64_t timestamp)
+void Subsystem::RegisterDataEntry(wpi::log::DataLog &log, std::string entry_name, std::string_view type, std::string_view metadata, int64_t timestamp)
 {
     data_entries[entry_name] = log.Start(entry_name, type, metadata, timestamp);
 }
 
-int Subsystem::GetDataEntry(std::string_view entry_name)
+int Subsystem::GetDataEntry(std::string entry_name)
 {
     return data_entries[entry_name];
 }
