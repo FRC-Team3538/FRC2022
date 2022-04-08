@@ -1,4 +1,4 @@
-#include "auto/AutoFiveBallSneaky.hpp"
+#include "auto/AutoFiveBallMeta.hpp"
 #include <frc/trajectory/constraint/CentripetalAccelerationConstraint.h>
 #include <frc/trajectory/constraint/DifferentialDriveKinematicsConstraint.h>
 #include <frc/trajectory/constraint/DifferentialDriveVoltageConstraint.h>
@@ -22,14 +22,14 @@
 #include <frc/DriverStation.h>
 
 // Name for Smart Dash Chooser
-std::string AutoFiveBallSneaky::GetName()
+std::string AutoFiveBallMeta::GetName()
 {
-    return "08 - Five Ball Sneaky";
+    return "05 - Five Ball Meta";
 }
 
 // Initialization
 // Constructor requires a reference to the robot map
-AutoFiveBallSneaky::AutoFiveBallSneaky(Robotmap &IO) : IO(IO)
+AutoFiveBallMeta::AutoFiveBallMeta(Robotmap &IO) : IO(IO)
 {
     m_driveState = 0;
     m_shooterState = 0;
@@ -39,7 +39,7 @@ AutoFiveBallSneaky::AutoFiveBallSneaky(Robotmap &IO) : IO(IO)
     m_shotCount = 0;
 }
 
-AutoFiveBallSneaky::~AutoFiveBallSneaky() {}
+AutoFiveBallMeta::~AutoFiveBallMeta() {}
 
 // process
 // 1 - grab second
@@ -50,7 +50,7 @@ AutoFiveBallSneaky::~AutoFiveBallSneaky() {}
 // 6 - shoot last
 
 // State Machine
-void AutoFiveBallSneaky::NextDriveState()
+void AutoFiveBallMeta::NextDriveState()
 {
     m_driveState++;
     m_newDriveState = true;
@@ -60,7 +60,7 @@ void AutoFiveBallSneaky::NextDriveState()
 }
 
 // State Machine
-void AutoFiveBallSneaky::NextShooterState()
+void AutoFiveBallMeta::NextShooterState()
 {
     m_shooterState++;
     m_newShooterState = true;
@@ -69,7 +69,7 @@ void AutoFiveBallSneaky::NextShooterState()
     m_shooterTimer.Start();
 }
 
-void AutoFiveBallSneaky::Init()
+void AutoFiveBallMeta::Init()
 {
     units::feet_per_second_t maxLinearVel = 8_fps;
     units::meters_per_second_squared_t maxCentripetalAcc = 1.7_mps_sq;
@@ -85,19 +85,19 @@ void AutoFiveBallSneaky::Init()
     if (frc::DriverStation::GetAlliance() == frc::DriverStation::Alliance::kBlue)
     {
         // TODO clone sneaky path
-        auto trajectories = rj::AutoHelper::LoadTrajectorySplit("07 - 5 Ball Sneaky", &config);
+        auto trajectories = rj::AutoHelper::LoadTrajectorySplit("05 - 5 Ball Wall Ball", &config);
 
         m_trajectory_first = trajectories[0];
         m_trajectory_second = trajectories[1];
-        m_trajectory_third = trajectories[2] + trajectories[3];
+        m_trajectory_third = trajectories[2];
     }
     else
     {
-        auto trajectories = rj::AutoHelper::LoadTrajectorySplit("07 - 5 Ball Sneaky", &config);
+        auto trajectories = rj::AutoHelper::LoadTrajectorySplit("05 - 5 Ball Wall Ball", &config);
 
         m_trajectory_first = trajectories[0];
         m_trajectory_second = trajectories[1];
-        m_trajectory_third = trajectories[2] + trajectories[3];
+        m_trajectory_third = trajectories[2];
     }
 
     IO.drivetrain.ResetOdometry(m_trajectory_first.InitialPose());
@@ -110,7 +110,7 @@ void AutoFiveBallSneaky::Init()
     m_totalTimer.Start();
 }
 
-bool AutoFiveBallSneaky::FollowTrajectory(frc::Trajectory &trajectory)
+bool AutoFiveBallMeta::FollowTrajectory(frc::Trajectory &trajectory)
 {
     auto reference = trajectory.Sample(m_driveTimer.Get());
 
@@ -119,14 +119,32 @@ bool AutoFiveBallSneaky::FollowTrajectory(frc::Trajectory &trajectory)
     return m_driveTimer.Get() > trajectory.TotalTime();
 }
 
-bool AutoFiveBallSneaky::FindVisionTarget()
+bool AutoFiveBallMeta::FindVisionTarget()
 {
     vision::RJVisionPipeline::visionData data = IO.rjVision.Run();
     return data.filled && IO.shooter.SetTurretAngle(data.turretAngle, 0.5_deg);
 }
 
+void AutoFiveBallMeta::PassiveTurretAim()
+{
+    /* ---------- robot state data ------------ */
+    auto turret_to_center_robot_distance = 2_in;
+    frc::Pose2d center_hub = frc::Pose2d{8.2296_m, 4.1148_m, 0_deg};
+
+    auto robot_heading = IO.drivetrain.GetPose().Rotation().Radians();
+
+    // positive because we're facing forward on the robot
+    auto turret_to_robot = frc::Transform2d{frc::Translation2d{turret_to_center_robot_distance, 0_in}, frc::Rotation2d{}};
+
+    // now we set our turret angle to the angle needed to face the center of the hub
+    auto turret_position = IO.drivetrain.GetPose() + turret_to_robot.Inverse() + frc::Transform2d{frc::Translation2d{}, frc::Rotation2d{180_deg}};
+    auto global_angle_to_hub = units::math::atan2(center_hub.Y() - turret_position.Y(), center_hub.X() - turret_position.X());
+    auto turret_angle_to_hub = global_angle_to_hub - turret_position.Rotation().Radians();
+    IO.shooter.SetTurretAngle(turret_angle_to_hub, 0.75_deg);
+}
+
 // Execute the program
-void AutoFiveBallSneaky::Run()
+void AutoFiveBallMeta::Run()
 {
     units::degree_t tol{ntVisionAngleTol.GetDouble(kVisionAngleTolDefault)};
     m_resetDriveState = m_newDriveState;
@@ -211,10 +229,10 @@ void AutoFiveBallSneaky::Run()
             IO.shooter.SetIndexer(5_V);
             IO.shooter.SetFeeder(-2_V);
 
-            IO.shooter.SetTurretAngle(0_deg, tol);
-
             IO.rjVision.SetLED(true);
         }
+
+        PassiveTurretAim();
 
         break;
     }
@@ -236,12 +254,12 @@ void AutoFiveBallSneaky::Run()
     }
     case 2:
     {
-        // shoot 2 balls
+        // shoot 3 balls
         if (m_newShooterState)
         {
             IO.shooter.ResetEdgeDetector();
-            IO.shooter.SetFeeder(5_V);
-            IO.shooter.SetIndexer(5_V);
+            IO.shooter.SetFeeder(8_V);
+            IO.shooter.SetIndexer(8_V);
         }
 
         FindVisionTarget();
@@ -251,7 +269,7 @@ void AutoFiveBallSneaky::Run()
             m_shotCount += 1;
         }
 
-        if (m_shotCount >= 2 || m_shooterTimer.Get() > m_shooterTimeout) {
+        if (m_shotCount >= 3 || m_shooterTimer.Get() > m_shooterTimeout) {
             std::cout << "Shot phase completed in  " << m_shooterTimer.Get().value() << "s" << std::endl;
             NextDriveState();
             NextShooterState();
@@ -260,15 +278,15 @@ void AutoFiveBallSneaky::Run()
         break;
     }
     case 3:
-    {
+    {        
         // wait for second path
         if (m_newShooterState) {
             IO.shooter.SetIntakeState(Shooter::Position::Deployed);
             IO.shooter.SetShooterRPM(0_rpm);
             IO.shooter.SetFeeder(-2_V);
-
-            IO.shooter.SetTurretAngle(-80_deg, tol);
         }
+
+        PassiveTurretAim();
 
         break;
     }
@@ -290,11 +308,11 @@ void AutoFiveBallSneaky::Run()
     }
     case 5:
     {
-        // shoot 3 balls
+        // shoot 2 balls
         if (m_newShooterState)
         {
-            IO.shooter.SetFeeder(5_V);
-            IO.shooter.SetIndexer(5_V);
+            IO.shooter.SetFeeder(8_V);
+            IO.shooter.SetIndexer(8_V);
         }
     
         if (IO.shooter.Shoot_EdgeDetector())
@@ -333,7 +351,7 @@ void AutoFiveBallSneaky::Run()
 }
 
 // Called Automagically by AutoPrograms (RobotPeriodic)
-void AutoFiveBallSneaky::UpdateSmartDash()
+void AutoFiveBallMeta::UpdateSmartDash()
 {
     frc::SmartDashboard::PutNumber("Auto/DriveState", m_driveState);
     frc::SmartDashboard::PutNumber("Auto/ShooterState", m_shooterState);

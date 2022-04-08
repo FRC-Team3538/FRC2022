@@ -3,6 +3,7 @@
 #include "auto/AutoBackForward.hpp"    // for AutoBackForward
 #include "auto/AutoFiveBallSafe.hpp"   // for AutoFiveBallSafe
 #include "auto/AutoFiveBallSneaky.hpp" // for AutoFiveBallSneaky
+#include "auto/AutoFiveBallMeta.hpp" // for AutoFiveBallMeta
 #include "auto/AutoFourBall.hpp"       // for AutoFourBall
 #include "auto/AutoInterface.hpp"      // for AutoInterface
 #include "auto/AutoLine.hpp"           // for AutoLine
@@ -24,6 +25,7 @@ AutoPrograms::AutoPrograms(Robotmap &IO) : IO(IO)
     m_chooser.AddOption(AutoFourBall::GetName(), AutoFourBall::GetName());
     m_chooser.AddOption(AutoFiveBallSafe::GetName(), AutoFiveBallSafe::GetName());
     m_chooser.AddOption(AutoFiveBallSneaky::GetName(), AutoFiveBallSneaky::GetName());
+    m_chooser.AddOption(AutoFiveBallMeta::GetName(), AutoFiveBallMeta::GetName());
     m_chooser.AddOption(Billiard::GetName(), Billiard::GetName());
 
     // Test programs
@@ -61,6 +63,10 @@ void AutoPrograms::Init()
     else if (name == AutoFiveBallSneaky::GetName())
     {
         m_autoProgram = new AutoFiveBallSneaky(IO);
+    }
+    else if (name == AutoFiveBallMeta::GetName())
+    {
+        m_autoProgram = new AutoFiveBallMeta(IO);
     }
     else if (name == Billiard::GetName())
     {
