@@ -25,27 +25,21 @@ namespace vision
 
     void RJVisionPipeline::ConfigureSystem()
     {
-        table = nt::NetworkTableInstance::GetDefault().GetTable("limelight");
-        // table->PutNumber("ledMode", 1.0);
-        table->PutNumber("pipeline", 0.0);
-        table->PutNumber("camMode", 0.0);
-        // camera.SetPipelineIndex(0);
-        // camera.SetDriverMode(false);
+        camera.SetPipelineIndex(0);
+        camera.SetDriverMode(false);
     }
 
     void RJVisionPipeline::Periodic()
     {
-        dx = -(table->GetNumber("tx", 0.0));
-        dy = table->GetNumber("ty", 0.0);
-        tv = table->GetNumber("tv", 0.0);
+        auto result = camera.GetLatestResult();
+        tv = result.HasTargets();
+        auto target = result.GetBestTarget();
+        dx = -target.GetYaw();
+        dy = target.GetPitch();
 
         alpha = frc::SmartDashboard::GetNumber("ALPHA", 0.2);
         N = frc::SmartDashboard::GetNumber("N", 10);
         estimatedPhaseShift = (double)(N + 1) / 2.0;
-        // if (snapShotTimer.Get() > snapTime)
-        // {
-        //     table->PutNumber("snapshot", 0.0);
-        // }
     }
 
     RJVisionPipeline::visionData RJVisionPipeline::Run()
@@ -272,24 +266,18 @@ namespace vision
     {
         if (enable)
         {
-            // camera.SetLEDMode(photonlib::LEDMode::kOn);
-            table->PutNumber("ledMode", 3.0); // Force On
+            camera.SetLEDMode(photonlib::LEDMode::kOn);
         }
         else
         {
-            // camera.SetLEDMode(photonlib::LEDMode::kOff);
-            table->PutNumber("ledMode", 1.0); // Force Off
+            camera.SetLEDMode(photonlib::LEDMode::kOff);
         }
     }
 
     void RJVisionPipeline::TakeSnapshot(uint8_t numberOfSnaps)
     {
-        // camera.TakeInputSnapshot();
-        // camera.TakeOutputSnapshot();
-        table->PutNumber("snapshot", (double)numberOfSnaps);
-        // snapTime = units::second_t{(double)numberOfSnaps / 2.0};
-        // snapShotTimer.Reset();
-        // snapShotTimer.Start();
+        camera.TakeInputSnapshot();
+        camera.TakeOutputSnapshot();
     }
 
     void RJVisionPipeline::SetTurretAngle(units::degree_t angle)

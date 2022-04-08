@@ -11,6 +11,7 @@
 #include "photonlib/PhotonPipelineResult.h"  // for PhotonPipelineResult
 #include "units/base.h"                      // for operator*
 #include "units/time.h"                      // for second_t, millisecond_t
+#include "photonlib/PhotonCamera.h"
 namespace nt { class NetworkTable; }
 
 namespace vision
@@ -74,9 +75,6 @@ namespace vision
         units::degree_t turretAngle;
         units::inch_t estDist = 0.0_in;
 
-        // TODO: ensure correctness @Jordan
-        // photonlib::PhotonCamera camera{""};
-        std::shared_ptr<nt::NetworkTable> table;
         double dy, dx, tv;
         frc::Timer lightOn;
 
@@ -114,5 +112,7 @@ namespace vision
 
         frc::Timer spinUpTimer;
         bool spinUpOS = false;
+
+        photonlib::PhotonCamera camera{"gloworm"};
     };
 } // namespace vision
