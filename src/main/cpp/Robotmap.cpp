@@ -92,35 +92,35 @@ void Robotmap::RegisterDataEntries(wpi::log::DataLog &log)
 
 void Robotmap::LogDataEntries(wpi::log::DataLog &log)
 {
-    log.AppendDouble(data_entries["PDH/Voltage"], pdp.GetVoltage(), 0);
-    log.AppendDouble(data_entries["PDH/Temperature"], pdp.GetTemperature(), 0);
-    // log.AppendDoubleArray(data_entries["PDH/Current"], 0.0, 0); 
-    log.AppendDouble(data_entries["PDH/TotalCurrent"], pdp.GetTotalCurrent(), 0);
-    log.AppendDouble(data_entries["PDH/TotalPower"], pdp.GetTotalPower(), 0);
-    log.AppendDouble(data_entries["PDH/TotalEnergy"], pdp.GetTotalEnergy(), 0);
-    log.AppendInteger(data_entries["PDH/Module"], pdp.GetModule(), 0);
-    log.AppendInteger(data_entries["PDH/Type"], (int64_t) pdp.GetType(), 0);
-    log.AppendBoolean(data_entries["PDH/SwitchableChannel"], pdp.GetSwitchableChannel(), 0);
-    // log.AppendIntegerArray(data_entries["PDH/Version"], 0.0, 0);
-    // log.AppendBooleanArray(data_entries["PDH/Faults"], 0.0, 0);
-    // log.AppendBooleanArray(data_entries["PDH/StickyFaults"], 0.0, 0);
+    // log.AppendDouble(data_entries["PDH/Voltage"], pdp.GetVoltage(), 0);
+    // log.AppendDouble(data_entries["PDH/Temperature"], pdp.GetTemperature(), 0);
+    // // log.AppendDoubleArray(data_entries["PDH/Current"], 0.0, 0); 
+    // log.AppendDouble(data_entries["PDH/TotalCurrent"], pdp.GetTotalCurrent(), 0);
+    // log.AppendDouble(data_entries["PDH/TotalPower"], pdp.GetTotalPower(), 0);
+    // log.AppendDouble(data_entries["PDH/TotalEnergy"], pdp.GetTotalEnergy(), 0);
+    // log.AppendInteger(data_entries["PDH/Module"], pdp.GetModule(), 0);
+    // log.AppendInteger(data_entries["PDH/Type"], (int64_t) pdp.GetType(), 0);
+    // log.AppendBoolean(data_entries["PDH/SwitchableChannel"], pdp.GetSwitchableChannel(), 0);
+    // // log.AppendIntegerArray(data_entries["PDH/Version"], 0.0, 0);
+    // // log.AppendBooleanArray(data_entries["PDH/Faults"], 0.0, 0);
+    // // log.AppendBooleanArray(data_entries["PDH/StickyFaults"], 0.0, 0);
 
-    log.AppendBoolean(data_entries["PH/Compressor"], ph.GetCompressor(), 0);
-    log.AppendInteger(data_entries["PH/CompressorConfigType"], (int64_t) ph.GetCompressorConfigType(), 0);
-    log.AppendBoolean(data_entries["PH/PressureSwitch"], ph.GetPressureSwitch(), 0);
-    log.AppendDouble(data_entries["PH/CompressorCurrent"], ph.GetCompressorCurrent().value(), 0);
-    // log.AppendBooleanArray(data_entries["PH/Solenoids"], 0.0, 0);
-    log.AppendInteger(data_entries["PH/ModuleNumber"], ph.GetModuleNumber(), 0);
-    // log.AppendBooleanArray(data_entries["PH/SolenoidDisabledList"], 0.0, 0);
-    // log.AppendIntegerArray(data_entries["PH/Version"], 0.0, 0);
-    // log.AppendBooleanArray(data_entries["PH/Faults"], 0.0, 0);
-    // log.AppendBooleanArray(data_entries["PH/StickyFaults"], 0.0, 0);
-    log.AppendDouble(data_entries["PH/InputVoltage"], ph.GetInputVoltage().value(), 0);
-    log.AppendDouble(data_entries["PH/RegulatedVoltage_5V"], ph.Get5VRegulatedVoltage().value(), 0);
-    log.AppendDouble(data_entries["PH/SolenoidsTotalCurrent"], ph.GetSolenoidsTotalCurrent().value(), 0);
-    log.AppendDouble(data_entries["PH/SolenoidsVoltage"], ph.GetSolenoidsVoltage().value(), 0);
-    // log.AppendDoubleArray(data_entries["PH/AnalogVoltage"], 0.0, 0);
-    // log.AppendDoubleArray(data_entries["PH/Pressure"], 0.0, 0);
+    // log.AppendBoolean(data_entries["PH/Compressor"], ph.GetCompressor(), 0);
+    // log.AppendInteger(data_entries["PH/CompressorConfigType"], (int64_t) ph.GetCompressorConfigType(), 0);
+    // log.AppendBoolean(data_entries["PH/PressureSwitch"], ph.GetPressureSwitch(), 0);
+    // log.AppendDouble(data_entries["PH/CompressorCurrent"], ph.GetCompressorCurrent().value(), 0);
+    // // log.AppendBooleanArray(data_entries["PH/Solenoids"], 0.0, 0);
+    // log.AppendInteger(data_entries["PH/ModuleNumber"], ph.GetModuleNumber(), 0);
+    // // log.AppendBooleanArray(data_entries["PH/SolenoidDisabledList"], 0.0, 0);
+    // // log.AppendIntegerArray(data_entries["PH/Version"], 0.0, 0);
+    // // log.AppendBooleanArray(data_entries["PH/Faults"], 0.0, 0);
+    // // log.AppendBooleanArray(data_entries["PH/StickyFaults"], 0.0, 0);
+    // log.AppendDouble(data_entries["PH/InputVoltage"], ph.GetInputVoltage().value(), 0);
+    // log.AppendDouble(data_entries["PH/RegulatedVoltage_5V"], ph.Get5VRegulatedVoltage().value(), 0);
+    // log.AppendDouble(data_entries["PH/SolenoidsTotalCurrent"], ph.GetSolenoidsTotalCurrent().value(), 0);
+    // log.AppendDouble(data_entries["PH/SolenoidsVoltage"], ph.GetSolenoidsVoltage().value(), 0);
+    // // log.AppendDoubleArray(data_entries["PH/AnalogVoltage"], 0.0, 0);
+    // // log.AppendDoubleArray(data_entries["PH/Pressure"], 0.0, 0);
 
     for (auto system : subsystems)
         system->LogDataEntries(log);
