@@ -181,7 +181,7 @@ namespace vision
     {
         RJVisionPipeline::photonVisionResult result;
         uint64_t change_time = rawVisionEntry.GetLastChange();
-        result.read_time = units::microsecond_t{change_time};
+        result.read_time = units::microsecond_t{(double) change_time};
         result.base_result = camera.GetLatestResult();
         return result;
     }
