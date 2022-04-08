@@ -180,9 +180,9 @@ namespace vision
     RJVisionPipeline::photonVisionResult RJVisionPipeline::RunPhotonVision()
     {
         RJVisionPipeline::photonVisionResult result;
-
-        result.read_time = units::microsecond_t{(double) wpi::Now()};
-        // result.base_result = camera.GetLatestResult();
+        uint64_t change_time = rawVisionEntry.GetLastChange();
+        result.read_time = units::microsecond_t{change_time};
+        result.base_result = camera.GetLatestResult();
         return result;
     }
 

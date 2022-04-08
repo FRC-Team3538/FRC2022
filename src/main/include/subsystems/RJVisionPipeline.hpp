@@ -114,5 +114,7 @@ namespace vision
         bool spinUpOS = false;
 
         photonlib::PhotonCamera camera{"gloworm"};
+
+        NetworkTableEntry rawVisionEntry = NetworkTableInstance::GetDefault().GetEntry("/photonvision/gloworm/rawBytes");
     };
 } // namespace vision
