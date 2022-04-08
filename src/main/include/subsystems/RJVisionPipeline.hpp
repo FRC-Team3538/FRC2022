@@ -12,6 +12,8 @@
 #include "units/base.h"                      // for operator*
 #include "units/time.h"                      // for second_t, millisecond_t
 #include "photonlib/PhotonCamera.h"
+#include "networktables/NetworkTableInstance.h"
+#include "networktables/NetworkTableEntry.h"
 namespace nt { class NetworkTable; }
 
 namespace vision
@@ -115,6 +117,6 @@ namespace vision
 
         photonlib::PhotonCamera camera{"gloworm"};
 
-        NetworkTableEntry rawVisionEntry = NetworkTableInstance::GetDefault().GetEntry("/photonvision/gloworm/rawBytes");
+        nt::NetworkTableEntry rawVisionEntry = nt::NetworkTableInstance::GetDefault().GetEntry("/photonvision/gloworm/rawBytes");
     };
 } // namespace vision
