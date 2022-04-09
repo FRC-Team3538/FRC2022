@@ -172,4 +172,6 @@ private:
     // Ratio between top and bottom wheels
     // note: this must be 1.0 if they are linked with belts !!!!
     double shooter_ratio = 1.0;
+
+    units::degree_t goalAngle;
 };

@@ -16,6 +16,7 @@
 #include "ctre/phoenix/motorcontrol/NeutralMode.h"
 #include "ctre/phoenix/motorcontrol/StatusFrame.h"
 #include "ctre/phoenix/motorcontrol/SupplyCurrentLimitConfiguration.h"
+#include <wpi/timestamp.h>
 
 using namespace ctre::phoenix::motorcontrol;
 
@@ -226,6 +227,8 @@ bool Shooter::SetTurretAngle(units::degree_t targetAngle, units::degree_t tol)
 {
     if (!zeroed)
         return false;
+
+    goalAngle = targetAngle;
 
     turret.Set(ctre::phoenix::motorcontrol::ControlMode::MotionMagic, targetAngle / kScaleFactorTurret);
 
@@ -570,6 +573,11 @@ void Shooter::LogDataEntries(wpi::log::DataLog &log)
     FalconEntryHelper(log, turret, "Shooter/turret");
     // FalconEntryHelper(log, hood, "hood");
 
+    uint64_t time = wpi::Now();
+
+    log.AppendDouble(GetDataEntry("Shooter/turret/goal"), goalAngle.value(), time);
+    log.AppendDouble(GetDataEntry("Shooter/turret/position"), GetTurretAngle().value(), time);
+
     // Shooter PID
     log.AppendDouble(GetDataEntry("Shooter/shooter/kP"), shooterSlotConfig.kP, 0);
     log.AppendDouble(GetDataEntry("Shooter/shooter/kI"), shooterSlotConfig.kI, 0);
@@ -598,6 +606,10 @@ void Shooter::RegisterDataEntries(wpi::log::DataLog &log)
     // FalconEntryStartHelper(log, "Shooter/hood");
     
     
+    // Shooter PID
+    RegisterDataEntry(log, "Shooter/turret/goal", "double");
+    RegisterDataEntry(log, "Shooter/turret/position", "double");
+
     // Shooter PID
     RegisterDataEntry(log, "Shooter/shooter/kP", "double");
     RegisterDataEntry(log, "Shooter/shooter/kI", "double");
