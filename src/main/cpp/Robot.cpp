@@ -239,6 +239,8 @@ void Robot::TeleopPeriodic()
 
       auto camera_pose = IO.drivetrain.GetPose() + camera_to_robot.Inverse();
       center_hub = camera_pose + camera_to_target_transform + hub_edge_transform.Inverse();
+
+      m_enablePassiveTurret = true;
     }
   }
   else if (IO.secondaryController.GetSquareButton())
@@ -291,6 +293,8 @@ void Robot::TeleopPeriodic()
 
       auto camera_pose = IO.drivetrain.GetPose() + camera_to_robot.Inverse();
       center_hub = camera_pose + camera_to_target_transform + hub_edge_transform.Inverse();
+
+      m_enablePassiveTurret = true;
     }
   }
   else
@@ -326,37 +330,39 @@ void Robot::TeleopPeriodic()
       climberTimerOS = false;
       manualJog = true;
       IO.shooter.SetTurret(units::volt_t{-3.0 * deadband(IO.secondaryController.GetRightX())});
+      m_enablePassiveTurret = false;
     }
     else if (m_csmode == ClimberShooterMode::Climber)
     {
       IO.shooter.SetTurretAngle(90.0_deg, 1_deg);
     }
-    else
+    else if (m_enablePassiveTurret && false)
     {
       // Passive Aim
 
-      if (localization_flag_entry.GetBoolean(false))
+      /* ---------- robot state data ------------ */
+      auto robot_pose = IO.drivetrain.GetPose();
+      // basically, if we've set our position thru auton
+      // this locks us out of any funny business in the pit
+      if (robot_pose.Translation().Norm() > 1.75_m)
       {
+        auto robot_heading = robot_pose.Rotation().Radians();
 
-        /* ---------- robot state data ------------ */
-        auto robot_pose = IO.drivetrain.GetPose();
-        // basically, if we've set our position thru auton
-        // this locks us out of any funny business in the pit
-        if (robot_pose.Translation().Norm() > 1.75_m)
-        {
-          auto robot_heading = robot_pose.Rotation().Radians();
+        // positive because we're facing forward on the robot
+        auto turret_to_robot = frc::Transform2d{frc::Translation2d{turret_to_center_robot_distance, 0_in}, frc::Rotation2d{}};
 
-          // positive because we're facing forward on the robot
-          auto turret_to_robot = frc::Transform2d{frc::Translation2d{turret_to_center_robot_distance, 0_in}, frc::Rotation2d{}};
-
-          // now we set our turret angle to the angle needed to face the center of the hub
-          auto turret_position = IO.drivetrain.GetPose() + turret_to_robot.Inverse() + frc::Transform2d{frc::Translation2d{}, frc::Rotation2d{180_deg}};
-          auto global_angle_to_hub = units::math::atan2(center_hub.Y() - turret_position.Y(), center_hub.X() - turret_position.X());
-          auto turret_angle_to_hub = global_angle_to_hub - turret_position.Rotation().Radians();
-          IO.shooter.SetTurretAngleSmooth(turret_angle_to_hub, 0.75_deg);
-        }
+        // now we set our turret angle to the angle needed to face the center of the hub
+        auto turret_position = IO.drivetrain.GetPose() + turret_to_robot.Inverse() + frc::Transform2d{frc::Translation2d{}, frc::Rotation2d{180_deg}};
+        auto global_angle_to_hub = units::math::atan2(center_hub.Y() - turret_position.Y(), center_hub.X() - turret_position.X());
+        auto turret_angle_to_hub = global_angle_to_hub - turret_position.Rotation().Radians();
+        IO.shooter.SetTurretAngleSmooth(turret_angle_to_hub, 0.75_deg);
       }
       
+      climberTimerOS = false;
+    }
+    else
+    {
+      IO.shooter.SetTurretAngle(0.0_deg, 1_deg);
       climberTimerOS = false;
     }
 

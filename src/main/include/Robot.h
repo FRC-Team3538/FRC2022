@@ -122,4 +122,5 @@ private:
   nt::NetworkTableEntry localization_flag_entry = frc::SmartDashboard::GetEntry("flags/alternate_localization");
 
   frc::Timer m_testTimer;
+  bool m_enablePassiveTurret = true;
 };
