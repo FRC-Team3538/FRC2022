@@ -136,13 +136,20 @@ private:
     static constexpr auto kScaleFactorTurret = 360_deg * (18.0 / 184.0) * (11.0 / 60.0) * (1.0 / 2048.0); // Angle Over Ticks
     static constexpr double kTicks2RPM = (1.0 / (2048.0)) * 10.0 * 60.0;
 
+    // static constexpr auto kSTurret = 1.0697_V;
+    static constexpr auto kSTurret = 0.5_V;
+    static constexpr auto kVTurret = 6.9796_V / 1_tps;
+    static constexpr auto kATurret = 0.087289_V / 1_tps / 1_s;
+
     // Controllers
     SlotConfiguration shooterSlotConfig;
 
     frc::ProfiledPIDController<units::radian> turretPID{
-        0.5, 0.0, 0.1, // Rotation-error
+        // Velocity PID 0.61116, 0.0, 0.0, // Rotation-error
+        // Position PID 4.9295, 0.0, 0.67183, // Rotation-error
+        0.61116, 0.0, 0.0, // Rotation-error
         frc::TrapezoidProfile<units::radian>::Constraints{
-            180_deg_per_s,
+            90_deg_per_s,
             360_deg_per_s / 1_s}};
 
     // Current Command

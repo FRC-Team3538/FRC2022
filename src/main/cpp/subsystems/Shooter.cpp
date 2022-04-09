@@ -88,12 +88,15 @@ Shooter::Shooter()
 
     turret.ConfigNeutralDeadband(0.05);
 
-    frc::SmartDashboard::PutNumber("TURRET P", 0.4);
-    frc::SmartDashboard::PutNumber("TURRET I", 0.0001);
-    frc::SmartDashboard::PutNumber("TURRET D", 0.0);
-
     indexerA.ConfigSupplyCurrentLimit(ctre::phoenix::motorcontrol::SupplyCurrentLimitConfiguration(true, 20, 20, 0));
     intake.ConfigSupplyCurrentLimit(ctre::phoenix::motorcontrol::SupplyCurrentLimitConfiguration(true, 30, 30, 0));
+
+    turret.Config_kP(0, 0.041334);
+    turret.Config_kD(0, 0.010188);
+    // 90 deg/s * 198 / 11040 * 2048 / 10 = 330.573913 tp100ms / 2 = 165.2869565
+    turret.ConfigMotionCruiseVelocity(5289);
+    // 360 deg/s/s * 198 / 11040 * 2048 / 10 = 1322.295652 tp100ms / s
+    turret.ConfigMotionAcceleration(10578);
 }
 
 void Shooter::ConfigureSystem() {}
@@ -102,9 +105,9 @@ void Shooter::UpdateTelemetry()
 {
     frc::SmartDashboard::PutNumber("Turret Angle Kekw", GetTurretAngle().value());
 
-    turret.Config_kP(0, frc::SmartDashboard::GetNumber("TURRET P", 0.4));
-    turret.Config_kI(0, frc::SmartDashboard::GetNumber("TURRET I", 0.0001));
-    turret.Config_kI(0, frc::SmartDashboard::GetNumber("TURRET D", 0.0));
+    // turret.Config_kP(0, frc::SmartDashboard::GetNumber("TURRET P", 0.4));
+    // turret.Config_kI(0, frc::SmartDashboard::GetNumber("TURRET I", 0.0001));
+    // turret.Config_kI(0, frc::SmartDashboard::GetNumber("TURRET D", 0.0));
 
     frc::SmartDashboard::PutBoolean("ZEROED", zeroed);
     frc::SmartDashboard::PutBoolean("ZEROED SWITCH", GetTurretSwitch());
@@ -224,17 +227,9 @@ bool Shooter::SetTurretAngle(units::degree_t targetAngle, units::degree_t tol)
     if (!zeroed)
         return false;
 
-    turret.Set(ctre::phoenix::motorcontrol::ControlMode::Position, targetAngle / kScaleFactorTurret);
+    turret.Set(ctre::phoenix::motorcontrol::ControlMode::MotionMagic, targetAngle / kScaleFactorTurret);
 
     return (units::math::abs((GetTurretAngle() - targetAngle)) < tol);
-    // units::degree_t currentAng = GetTurretAngle();
-
-    // if (targetAngle != turretPID.GetGoal().position)
-    // {
-    //     turretPID.SetGoal(targetAngle);
-    // }
-
-    // SetTurret(units::volt_t{turretPID.Calculate(currentAng)});
 }
 
 void Shooter::SetHoodAngle(Shooter::HoodPosition pos)
