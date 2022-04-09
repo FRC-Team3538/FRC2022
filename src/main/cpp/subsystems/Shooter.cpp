@@ -81,8 +81,8 @@ Shooter::Shooter()
     turret.ConfigPeakOutputReverse(-0.625);
     turret.ConfigForwardSoftLimitThreshold(kTurretMax / kScaleFactorTurret);
     turret.ConfigReverseSoftLimitThreshold(kTurretMin / kScaleFactorTurret);
-    turret.Config_IntegralZone(0, 2.0 / kScaleFactorTurret);
-    turret.ConfigAllowableClosedloopError(0, 0.5 / kScaleFactorTurret);
+    turret.Config_IntegralZone(0, 2_deg / kScaleFactorTurret);
+    turret.ConfigAllowableClosedloopError(0, 0.5_deg / kScaleFactorTurret);
     turret.ConfigForwardSoftLimitEnable(true);
     turret.ConfigReverseSoftLimitEnable(true);
 
@@ -195,9 +195,9 @@ bool Shooter::GetTurretSwitch()
 void Shooter::ZeroTurret(bool negative)
 {
     if (negative)
-        turret.SetSelectedSensorPosition(-3.0 / kScaleFactorTurret);
+        turret.SetSelectedSensorPosition(-3_deg / kScaleFactorTurret);
     else
-        turret.SetSelectedSensorPosition(0.4 / kScaleFactorTurret);
+        turret.SetSelectedSensorPosition(0.4_deg / kScaleFactorTurret);
     zeroed = true;
 }
 
@@ -224,7 +224,7 @@ bool Shooter::SetTurretAngle(units::degree_t targetAngle, units::degree_t tol)
     if (!zeroed)
         return false;
 
-    turret.Set(ctre::phoenix::motorcontrol::ControlMode::Position, (targetAngle / kScaleFactorTurret).value());
+    turret.Set(ctre::phoenix::motorcontrol::ControlMode::Position, targetAngle / kScaleFactorTurret);
 
     return (units::math::abs((GetTurretAngle() - targetAngle)) < tol);
     // units::degree_t currentAng = GetTurretAngle();
@@ -308,8 +308,7 @@ units::revolutions_per_minute_t Shooter::GetShooterRPM()
 
 units::degree_t Shooter::GetTurretAngle()
 {
-    double ang = turret.GetSelectedSensorPosition() * kScaleFactorTurret;
-    return units::degree_t(ang);
+    return turret.GetSelectedSensorPosition() * kScaleFactorTurret;
 }
 
 void Shooter::ResetEdgeDetector()

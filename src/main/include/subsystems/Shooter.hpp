@@ -112,8 +112,8 @@ public:
     void InitSendable(wpi::SendableBuilder &builder) override;
     void FalconSendableHelper(wpi::SendableBuilder &builder, WPI_TalonFX &motor, std::string name);
 
-    static constexpr double kTurretMax = 150.0; // Degrees
-    static constexpr double kTurretMin = -150.0;
+    static constexpr auto kTurretMax = 150_deg;
+    static constexpr auto kTurretMin = 150_deg * -1;
 
 private:
     // Hardware
@@ -133,7 +133,7 @@ private:
     frc::Solenoid hoodStop{frc::PneumaticsModuleType::REVPH, 3};
 
     // Constants
-    static constexpr double kScaleFactorTurret = 360.0 * (18.0 / 184.0) * (11.0 / 60.0) * (1.0 / 2048.0); // Angle Over Ticks
+    static constexpr auto kScaleFactorTurret = 360_deg * (18.0 / 184.0) * (11.0 / 60.0) * (1.0 / 2048.0); // Angle Over Ticks
     static constexpr double kTicks2RPM = (1.0 / (2048.0)) * 10.0 * 60.0;
 
     // Controllers
