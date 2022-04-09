@@ -50,7 +50,7 @@ void Subsystem::FalconEntryStartHelper(wpi::log::DataLog &log, std::string name)
 {
     RegisterDataEntry(log, name + "/percent", "double");
     RegisterDataEntry(log, name + "/voltage", "double");
-    RegisterDataEntry(log, name + "/rpm", "double");
+    // RegisterDataEntry(log, name + "/rpm", "double");
     RegisterDataEntry(log, name + "/temperature", "double");
     RegisterDataEntry(log, name + "/current", "double");
 }
@@ -59,7 +59,7 @@ void Subsystem::FalconEntryHelper(wpi::log::DataLog &log, WPI_TalonFX &motor, st
 {
     log.AppendDouble(GetDataEntry(name + "/percent"), motor.Get(), timestamp);
     log.AppendDouble(GetDataEntry(name + "/voltage"), motor.GetMotorOutputVoltage(), timestamp);
-    log.AppendDouble(GetDataEntry(name + "/rpm"), motor.GetSelectedSensorVelocity() * kTicks2RPM, timestamp);
+    // log.AppendDouble(GetDataEntry(name + "/rpm"), motor.GetSelectedSensorVelocity() * kTicks2RPM, timestamp);
     log.AppendDouble(GetDataEntry(name + "/temperature"), motor.GetTemperature(), timestamp);
     log.AppendDouble(GetDataEntry(name + "/current"), motor.GetOutputCurrent(), timestamp);
 }
