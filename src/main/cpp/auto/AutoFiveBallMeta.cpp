@@ -295,7 +295,7 @@ void AutoFiveBallMeta::Run()
         // aim at target
         if (m_newShooterState) {
             IO.shooter.SetIntakeState(Shooter::Position::Stowed);
-            IO.shooter.SetShooterRPM(4500_rpm);
+            IO.shooter.SetShooterRPM(4350_rpm);
         }
 
         if (FindVisionTarget() || m_shooterTimer.Get() > m_shooterTimeout)
