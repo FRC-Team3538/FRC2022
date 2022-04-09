@@ -120,4 +120,6 @@ private:
   static constexpr auto hub_upper_radius = 2_ft;
 
   nt::NetworkTableEntry localization_flag_entry = frc::SmartDashboard::GetEntry("flags/alternate_localization");
+
+  frc::Timer m_testTimer;
 };
