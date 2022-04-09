@@ -151,16 +151,16 @@ void Drivetrain::SetSpeeds(const frc::DifferentialDriveWheelSpeeds &speeds)
     auto leftRate = -m_driveL0.GetSelectedSensorVelocity() * kDPP / 0.1_s;
     auto rightRate = m_driveR0.GetSelectedSensorVelocity() * kDPP / 0.1_s;
 
-    auto current_speeds_vec = Eigen::Vector2<double>{leftRate.value(), rightRate.value()};
-    auto goal_speeds_vec = Eigen::Vector2<double>{speeds.left.value(), speeds.right.value()};
+    // auto current_speeds_vec = Eigen::Vector2<double>{leftRate.value(), rightRate.value()};
+    // auto goal_speeds_vec = Eigen::Vector2<double>{speeds.left.value(), speeds.right.value()};
 
-    auto ff = m_drivetrainFeedForward.Calculate(current_speeds_vec, goal_speeds_vec);
+    // auto ff = m_drivetrainFeedForward.Calculate(current_speeds_vec, goal_speeds_vec);
 
-    auto leftFeedforward = ff[0];
-    auto rightFeedforward = ff[1];
+    // auto leftFeedforward = ff[0];
+    // auto rightFeedforward = ff[1];
 
-    // auto leftFeedforward = m_feedforward.Calculate(speeds.left);
-    // auto rightFeedforward = m_feedforward.Calculate(speeds.right);
+    auto leftFeedforward = m_feedforward.Calculate(speeds.left);
+    auto rightFeedforward = m_feedforward.Calculate(speeds.right);
 
     // convert from meters per second to ticks per 100ms
     auto leftSpeed = speeds.left * (0.1_s / kDPP);
