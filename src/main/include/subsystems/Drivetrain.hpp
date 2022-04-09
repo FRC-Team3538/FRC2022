@@ -39,6 +39,8 @@
 #include "ctre/phoenix/motorcontrol/can/WPI_TalonFX.h"
 #include "ctre/phoenix/sensors/SensorVelocityMeasPeriod.h"
 #include "ctre/phoenix/sensors/WPI_Pigeon2.h"
+#include <frc/controller/LinearPlantInversionFeedforward.h>
+#include <frc/system/LinearSystem.h>
 
 namespace frc {
 class FieldObject2d;
@@ -188,7 +190,6 @@ private:
     double cmd_vl = 0.0;
     double cmd_vr = 0.0;
 
-#ifndef __FRC_ROBORIO__
     //
     // Simulation
     //
@@ -197,6 +198,10 @@ private:
             kVlinear, kAlinear,
             kVangular, kAangular, kTrackWidth);
 
+    frc::LinearPlantInversionFeedforward<2, 2> m_drivetrainFeedForward = 
+        frc::LinearPlantInversionFeedforward<2, 2>{m_drivetrainSystem, 0.02_s};
+
+#ifndef __FRC_ROBORIO__
     frc::sim::DifferentialDrivetrainSim m_drivetrainSimulator{
         m_drivetrainSystem,
         kTrackWidth,
