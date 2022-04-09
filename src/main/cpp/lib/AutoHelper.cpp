@@ -142,7 +142,7 @@ namespace rj
             bool reverse_here = waypoint.at("isReversal");
             invert = invert ^ reverse_here;
 
-            for (int i = 250 * current_segment; i < 250 * (current_segment + 1) + 1; i++)
+            for (std::size_t i = 250 * current_segment; i < 250 * (current_segment + 1) + 1; i++)
             {
                 if (i >= path.size())
                 {
