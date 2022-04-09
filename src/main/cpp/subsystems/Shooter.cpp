@@ -92,6 +92,9 @@ Shooter::Shooter()
     indexerA.ConfigSupplyCurrentLimit(ctre::phoenix::motorcontrol::SupplyCurrentLimitConfiguration(true, 20, 20, 0));
     intake.ConfigSupplyCurrentLimit(ctre::phoenix::motorcontrol::SupplyCurrentLimitConfiguration(true, 30, 30, 0));
 
+
+    turret.Config_kP(0, 0.4);
+
     turret.Config_kP(0, 0.041334);
     turret.Config_kD(0, 0.010188);
     // 90 deg/s * 198 / 11040 * 2048 / 10 = 330.573913 tp100ms / 2 = 165.2869565
@@ -108,7 +111,7 @@ void Shooter::UpdateTelemetry()
 
     // turret.Config_kP(0, frc::SmartDashboard::GetNumber("TURRET P", 0.4));
     // turret.Config_kI(0, frc::SmartDashboard::GetNumber("TURRET I", 0.0001));
-    // turret.Config_kI(0, frc::SmartDashboard::GetNumber("TURRET D", 0.0));
+    // turret.Config_kD(0, frc::SmartDashboard::GetNumber("TURRET D", 0.0));
 
     frc::SmartDashboard::PutBoolean("ZEROED", zeroed);
     frc::SmartDashboard::PutBoolean("ZEROED SWITCH", GetTurretSwitch());
@@ -229,6 +232,24 @@ bool Shooter::SetTurretAngle(units::degree_t targetAngle, units::degree_t tol)
         return false;
 
     goalAngle = targetAngle;
+
+    turret.Config_kP(0, 0.4);
+
+
+    turret.Set(ctre::phoenix::motorcontrol::ControlMode::Position, targetAngle / kScaleFactorTurret);
+
+    return (units::math::abs((GetTurretAngle() - targetAngle)) < tol);
+}
+
+
+bool Shooter::SetTurretAngleSmooth(units::degree_t targetAngle, units::degree_t tol)
+{
+    if (!zeroed)
+        return false;
+
+    goalAngle = targetAngle;
+    turret.Config_kP(0, 0.041334);
+    turret.Config_kD(0, 0.010188);
 
     turret.Set(ctre::phoenix::motorcontrol::ControlMode::MotionMagic, targetAngle / kScaleFactorTurret);
 

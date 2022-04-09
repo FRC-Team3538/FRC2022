@@ -353,7 +353,7 @@ void Robot::TeleopPeriodic()
           auto turret_position = IO.drivetrain.GetPose() + turret_to_robot.Inverse() + frc::Transform2d{frc::Translation2d{}, frc::Rotation2d{180_deg}};
           auto global_angle_to_hub = units::math::atan2(center_hub.Y() - turret_position.Y(), center_hub.X() - turret_position.X());
           auto turret_angle_to_hub = global_angle_to_hub - turret_position.Rotation().Radians();
-          IO.shooter.SetTurretAngle(turret_angle_to_hub, 0.75_deg);
+          IO.shooter.SetTurretAngleSmooth(turret_angle_to_hub, 0.75_deg);
         }
       }
       
@@ -539,7 +539,7 @@ void Robot::TeleopPeriodic()
   else if (IO.shooter.GetShooterRPM() > 10.0_rpm ||
            units::math::abs(intakeCmd) > 0.0_V)
   {
-    IO.shooter.SetFeeder(-2_V);
+    IO.shooter.SetFeeder(-4_V);
   }
   else
   {

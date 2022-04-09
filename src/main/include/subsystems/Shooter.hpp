@@ -87,6 +87,7 @@ public:
     void SetTurretBrakeMode();
     void SetTurret(units::volt_t targetVolts);
     bool SetTurretAngle(units::degree_t targetAngle, units::degree_t tol);
+    bool SetTurretAngleSmooth(units::degree_t targetAngle, units::degree_t tol);
     void ZeroTurret(bool negative);
     void ZeroTurret();
 
