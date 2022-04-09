@@ -240,7 +240,7 @@ void AutoFiveBallMeta::Run()
     {
         // aim at target
         if (m_newShooterState) {
-            IO.shooter.SetIntakeState(Shooter::Position::Stowed);
+            // IO.shooter.SetIntakeState(Shooter::Position::Stowed);
             IO.shooter.SetShooterRPM(4550_rpm);
         }
 
