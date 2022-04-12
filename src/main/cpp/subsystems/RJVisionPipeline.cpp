@@ -276,8 +276,11 @@ namespace vision
 
     void RJVisionPipeline::TakeSnapshot(uint8_t numberOfSnaps)
     {
-        camera.TakeInputSnapshot();
-        camera.TakeOutputSnapshot();
+        if (numberOfSnaps > 0)
+        {
+            camera.TakeInputSnapshot();
+            camera.TakeOutputSnapshot();
+        }
     }
 
     void RJVisionPipeline::SetTurretAngle(units::degree_t angle)
