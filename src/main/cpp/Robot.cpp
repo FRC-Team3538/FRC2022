@@ -548,7 +548,7 @@ void Robot::TeleopPeriodic()
   else if (IO.shooter.GetShooterRPM() > 10.0_rpm ||
            units::math::abs(intakeCmd) > 0.0_V)
   {
-    IO.shooter.SetFeeder(-4_V);
+    IO.shooter.SetFeeder(-2_V);
   }
   else
   {
