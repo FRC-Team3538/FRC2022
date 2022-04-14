@@ -73,7 +73,7 @@ void AutoTwoBall::Run()
 
         IO.shooter.SetIntakeState(Shooter::Position::Deployed);
         IO.shooter.SetIntake(8_V);
-        IO.shooter.SetShooterRPM(3950_rpm);
+        IO.shooter.SetShooterRPM(3100_rpm);
         IO.shooter.SetIndexer(3_V);
         IO.shooter.SetFeeder(-2_V);
 

@@ -227,7 +227,7 @@ void AutoFiveBallMeta::Run()
             IO.shooter.SetIntake(8_V);
             IO.shooter.SetShooterRPM(0_rpm);
             IO.shooter.SetIndexer(5_V);
-            IO.shooter.SetFeeder(-2_V);
+            IO.shooter.SetFeeder(-4_V);
 
             IO.rjVision.SetLED(true);
         }
@@ -241,7 +241,8 @@ void AutoFiveBallMeta::Run()
         // aim at target
         if (m_newShooterState) {
             // IO.shooter.SetIntakeState(Shooter::Position::Stowed);
-            IO.shooter.SetShooterRPM(4550_rpm);
+            IO.shooter.SetShooterRatio(-1.0);
+            IO.shooter.SetShooterRPM(3350_rpm);
         }
 
         if (FindVisionTarget() || m_shooterTimer.Get() > m_shooterTimeout)
@@ -283,7 +284,7 @@ void AutoFiveBallMeta::Run()
         if (m_newShooterState) {
             IO.shooter.SetIntakeState(Shooter::Position::Deployed);
             IO.shooter.SetShooterRPM(0_rpm);
-            IO.shooter.SetFeeder(-2_V);
+            IO.shooter.SetFeeder(-4_V);
         }
 
         PassiveTurretAim();
@@ -295,7 +296,8 @@ void AutoFiveBallMeta::Run()
         // aim at target
         if (m_newShooterState) {
             IO.shooter.SetIntakeState(Shooter::Position::Stowed);
-            IO.shooter.SetShooterRPM(4350_rpm);
+            IO.shooter.SetShooterRatio(-1.0);
+            IO.shooter.SetShooterRPM(3250_rpm);
         }
 
         if (FindVisionTarget() || m_shooterTimer.Get() > m_shooterTimeout)

@@ -184,7 +184,7 @@ void Robot::TeleopPeriodic()
 
     if (IO.shooter.GetShooterRPM() < 250.0_rpm)
     {
-      IO.shooter.SetShooterRPM(rpmRight); // Tarmac
+      IO.shooter.SetShooterRPM(rpmLeft); // Wall
     }
 
     climberTimerOS = false;
@@ -197,7 +197,9 @@ void Robot::TeleopPeriodic()
     {
       // Calculate Turret
       auto turretOK = IO.shooter.SetTurretAngle(data.turretAngle, 1.0_deg);
-      auto flywheelOK = units::math::abs(IO.shooter.GetShooterRPM() - rpmRight) < 100_rpm;
+      auto flywheelOK = units::math::abs(IO.shooter.GetShooterRPM() - rpmLeft) < 100_rpm;
+      frc::SmartDashboard::PutBoolean("flags/turretOk", turretOK);
+      frc::SmartDashboard::PutBoolean("flags/flywheelOK", flywheelOK);
       shoot = turretOK && flywheelOK;
     }
 
@@ -382,6 +384,7 @@ void Robot::TeleopPeriodic()
     break;
   case 0:
     // Launchpad
+    IO.shooter.SetShooterRatio(-1.2);
     IO.shooter.SetShooterRPM(rpmUp);
     m_csmode = ClimberShooterMode::Shooter;
     if (!hoodOS)
