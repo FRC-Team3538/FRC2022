@@ -99,6 +99,7 @@ public:
     // *** GETTERS ***
     units::revolutions_per_minute_t GetShooterRPM();
     units::degree_t GetTurretAngle();
+    bool AtRPM(units::revolutions_per_minute_t threshold);
 
     bool GetTurretSwitch();
 

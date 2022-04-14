@@ -412,6 +412,11 @@ bool Shooter::Shoot(units::second_t settleTime)
     return false; // TODO: Move to NT Parameter / Class Constant?
 }
 
+bool Shooter::AtRPM(units::revolutions_per_minute_t threshold)
+{
+    return units::math::abs(GetShooterRPM() - cmd_shooterRPM) < threshold;
+}
+
 Shooter::State Shooter::CalculateShot(units::inch_t distance)
 {
     double mainWheel = 2031.0 + (0.0015 * std::pow(distance.value(), 3)) + (-0.34445 * std::pow(distance.value(), 2)) + (28.5196 * std::pow(distance.value(), 1));

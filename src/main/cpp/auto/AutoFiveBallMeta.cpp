@@ -242,7 +242,7 @@ void AutoFiveBallMeta::Run()
         if (m_newShooterState) {
             // IO.shooter.SetIntakeState(Shooter::Position::Stowed);
             IO.shooter.SetShooterRatio(-1.0);
-            IO.shooter.SetShooterRPM(3350_rpm);
+            IO.shooter.SetShooterRPM(3450_rpm);
         }
 
         if (FindVisionTarget() || m_shooterTimer.Get() > m_shooterTimeout)
@@ -283,7 +283,7 @@ void AutoFiveBallMeta::Run()
         // wait for second path
         if (m_newShooterState) {
             IO.shooter.SetIntakeState(Shooter::Position::Deployed);
-            IO.shooter.SetShooterRPM(0_rpm);
+            IO.shooter.SetShooterRPM(3250_rpm);
             IO.shooter.SetFeeder(-4_V);
         }
 
