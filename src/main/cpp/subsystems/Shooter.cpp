@@ -338,7 +338,7 @@ void Shooter::ResetEdgeDetector()
 bool Shooter::Shoot_EdgeDetector()
 {
     // Resume Last Command (in case shooter was stopped)
-    SetShooterRPM(cmd_shooterRPM);
+    // SetShooterRPM(cmd_shooterRPM);
 
 #ifdef __FRC_ROBORIO__
 
