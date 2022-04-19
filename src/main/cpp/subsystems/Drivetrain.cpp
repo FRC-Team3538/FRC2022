@@ -208,7 +208,7 @@ frc::Pose2d Drivetrain::GetPose() const
     if (localization_flag_entry.GetBoolean(false) )
     {
         // return m_poseEstimator.GetEstimatedPosition();
-        return frc::Pose2d{};
+        return m_odometry.GetPose();
     }
     else 
     {  
