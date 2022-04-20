@@ -85,7 +85,7 @@ void AutoFiveBallMeta::Init()
     if (frc::DriverStation::GetAlliance() == frc::DriverStation::Alliance::kBlue)
     {
         // TODO clone sneaky path
-        auto trajectories = rj::AutoHelper::LoadTrajectorySplit("05 - 5 Ball Wall Ball", &config);
+        auto trajectories = rj::AutoHelper::LoadTrajectorySplit("05 - 5 Ball Wall Ball Blue", &config);
 
         m_trajectory_first = trajectories[0];
         m_trajectory_second = trajectories[1];
@@ -93,7 +93,7 @@ void AutoFiveBallMeta::Init()
     }
     else
     {
-        auto trajectories = rj::AutoHelper::LoadTrajectorySplit("05 - 5 Ball Wall Ball", &config);
+        auto trajectories = rj::AutoHelper::LoadTrajectorySplit("05 - 5 Ball Wall Ball Red", &config);
 
         m_trajectory_first = trajectories[0];
         m_trajectory_second = trajectories[1];
