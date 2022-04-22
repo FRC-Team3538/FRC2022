@@ -109,6 +109,15 @@ void Shooter::UpdateTelemetry()
 {
     frc::SmartDashboard::PutNumber("Turret Angle Kekw", GetTurretAngle().value());
 
+    double shooterRatio;
+    if (shooterA.GetSelectedSensorVelocity() == 0) {
+        shooterRatio = 0;
+    } else {
+        shooterRatio = shooterB.GetSelectedSensorVelocity() / shooterA.GetSelectedSensorVelocity();
+    }
+
+    frc::SmartDashboard::PutNumber("robot/Shooter Actual Ratio", shooterRatio);
+
     // turret.Config_kP(0, frc::SmartDashboard::GetNumber("TURRET P", 0.4));
     // turret.Config_kI(0, frc::SmartDashboard::GetNumber("TURRET I", 0.0001));
     // turret.Config_kD(0, frc::SmartDashboard::GetNumber("TURRET D", 0.0));
@@ -491,6 +500,11 @@ void Shooter::InitSendable(wpi::SendableBuilder &builder)
         [this]
         { return cmd_shooterRPM.value(); },
         nullptr);
+    builder.AddDoubleProperty(
+        "cmd/shooterRPM_B",
+        [this]
+        { return cmd_shooterRPM.value() * shooter_ratio; },
+        nullptr);
     //[this] (double value) {  cmd_shooterRPM = units::revolutions_per_minute_t{value}; });
 
     // Basic Motors
@@ -594,8 +608,8 @@ void Shooter::LogDataEntries(wpi::log::DataLog &log)
     FalconEntryHelper(log, intake, "Shooter/intake");
     FalconEntryHelper(log, indexerA, "Shooter/indexerA");
     FalconEntryHelper(log, feeder, "Shooter/feeder");
-    FalconEntryHelper(log, shooterA, "Shooter/shooterA");
-    FalconEntryHelper(log, shooterB, "Shooter/shooterB");
+    FalconEntryHelper(log, shooterA, "Shooter/shooterA", 0, true);
+    FalconEntryHelper(log, shooterB, "Shooter/shooterB", 0, true);
     FalconEntryHelper(log, turret, "Shooter/turret");
     // FalconEntryHelper(log, hood, "hood");
 
@@ -626,8 +640,8 @@ void Shooter::RegisterDataEntries(wpi::log::DataLog &log)
     FalconEntryStartHelper(log, "Shooter/intake");
     FalconEntryStartHelper(log, "Shooter/indexerA");
     FalconEntryStartHelper(log, "Shooter/feeder");
-    FalconEntryStartHelper(log, "Shooter/shooterA");
-    FalconEntryStartHelper(log, "Shooter/shooterB");
+    FalconEntryStartHelper(log, "Shooter/shooterA", true);
+    FalconEntryStartHelper(log, "Shooter/shooterB", true);
     FalconEntryStartHelper(log, "Shooter/turret");
     // FalconEntryStartHelper(log, "Shooter/hood");
     

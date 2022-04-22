@@ -46,20 +46,26 @@ int Subsystem::GetDataEntry(std::string entry_name)
     return data_entries[entry_name];
 }
 
-void Subsystem::FalconEntryStartHelper(wpi::log::DataLog &log, std::string name)
+void Subsystem::FalconEntryStartHelper(wpi::log::DataLog &log, std::string name, bool primary)
 {
     RegisterDataEntry(log, name + "/percent", "double");
     RegisterDataEntry(log, name + "/voltage", "double");
-    // RegisterDataEntry(log, name + "/rpm", "double");
     RegisterDataEntry(log, name + "/temperature", "double");
     RegisterDataEntry(log, name + "/current", "double");
+
+    if (primary) {
+        RegisterDataEntry(log, name + "/rpm", "double");
+    }
 }
 
-void Subsystem::FalconEntryHelper(wpi::log::DataLog &log, WPI_TalonFX &motor, std::string name, uint64_t timestamp)
+void Subsystem::FalconEntryHelper(wpi::log::DataLog &log, WPI_TalonFX &motor, std::string name, uint64_t timestamp, bool primary)
 {
     log.AppendDouble(GetDataEntry(name + "/percent"), motor.Get(), timestamp);
     log.AppendDouble(GetDataEntry(name + "/voltage"), motor.GetMotorOutputVoltage(), timestamp);
-    // log.AppendDouble(GetDataEntry(name + "/rpm"), motor.GetSelectedSensorVelocity() * kTicks2RPM, timestamp);
     log.AppendDouble(GetDataEntry(name + "/temperature"), motor.GetTemperature(), timestamp);
     log.AppendDouble(GetDataEntry(name + "/current"), motor.GetOutputCurrent(), timestamp);
+
+    if (primary) {
+            log.AppendDouble(GetDataEntry(name + "/rpm"), motor.GetSelectedSensorVelocity() * kTicks2RPM, timestamp);
+    }
 }

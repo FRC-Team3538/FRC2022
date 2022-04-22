@@ -39,8 +39,8 @@ public:
     void RegisterDataEntry(wpi::log::DataLog &log, std::string entry_name, std::string_view type, std::string_view metadata = {}, int64_t timestamp = 0);
     int GetDataEntry(std::string key);
 
-    void FalconEntryStartHelper(wpi::log::DataLog &log, std::string name);
-    void FalconEntryHelper(wpi::log::DataLog &log, WPI_TalonFX &motor, std::string name, uint64_t timestamp = 0);
+    void FalconEntryStartHelper(wpi::log::DataLog &log, std::string name, bool primary = false);
+    void FalconEntryHelper(wpi::log::DataLog &log, WPI_TalonFX &motor, std::string name, uint64_t timestamp = 0, bool primary = false);
 private:
     std::unordered_map<std::string, int> data_entries{};
 
