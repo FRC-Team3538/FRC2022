@@ -51,13 +51,21 @@ Shooter::Shooter()
 
     // Closed Loop Configuration
     shooterA.GetSlotConfigs(shooterSlotConfig, 0);
-    shooterSlotConfig.kF = 0.056494409;
-    shooterSlotConfig.kP = 0.225;
-    shooterSlotConfig.kI = 0.0001;
-    shooterSlotConfig.kD = 6.000;
+    shooterSlotConfig.kF = 0.0;
+    shooterSlotConfig.kP = 3.8716e-06;
+    shooterSlotConfig.kI = 0.0;
+    shooterSlotConfig.kD = 0.0;
     shooterSlotConfig.integralZone = 400.0;
 
     FalconSlotConfig(shooterA, 0, shooterSlotConfig);
+
+    shooterB.GetSlotConfigs(shooterSlotConfig, 0);
+    shooterSlotConfig.kF = 0.0;
+    shooterSlotConfig.kP = 1.5039e-06;
+    shooterSlotConfig.kI = 0.0;
+    shooterSlotConfig.kD = 0.0;
+    shooterSlotConfig.integralZone = 400.0;
+
     FalconSlotConfig(shooterB, 0, shooterSlotConfig);
 
     SetStatusFrames(shooterA, 250);
@@ -67,8 +75,10 @@ Shooter::Shooter()
     SetStatusFrames(feeder, 250);
     SetStatusFrames(turret, 250);
 
-    shooterA.SetStatusFramePeriod(ctre::phoenix::motorcontrol::StatusFrameEnhanced::Status_3_Quadrature, 18);
-    shooterB.SetStatusFramePeriod(ctre::phoenix::motorcontrol::StatusFrameEnhanced::Status_3_Quadrature, 18);
+    shooterA.SetStatusFramePeriod(StatusFrameEnhanced::Status_1_General, 20, 50);
+    shooterA.SetStatusFramePeriod(StatusFrameEnhanced::Status_2_Feedback0, 20, 50);
+    shooterB.SetStatusFramePeriod(StatusFrameEnhanced::Status_1_General, 20, 50);
+    shooterB.SetStatusFramePeriod(StatusFrameEnhanced::Status_2_Feedback0, 20, 50);
 
     // turret.SetStatusFramePeriod(StatusFrameEnhanced::Status_1_General, 10, 50);
     turret.SetStatusFramePeriod(StatusFrameEnhanced::Status_1_General, 20, 50);
@@ -174,8 +184,14 @@ void Shooter::SetShooterRPM(units::revolutions_per_minute_t targetRPM)
         return;
     }
 
-    shooterA.Set(ControlMode::Velocity, targetRPM.value() / kTicks2RPM);
-    shooterB.Set(ControlMode::Velocity, targetRPM.value() / kTicks2RPM * shooter_ratio);
+    auto a_feedforward = m_shooterAFeedForward.Calculate(targetRPM);
+    auto b_feedforward = m_shooterAFeedForward.Calculate(targetRPM * shooter_ratio);
+
+    frc::SmartDashboard::PutNumber("shooter_a_ff", a_feedforward / 12_V);
+    frc::SmartDashboard::PutNumber("shooter_b_ff", b_feedforward / 12_V);
+
+    shooterA.Set(ControlMode::Velocity, targetRPM.value() / kTicks2RPM, DemandType::DemandType_ArbitraryFeedForward, a_feedforward / 12_V);
+    shooterB.Set(ControlMode::Velocity, targetRPM.value() / kTicks2RPM * shooter_ratio, DemandType::DemandType_ArbitraryFeedForward, b_feedforward / 12_V);
 }
 
 void Shooter::SetShooterRPM()

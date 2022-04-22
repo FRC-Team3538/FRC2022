@@ -22,6 +22,7 @@
 #include "ctre/phoenix/motorcontrol/IMotorController.h"
 #include "ctre/phoenix/motorcontrol/can/BaseMotorController.h"
 #include "ctre/phoenix/motorcontrol/can/WPI_TalonFX.h"
+#include <frc/controller/SimpleMotorFeedforward.h>
 
 namespace wpi {
 class SendableBuilder;
@@ -141,7 +142,19 @@ private:
     // static constexpr auto kSTurret = 1.0697_V;
     static constexpr auto kSTurret = 0.5_V;
     static constexpr auto kVTurret = 6.9796_V / 1_tps;
-    static constexpr auto kATurret = 0.087289_V / 1_tps / 1_s;
+    static constexpr auto kATurret = 0.087289_V / (1_tps / 1_s);
+
+    static constexpr auto kSShooterA = 0.69164_V;
+    static constexpr auto kVShooterA = 0.10744_V / 1_tps;
+    static constexpr auto kAShooterA = 0.0026336_V / (1_tps / 1_s);
+
+    static constexpr auto kSShooterB = 0.69479_V;
+    static constexpr auto kVShooterB = 0.10567_V / 1_tps;
+    static constexpr auto kAShooterB = 0.0024562_V / (1_tps / 1_s);
+
+    frc::SimpleMotorFeedforward<units::turn> m_shooterAFeedForward{kSShooterA, kVShooterA, kAShooterA};
+    frc::SimpleMotorFeedforward<units::turn> m_shooterBFeedForward{kSShooterB, kVShooterB, kAShooterB};
+
 
     // Controllers
     SlotConfiguration shooterSlotConfig;
