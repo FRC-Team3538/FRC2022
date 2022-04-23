@@ -384,7 +384,7 @@ void Robot::TeleopPeriodic()
     break;
   case 0:
     // Launchpad
-    IO.shooter.SetShooterRatio(-1.2);
+    // IO.shooter.SetShooterRatio(-1.2);
     IO.shooter.SetShooterRPM(rpmUp);
     m_csmode = ClimberShooterMode::Shooter;
     if (!hoodOS)
