@@ -439,7 +439,7 @@ bool Shooter::Shoot(units::second_t settleTime)
 
 bool Shooter::AtRPM(units::revolutions_per_minute_t threshold)
 {
-    return units::math::abs(GetShooterRPM() - cmd_shooterRPM) < threshold;
+    return units::math::abs(GetShooterRPM() - 130_rpm - cmd_shooterRPM) < threshold;
 }
 
 Shooter::State Shooter::CalculateShot(units::inch_t distance)
