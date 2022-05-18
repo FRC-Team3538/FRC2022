@@ -77,13 +77,8 @@ public:
 
     void ConfigureSystem() override;
 
-    void Arcade(double forward, double rotate);
-    void SetSpeeds(const frc::DifferentialDriveWheelSpeeds &speeds);
-    void Drive(units::meters_per_second_t xSpeed,
-               units::radians_per_second_t rot);
-    void Drive(frc::ChassisSpeeds &speeds);
+    void Drive(double forward, double rotate);
     bool TurnRel(double forward, units::degree_t target, units::degree_t tolerance);
-    void Drive(const frc::Trajectory::State& target);
 
     void UpdateOdometryWithGlobalEstimate(frc::Pose2d globalEstimate, units::second_t estimateTime);
     void UpdateOdometry();
@@ -106,20 +101,20 @@ private:
     /***************************************************************************/
     // Characterization Values
 
-    static constexpr units::meter_t kTrackWidth = 0.78107_m;
-    static constexpr units::meter_t kWheelRadius = 1.95_in;
+   // static constexpr units::meter_t kTrackWidth = 0.78107_m;
+   // static constexpr units::meter_t kWheelRadius = 1.95_in;
 
-    static constexpr double kGearRatio = (60.0 / 11.0) * (54.0 / 38.0);
-    static constexpr int kEncoderResolution = 2048;
-    static constexpr int kMotorCount = 3; // Per gearbox
+   // static constexpr double kGearRatio = (60.0 / 11.0) * (54.0 / 38.0);
+   // static constexpr int kEncoderResolution = 2048;
+   // static constexpr int kMotorCount = 3; // Per gearbox
 
     // Made these slightly more obscure to support use in calculating kMaxSpeedLinear/Angular at compile time.
-    static constexpr auto kMaxVoltage = 12.0_V;
+   // static constexpr auto kMaxVoltage = 12.0_V;
     static constexpr auto kStatic = 0.68798_V;
     static constexpr auto kVlinear = 2.643_V / 1_mps;
     static constexpr auto kAlinear = 0.16209_V / 1_mps_sq;
-    static constexpr auto kVangular = 2.7351_V / 1_rad_per_s;
-    static constexpr auto kAangular = 0.035228_V / 1_rad_per_s_sq;
+   // static constexpr auto kVangular = 2.7351_V / 1_rad_per_s;
+   // static constexpr auto kAangular = 0.035228_V / 1_rad_per_s_sq;
 
     // Velocity Control PID (Is this really required ???)
     // these are updated w/ the latest sysid data, BUT are untested
@@ -127,16 +122,16 @@ private:
     frc2::PIDController m_rightPIDController{5.7845, 0.0, 0.0}; //{0.89223, 0.0, 0.0};
 
     // Average Battery Resistance (Simulation)
-    static constexpr auto kBatteryResistance = 0.03;
+  //  static constexpr auto kBatteryResistance = 0.03;
 
     // Distance Per Pulse (Scale Factor)
-    static constexpr auto kDPP = (2 * kWheelRadius * M_PI) / kGearRatio / kEncoderResolution; 
+  //  static constexpr auto kDPP = (2 * kWheelRadius * M_PI) / kGearRatio / kEncoderResolution; 
 
 public:
     // Teleop Values
     // CHECK: calculated based on sysid characterization
-    static constexpr units::meters_per_second_t kMaxSpeedLinear = (kMaxVoltage - kStatic) / kVlinear;
-    static constexpr units::radians_per_second_t kMaxSpeedAngular = (kMaxVoltage - kStatic) / kVangular;
+   // static constexpr units::meters_per_second_t kMaxSpeedLinear = (kMaxVoltage - kStatic) / kVlinear;
+   // static constexpr units::radians_per_second_t kMaxSpeedAngular = (kMaxVoltage - kStatic) / kVangular;
 
 
     /***************************************************************************/
@@ -169,7 +164,7 @@ private:
     //
     // Dynamics
     //
-    frc::DifferentialDriveKinematics m_kinematics{kTrackWidth};
+    frc::DifferentialDriveKinematics m_kinematics{};
     frc::DifferentialDriveOdometry m_odometry{GetYaw()};
     frc::DifferentialDrivePoseEstimator m_poseEstimator{
         GetYaw(), 
