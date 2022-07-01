@@ -30,7 +30,6 @@ Shooter::Shooter()
     shooterA.ConfigFactoryDefault();
     shooterB.ConfigFactoryDefault();
     turret.ConfigFactoryDefault();
-    // hood.ConfigFactoryDefault();
 
     // Invert motors
     intake.SetInverted(false);
@@ -39,7 +38,6 @@ Shooter::Shooter()
     feeder.SetInverted(false);
     shooterA.SetInverted(false);
     shooterB.SetInverted(true);
-    // hood.SetInverted(false);
 
     // Break / Coast mode (Not affected by ConfigFactoryDefault)
     intake.SetNeutralMode(NeutralMode::Coast);
@@ -47,25 +45,16 @@ Shooter::Shooter()
     // indexerB.SetNeutralMode(NeutralMode::Coast);
     shooterA.SetNeutralMode(NeutralMode::Coast);
     shooterB.SetNeutralMode(NeutralMode::Coast);
-    // hood.SetNeutralMode(NeutralMode::Coast);
 
     // Closed Loop Configuration
     shooterA.GetSlotConfigs(shooterSlotConfig, 0);
-    shooterSlotConfig.kF = 0.0;
-    shooterSlotConfig.kP = 3.8716e-06;
-    shooterSlotConfig.kI = 0.0;
-    shooterSlotConfig.kD = 0.0;
+    shooterSlotConfig.kF = 0.056494409;
+    shooterSlotConfig.kP = 0.225;
+    shooterSlotConfig.kI = 0.0001;
+    shooterSlotConfig.kD = 6.000;
     shooterSlotConfig.integralZone = 400.0;
 
     FalconSlotConfig(shooterA, 0, shooterSlotConfig);
-
-    shooterB.GetSlotConfigs(shooterSlotConfig, 0);
-    shooterSlotConfig.kF = 0.0;
-    shooterSlotConfig.kP = 1.5039e-06;
-    shooterSlotConfig.kI = 0.0;
-    shooterSlotConfig.kD = 0.0;
-    shooterSlotConfig.integralZone = 400.0;
-
     FalconSlotConfig(shooterB, 0, shooterSlotConfig);
 
     SetStatusFrames(shooterA, 250);
@@ -103,9 +92,8 @@ Shooter::Shooter()
     intake.ConfigSupplyCurrentLimit(ctre::phoenix::motorcontrol::SupplyCurrentLimitConfiguration(true, 30, 30, 0));
 
 
-    turret.Config_kP(0, 0.4);
-
     turret.Config_kP(0, 0.041334);
+    // kI ??
     turret.Config_kD(0, 0.010188);
     // 90 deg/s * 198 / 11040 * 2048 / 10 = 330.573913 tp100ms / 2 = 165.2869565
     turret.ConfigMotionCruiseVelocity(5289);
@@ -120,9 +108,12 @@ void Shooter::UpdateTelemetry()
     frc::SmartDashboard::PutNumber("Turret Angle Kekw", GetTurretAngle().value());
 
     double shooterRatio;
-    if (shooterA.GetSelectedSensorVelocity() == 0) {
+    if (shooterA.GetSelectedSensorVelocity() == 0) 
+    {
         shooterRatio = 0;
-    } else {
+    } 
+    else 
+    {
         shooterRatio = shooterB.GetSelectedSensorVelocity() / shooterA.GetSelectedSensorVelocity();
     }
 
@@ -184,14 +175,8 @@ void Shooter::SetShooterRPM(units::revolutions_per_minute_t targetRPM)
         return;
     }
 
-    auto a_feedforward = m_shooterAFeedForward.Calculate(targetRPM);
-    auto b_feedforward = m_shooterAFeedForward.Calculate(targetRPM * shooter_ratio);
-
-    frc::SmartDashboard::PutNumber("shooter_a_ff", a_feedforward / 12_V);
-    frc::SmartDashboard::PutNumber("shooter_b_ff", b_feedforward / 12_V);
-
-    shooterA.Set(ControlMode::Velocity, targetRPM.value() / kTicks2RPM, DemandType::DemandType_ArbitraryFeedForward, a_feedforward / 12_V);
-    shooterB.Set(ControlMode::Velocity, targetRPM.value() / kTicks2RPM * shooter_ratio, DemandType::DemandType_ArbitraryFeedForward, b_feedforward / 12_V);
+    shooterA.Set(ControlMode::Velocity, targetRPM.value() / kTicks2RPM);
+    shooterB.Set(ControlMode::Velocity, targetRPM.value() / kTicks2RPM * shooter_ratio);
 }
 
 void Shooter::SetShooterRPM()
@@ -227,10 +212,16 @@ bool Shooter::GetTurretSwitch()
 void Shooter::ZeroTurret(bool negative)
 {
     if (negative)
+    {
         turret.SetSelectedSensorPosition(-3_deg / kScaleFactorTurret);
+    }
     else
+    {
         turret.SetSelectedSensorPosition(0.4_deg / kScaleFactorTurret);
+    }
+
     zeroed = true;
+    blinkyZeroLight = true;
 }
 
 void Shooter::ZeroTurret()
@@ -281,69 +272,6 @@ bool Shooter::SetTurretAngleSmooth(units::degree_t targetAngle, units::degree_t 
     return (units::math::abs((GetTurretAngle() - targetAngle)) < tol);
 }
 
-void Shooter::SetHoodAngle(Shooter::HoodPosition pos)
-{
-    return;
-    cmd_hoodPosition = pos;
-    hoodPosOS = false;
-
-    if (pos == HoodPosition::Top)
-    {
-        hoodStop.Set(false);
-        hood.Set(true);
-    }
-}
-
-void Shooter::SetHoodAngle()
-{
-    return;
-    // std::cout << (int)cmd_hoodPosition << std::endl;
-
-    if (cmd_hoodPosition == HoodPosition::Top)
-        return;
-
-    switch (cmd_hoodPosition)
-    {
-    case HoodPosition::Top:
-    {
-        hoodStop.Set(false);
-        hood.Set(true);
-    }
-    break;
-
-    case HoodPosition::Middle:
-    {
-        hoodStop.Set(true);
-        if (!hoodPosOS)
-        {
-            hoodPosTimer.Reset();
-            hoodPosTimer.Start();
-            hood.Set(true);
-            hoodPosOS = true;
-        }
-
-        if ((hoodPosTimer.Get() > 0.5_s) && (hoodPosOS))
-            hood.Set(false);
-    }
-    break;
-
-    case HoodPosition::Bottom:
-    {
-        if (!hoodPosOS)
-        {
-            hoodStop.Set(false);
-            hoodPosTimer.Reset();
-            hoodPosTimer.Start();
-            hood.Set(true);
-            hoodPosOS = true;
-        }
-
-        if ((hoodPosTimer.Get() > 0.2_s) && (hoodPosOS))
-            hood.Set(false);
-    }
-    break;
-    }
-}
 
 units::revolutions_per_minute_t Shooter::GetShooterRPM()
 {
@@ -394,7 +322,6 @@ bool Shooter::Shoot(units::second_t settleTime)
     // Resume Last Command (in case shooter was stopped)
     SetShooterRPM(cmd_shooterRPM);
 // SetTurretAngle(cmd_turretAngle);
-// SetHoodAngle(cmd_hoodAngle);
 
 // Percent of setpoint to accept and begin shooting
 // TODO: Sensor Override Mode
@@ -408,7 +335,6 @@ bool Shooter::Shoot(units::second_t settleTime)
     // Just wait and proceed.
 #endif
     // if(units::math::abs(GetTurretAngle() - cmd_TurretAngle) > (1.5_deg)) settleTimer.Reset();
-    // if(units::math::abs(GetHoodAngle() - cmd_HoodAngle) > (0.5_deg)) settleTimer.Reset();
 
     // Prevent the intake from holding on to a ball while stowed
     // TODO: Should intake be automatic?
@@ -439,7 +365,7 @@ bool Shooter::Shoot(units::second_t settleTime)
 
 bool Shooter::AtRPM(units::revolutions_per_minute_t threshold)
 {
-    return units::math::abs(GetShooterRPM() - 130_rpm - cmd_shooterRPM) < threshold;
+    return units::math::abs(GetShooterRPM() - cmd_shooterRPM) < threshold;
 }
 
 Shooter::State Shooter::CalculateShot(units::inch_t distance)
@@ -447,7 +373,6 @@ Shooter::State Shooter::CalculateShot(units::inch_t distance)
     double mainWheel = 2031.0 + (0.0015 * std::pow(distance.value(), 3)) + (-0.34445 * std::pow(distance.value(), 2)) + (28.5196 * std::pow(distance.value(), 1));
 
     State shotStates;
-    shotStates.hoodAngle = HoodPosition::Middle;
     shotStates.shooterRPM = units::revolutions_per_minute_t{mainWheel};
 
     return shotStates;
@@ -530,7 +455,6 @@ void Shooter::InitSendable(wpi::SendableBuilder &builder)
     FalconSendableHelper(builder, shooterA, "shooterA");
     FalconSendableHelper(builder, shooterB, "shooterB");
     // FalconSendableHelper(builder, turret, "turret");
-    // FalconSendableHelper(builder, hood, "hood");
 
     // Shooter PID
     // TODO: Disable this for Competition?

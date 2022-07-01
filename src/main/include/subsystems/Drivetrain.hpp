@@ -217,5 +217,5 @@ private:
 
     frc::Trajectory::State reference;
 
-    nt::NetworkTableEntry localization_flag_entry = frc::SmartDashboard::GetEntry("flags/alternate_localization");
+    // nt::NetworkTableEntry localization_flag_entry = frc::SmartDashboard::GetEntry("flags/alternate_localization");
 };

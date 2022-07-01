@@ -105,7 +105,7 @@ void Robot::RobotInit()
     IO.shooter.ZeroTurret();
   }
 
-  localization_flag_entry.SetDefaultBoolean(false);
+  // localization_flag_entry.SetDefaultBoolean(false);
 }
 
 void Robot::RobotPeriodic()
@@ -113,8 +113,10 @@ void Robot::RobotPeriodic()
   IO.UpdateSmartDash();
   IO.drivetrain.Periodic();
   autoprograms.SmartDash();
+
   IO.rjVision.SetTurretAngle(IO.shooter.GetTurretAngle());
   IO.rjVision.Periodic();
+  
   frc::SmartDashboard::PutNumber("robot/MatchTime", frc::DriverStation::GetMatchTime());
   frc::SmartDashboard::PutNumber("robot/PressureHigh", IO.ph.GetPressure(0).value());
   frc::SmartDashboard::PutNumber("robot/ShooterRPM", IO.shooter.GetShooterRPM().value());
@@ -122,19 +124,17 @@ void Robot::RobotPeriodic()
     IO.shooter.SetBlinkyZeroThing();
 
   // touchpad to toggle between old odometry & limelight and new pose estimation / photon vision / turret fun
-  if (IO.secondaryController.IsConnected() && IO.secondaryController.GetTouchpadPressed())
-  {
-    auto new_flag = !localization_flag_entry.GetBoolean(false);
-    localization_flag_entry.SetBoolean(new_flag);
-  }
-  IO.shooter.SetShooterRatio(ntShooterRatio.GetDouble(kShooterRPMDefault));
+  // if (IO.secondaryController.IsConnected() && IO.secondaryController.GetTouchpadPressed())
+  // {
+  //   auto new_flag = !localization_flag_entry.GetBoolean(false);
+  //   localization_flag_entry.SetBoolean(new_flag);
+  // }
+
+  IO.shooter.SetShooterRatio(ntShooterRatio.GetDouble(kShooterRatioDefault));
 
   // Logging Stuff
 #ifdef LOGGER
-  uint64_t t0 = wpi::Now();
   IO.LogDataEntries(log);
-  uint64_t t1 = wpi::Now();
-  // std::cout << "time to log: " << t1 - t0 << "us" << std::endl;
 #endif // LOGGER
 }
 
@@ -142,8 +142,8 @@ void Robot::AutonomousInit()
 {
   autoprograms.Init();
   IO.drivetrain.SetBrakeMode();
-  IO.rjVision.SetLED(false);
   IO.shooter.SetTurretBrakeMode();
+  IO.rjVision.SetLED(false);
 }
 
 void Robot::AutonomousPeriodic()
@@ -154,8 +154,8 @@ void Robot::AutonomousPeriodic()
 void Robot::TeleopInit()
 {
   IO.drivetrain.SetBrakeMode();
-  IO.rjVision.SetLED(false);
   IO.shooter.SetTurretBrakeMode();
+  IO.rjVision.SetLED(false);
 }
 
 void Robot::TeleopPeriodic()
@@ -182,6 +182,7 @@ void Robot::TeleopPeriodic()
   {
     // *** Automatic Aim and Shoot ***
 
+    // If you forget to turn on the shooter, pick the default preset and shoot.
     if (IO.shooter.GetShooterRPM() < 250.0_rpm)
     {
       IO.shooter.SetShooterRPM(rpmRight); // Tarmac
@@ -197,7 +198,7 @@ void Robot::TeleopPeriodic()
     {
       // Calculate Turret
       auto turretOK = IO.shooter.SetTurretAngle(data.turretAngle, 1.0_deg);
-      auto flywheelOK = IO.shooter.AtRPM(100_rpm);
+      auto flywheelOK = IO.shooter.AtRPM(30_rpm);
       frc::SmartDashboard::PutBoolean("flags/turretOk", turretOK);
       frc::SmartDashboard::PutBoolean("flags/flywheelOK", flywheelOK);
       shoot = turretOK && flywheelOK;
@@ -242,7 +243,7 @@ void Robot::TeleopPeriodic()
       auto camera_pose = IO.drivetrain.GetPose() + camera_to_robot.Inverse();
       center_hub = camera_pose + camera_to_target_transform + hub_edge_transform.Inverse();
 
-      m_enablePassiveTurret = true;
+      // m_enablePassiveTurret = true;
     }
   }
   else if (IO.secondaryController.GetSquareButton())
@@ -296,14 +297,11 @@ void Robot::TeleopPeriodic()
       auto camera_pose = IO.drivetrain.GetPose() + camera_to_robot.Inverse();
       center_hub = camera_pose + camera_to_target_transform + hub_edge_transform.Inverse();
 
-      m_enablePassiveTurret = true;
+      // m_enablePassiveTurret = true;
     }
   }
   else
   {
-
-    elShoot = false;
-
     IO.rjVision.SetLED(false);
     IO.rjVision.Reset();
 
@@ -311,14 +309,17 @@ void Robot::TeleopPeriodic()
     {
       if (IO.secondaryController.GetPSButton())
       {
-        double turn = -1.5 * deadband(IO.secondaryController.GetRightX());
-        IO.shooter.SetTurret(units::volt_t{turn});
-        bool negative = turn > 0.0;
+        auto turn_cmd = -1.5_V * deadband(IO.secondaryController.GetRightX());
+        IO.shooter.SetTurret(turn_cmd);
         if (IO.shooter.GetTurretSwitch())
-          IO.shooter.ZeroTurret(negative);
+        {
+          IO.shooter.ZeroTurret(turn_cmd > 0.0_V);
+        }
       }
       else
+      {
         IO.shooter.SetTurret(0.0_V);
+      }
     }
     else if (IO.secondaryController.GetPSButton())
     {
@@ -332,36 +333,36 @@ void Robot::TeleopPeriodic()
       climberTimerOS = false;
       manualJog = true;
       IO.shooter.SetTurret(units::volt_t{-3.0 * deadband(IO.secondaryController.GetRightX())});
-      m_enablePassiveTurret = false;
+      // m_enablePassiveTurret = false;
     }
     else if (m_csmode == ClimberShooterMode::Climber)
     {
       IO.shooter.SetTurretAngle(90.0_deg, 1_deg);
     }
-    else if (m_enablePassiveTurret && false)
-    {
-      // Passive Aim
+    // else if (m_enablePassiveTurret && false)
+    // {
+    //   // Passive Aim
 
-      /* ---------- robot state data ------------ */
-      auto robot_pose = IO.drivetrain.GetPose();
-      // basically, if we've set our position thru auton
-      // this locks us out of any funny business in the pit
-      if (robot_pose.Translation().Norm() > 1.75_m)
-      {
-        auto robot_heading = robot_pose.Rotation().Radians();
+    //   /* ---------- robot state data ------------ */
+    //   auto robot_pose = IO.drivetrain.GetPose();
+    //   // basically, if we've set our position thru auton
+    //   // this locks us out of any funny business in the pit
+    //   if (robot_pose.Translation().Norm() > 1.75_m)
+    //   {
+    //     auto robot_heading = robot_pose.Rotation().Radians();
 
-        // positive because we're facing forward on the robot
-        auto turret_to_robot = frc::Transform2d{frc::Translation2d{turret_to_center_robot_distance, 0_in}, frc::Rotation2d{}};
+    //     // positive because we're facing forward on the robot
+    //     auto turret_to_robot = frc::Transform2d{frc::Translation2d{turret_to_center_robot_distance, 0_in}, frc::Rotation2d{}};
 
-        // now we set our turret angle to the angle needed to face the center of the hub
-        auto turret_position = IO.drivetrain.GetPose() + turret_to_robot.Inverse() + frc::Transform2d{frc::Translation2d{}, frc::Rotation2d{180_deg}};
-        auto global_angle_to_hub = units::math::atan2(center_hub.Y() - turret_position.Y(), center_hub.X() - turret_position.X());
-        auto turret_angle_to_hub = global_angle_to_hub - turret_position.Rotation().Radians();
-        IO.shooter.SetTurretAngleSmooth(turret_angle_to_hub, 0.75_deg);
-      }
+    //     // now we set our turret angle to the angle needed to face the center of the hub
+    //     auto turret_position = IO.drivetrain.GetPose() + turret_to_robot.Inverse() + frc::Transform2d{frc::Translation2d{}, frc::Rotation2d{180_deg}};
+    //     auto global_angle_to_hub = units::math::atan2(center_hub.Y() - turret_position.Y(), center_hub.X() - turret_position.X());
+    //     auto turret_angle_to_hub = global_angle_to_hub - turret_position.Rotation().Radians();
+    //     IO.shooter.SetTurretAngleSmooth(turret_angle_to_hub, 0.75_deg);
+    //   }
       
-      climberTimerOS = false;
-    }
+    //   climberTimerOS = false;
+    // }
     else
     {
       IO.shooter.SetTurretAngle(0.0_deg, 1_deg);
@@ -369,8 +370,6 @@ void Robot::TeleopPeriodic()
     }
 
     // IO.shooter.SetTurretAngle(units::degree_t{ntTurretTargetAng.GetDouble(kTurretTargetAngDefault)}, units::degree_t{0.5});
-
-    hoodOS2 = false;
   }
 
   //
@@ -380,51 +379,30 @@ void Robot::TeleopPeriodic()
   switch (IO.secondaryController.GetPOV())
   {
   case -1:
-    hoodOS = false;
     break;
+
   case 0:
     // Launchpad
-    // IO.shooter.SetShooterRatio(-1.2);
     IO.shooter.SetShooterRPM(rpmUp);
     m_csmode = ClimberShooterMode::Shooter;
-    if (!hoodOS)
-    {
-      IO.shooter.SetHoodAngle(Shooter::HoodPosition::Bottom);
-      hoodOS = true;
-    }
     break;
 
   case 90:
-    // Wall 
+    // Tarmac 
     IO.shooter.SetShooterRPM(rpmRight);
     m_csmode = ClimberShooterMode::Shooter;
-    if (!hoodOS)
-    {
-      IO.shooter.SetHoodAngle(Shooter::HoodPosition::Middle);
-      hoodOS = true;
-    }
     break;
 
   case 180:
     // Fender
     IO.shooter.SetShooterRPM(rpmDown);
     m_csmode = ClimberShooterMode::Shooter;
-    if (!hoodOS)
-    {
-      IO.shooter.SetHoodAngle(Shooter::HoodPosition::Middle);
-      hoodOS = true;
-    }
     break;
 
   case 270:
-    // TARMAC
+    // Wall
     IO.shooter.SetShooterRPM(rpmLeft);
     m_csmode = ClimberShooterMode::Shooter;
-    if (!hoodOS)
-    {
-      IO.shooter.SetHoodAngle(Shooter::HoodPosition::Middle);
-      hoodOS = true;
-    }
     break;
   }
 
@@ -434,8 +412,6 @@ void Robot::TeleopPeriodic()
     IO.shooter.SetShooterRPM(s);
     m_csmode = ClimberShooterMode::Shooter;
   }
-
-  IO.shooter.SetHoodAngle();
 
   // Shoot
   if (shoot || IO.secondaryController.GetTriangleButton() || IO.mainController.GetL1Button())
@@ -475,50 +451,50 @@ void Robot::TeleopPeriodic()
   //
 
   // if intaking balls and color sensor is connected
-  if (false)//(units::math::abs(intakeCmd) > 0.0_V && colorSensor.IsConnected())
-  {
+  // if (false)//(units::math::abs(intakeCmd) > 0.0_V && colorSensor.IsConnected())
+  // {
 
-    // If a ball is present
-    frc::Color ballColor = colorSensor.GetColor();
-    if (fabs(ballColor.blue - ballColor.red) > 0.2)
-    {
-      // Check for ball color missmatch
-      auto blueAlliance = frc::DriverStation::GetAlliance() == frc::DriverStation::Alliance::kBlue;
-      auto redAlliance = frc::DriverStation::GetAlliance() == frc::DriverStation::Alliance::kRed;
-      auto blueBall = ballColor.blue > ballColor.red;
-      auto redBall = !blueBall;
-      if ((blueAlliance && redBall) || (redAlliance && blueBall))
-      {
-        autoEjectTimer.Start();
-      }
+  //   // If a ball is present
+  //   frc::Color ballColor = colorSensor.GetColor();
+  //   if (fabs(ballColor.blue - ballColor.red) > 0.2)
+  //   {
+  //     // Check for ball color missmatch
+  //     auto blueAlliance = frc::DriverStation::GetAlliance() == frc::DriverStation::Alliance::kBlue;
+  //     auto redAlliance = frc::DriverStation::GetAlliance() == frc::DriverStation::Alliance::kRed;
+  //     auto blueBall = ballColor.blue > ballColor.red;
+  //     auto redBall = !blueBall;
+  //     if ((blueAlliance && redBall) || (redAlliance && blueBall))
+  //     {
+  //       autoEjectTimer.Start();
+  //     }
 
-      if ((blueAlliance && blueBall) || (redAlliance && redBall))
-      {
-        autoEjectTimer.Stop();
-        autoEjectTimer.Reset();
-        IO.shooter.SetShooter(0_V);
-      }
-    }
+  //     if ((blueAlliance && blueBall) || (redAlliance && redBall))
+  //     {
+  //       autoEjectTimer.Stop();
+  //       autoEjectTimer.Reset();
+  //       IO.shooter.SetShooter(0_V);
+  //     }
+  //   }
 
-    if (autoEjectTimer.Get() > 0.25_s)
-    {
-      IO.shooter.SetShooterRPM(800_rpm);
-      if (IO.shooter.SetTurretAngle(0.0_deg, 10_deg))
-      {
-        m_csmode = ClimberShooterMode::Shooter;
-        IO.shooter.Shoot();
-        shoot = true;
-      }
-    }
-  }
+  //   if (autoEjectTimer.Get() > 0.25_s)
+  //   {
+  //     IO.shooter.SetShooterRPM(800_rpm);
+  //     if (IO.shooter.SetTurretAngle(0.0_deg, 10_deg))
+  //     {
+  //       m_csmode = ClimberShooterMode::Shooter;
+  //       IO.shooter.Shoot();
+  //       shoot = true;
+  //     }
+  //   }
+  // }
 
-  // Attempt to eject this ball for x seconds
-  if (autoEjectTimer.Get() > 2.0_s)
-  {
-    autoEjectTimer.Stop();
-    autoEjectTimer.Reset();
-    IO.shooter.SetShooter(0_V);
-  }
+  // // Attempt to eject this ball for x seconds
+  // if (autoEjectTimer.Get() > 2.0_s)
+  // {
+  //   autoEjectTimer.Stop();
+  //   autoEjectTimer.Reset();
+  //   IO.shooter.SetShooter(0_V);
+  // }
 
   // Retract Intake after a short delay
   if (intakeTimer.Get() > 0.25_s)
@@ -590,7 +566,9 @@ void Robot::TeleopPeriodic()
   }
 
   if (IO.secondaryController.GetShareButtonPressed())
+  {
     IO.climber.SetSensorOverride(!IO.climber.GetSensorOverride());
+  }
 }
 
 void Robot::DisabledInit()
@@ -620,45 +598,52 @@ void Robot::SimulationPeriodic()
 void Robot::TestInit()
 {
   IO.pdp.ClearStickyFaults();
-  IO.drivetrain.ResetOdometry(frc::Pose2d{frc::Translation2d{4.1148_m, 4.1148_m}, frc::Rotation2d{0_deg}});
+
+  //IO.drivetrain.ResetOdometry(frc::Pose2d{frc::Translation2d{4.1148_m, 4.1148_m}, frc::Rotation2d{0_deg}});
+
   m_testTimer.Reset();
   m_testTimer.Start();
 }
+
 void Robot::TestPeriodic()
 {
   // IO.shooter.SetTurret(0_V);
-  IO.rjVision.SetLED(true);
 
+  // Vision Snapshots
+  IO.rjVision.SetLED(true);
   if (IO.mainController.GetPSButton())
   {
     IO.rjVision.TakeSnapshot(1);
   }
   else
+  {
     IO.rjVision.TakeSnapshot(0);
+  }
 
+  // Drive
   double fwd = -0.5 * deadband(IO.mainController.GetLeftY());
   double rot = -0.5 * deadband(IO.mainController.GetRightX());
 
   IO.drivetrain.Arcade(fwd, rot);
 
-  /* ---------- robot state data ------------ */
-  // test for turret smoothness
-  auto robot_pose = IO.drivetrain.GetPose();
-  auto robot_heading = robot_pose.Rotation().Radians();
-  auto time_modulo = units::math::fmod(m_testTimer.Get(), 8.2296_s);
-  auto y = units::meter_t{time_modulo.value()};
-  auto hub_pose = frc::Translation2d{0_m, y};
+  // /* ---------- robot state data ------------ */
+  // // test for turret smoothness
+  // //auto robot_pose = IO.drivetrain.GetPose();
+  // //auto robot_heading = robot_pose.Rotation().Radians();
+  // auto time_modulo = units::math::fmod(m_testTimer.Get(), 8.2296_s);
+  // auto y = units::meter_t{time_modulo.value()};
+  // auto hub_pose = frc::Translation2d{0_m, y};
 
-  // positive because we're facing forward on the robot
-  auto turret_to_robot = frc::Transform2d{frc::Translation2d{turret_to_center_robot_distance, 0_in}, frc::Rotation2d{}};
+  // // positive because we're facing forward on the robot
+  // auto turret_to_robot = frc::Transform2d{frc::Translation2d{turret_to_center_robot_distance, 0_in}, frc::Rotation2d{}};
 
-  // now we set our turret angle to the angle needed to face the center of the hub
-  auto turret_position = IO.drivetrain.GetPose() + turret_to_robot.Inverse() + frc::Transform2d{frc::Translation2d{}, frc::Rotation2d{180_deg}};
-  auto global_angle_to_hub = units::math::atan2(hub_pose.Y() - turret_position.Y(), hub_pose.X() - turret_position.X());
-  auto turret_angle_to_hub = global_angle_to_hub - turret_position.Rotation().Radians();
-  auto turret_rot = frc::Rotation2d{units::math::cos(turret_angle_to_hub), units::math::sin(turret_angle_to_hub)};
-  IO.shooter.SetTurretAngle(turret_rot.Radians(), 0.75_deg);
-  std::cout << hub_pose.Y().value() << ", " << global_angle_to_hub.value() << " = " << turret_rot.Radians().value() << ", " << turret_rot.Degrees().value() << std::endl;
+  // // now we set our turret angle to the angle needed to face the center of the hub
+  // auto turret_position = IO.drivetrain.GetPose() + turret_to_robot.Inverse() + frc::Transform2d{frc::Translation2d{}, frc::Rotation2d{180_deg}};
+  // auto global_angle_to_hub = units::math::atan2(hub_pose.Y() - turret_position.Y(), hub_pose.X() - turret_position.X());
+  // auto turret_angle_to_hub = global_angle_to_hub - turret_position.Rotation().Radians();
+  // auto turret_rot = frc::Rotation2d{units::math::cos(turret_angle_to_hub), units::math::sin(turret_angle_to_hub)};
+  // IO.shooter.SetTurretAngle(turret_rot.Radians(), 0.75_deg);
+  // std::cout << hub_pose.Y().value() << ", " << global_angle_to_hub.value() << " = " << turret_rot.Radians().value() << ", " << turret_rot.Degrees().value() << std::endl;
 }
 
 double Robot::deadband(double val, double min, double max)

@@ -131,7 +131,7 @@ void AutoFiveBallMeta::PassiveTurretAim()
     auto turret_to_center_robot_distance = 2_in;
     frc::Pose2d center_hub = frc::Pose2d{8.2296_m, 4.1148_m, 0_deg};
 
-    auto robot_heading = IO.drivetrain.GetPose().Rotation().Radians();
+    //auto robot_heading = IO.drivetrain.GetPose().Rotation().Radians();
 
     // positive because we're facing forward on the robot
     auto turret_to_robot = frc::Transform2d{frc::Translation2d{turret_to_center_robot_distance, 0_in}, frc::Rotation2d{}};

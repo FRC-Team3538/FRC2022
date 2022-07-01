@@ -43,22 +43,14 @@ public:
         Deployed = 1
     };
 
-    enum class HoodPosition : uint8_t
-    {
-        Top = 0,
-        Middle,
-        Bottom
-    };
-
     struct State
     {
         units::revolutions_per_minute_t shooterRPM = 0_rpm;
-        HoodPosition hoodAngle = HoodPosition::Top;
 
-        bool operator==(const State &param)
-        {
-            return ((this->shooterRPM == param.shooterRPM) && (this->hoodAngle == param.hoodAngle));
-        }
+        // bool operator==(const State &param)
+        // {
+        //     return abs(this->shooterRPM - param.shooterRPM) < 1.0;
+        // }
     };
 
     // Constructor
@@ -91,9 +83,6 @@ public:
     bool SetTurretAngleSmooth(units::degree_t targetAngle, units::degree_t tol);
     void ZeroTurret(bool negative);
     void ZeroTurret();
-
-    void SetHoodAngle(HoodPosition pos);
-    void SetHoodAngle();
 
     void SetBlinkyZeroThing();
 
@@ -128,12 +117,8 @@ private:
     WPI_TalonFX shooterB{15};
     // WPI_TalonFX shooterTop{16};
     WPI_TalonFX turret{17};
-    // WPI_TalonFX hood{18};
 
     frc::Solenoid deployPiston{frc::PneumaticsModuleType::REVPH, 0};
-
-    frc::Solenoid hood{frc::PneumaticsModuleType::REVPH, 2};
-    frc::Solenoid hoodStop{frc::PneumaticsModuleType::REVPH, 3};
 
     // Constants
     static constexpr auto kScaleFactorTurret = 360_deg * (18.0 / 184.0) * (11.0 / 60.0) * (1.0 / 2048.0); // Angle Over Ticks
@@ -169,11 +154,6 @@ private:
 
     // Current Command
     units::revolutions_per_minute_t cmd_shooterRPM{0_rpm};
-
-    HoodPosition cmd_hoodPosition = HoodPosition::Bottom;
-
-    bool hoodPosOS = false;
-    frc::Timer hoodPosTimer;
 
     frc::DigitalInput turretZeroSwitch {9};
 

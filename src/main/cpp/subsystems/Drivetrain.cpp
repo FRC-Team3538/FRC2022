@@ -148,8 +148,8 @@ void Drivetrain::SetSpeeds(const frc::DifferentialDriveWheelSpeeds &speeds)
     cmd_vl = speeds.left.value();
     cmd_vr = speeds.right.value();
 
-    auto leftRate = -m_driveL0.GetSelectedSensorVelocity() * kDPP / 0.1_s;
-    auto rightRate = m_driveR0.GetSelectedSensorVelocity() * kDPP / 0.1_s;
+    //auto leftRate = -m_driveL0.GetSelectedSensorVelocity() * kDPP / 0.1_s;
+    //auto rightRate = m_driveR0.GetSelectedSensorVelocity() * kDPP / 0.1_s;
 
     // auto current_speeds_vec = Eigen::Vector2<double>{leftRate.value(), rightRate.value()};
     // auto goal_speeds_vec = Eigen::Vector2<double>{speeds.left.value(), speeds.right.value()};
@@ -205,15 +205,15 @@ void Drivetrain::Drive(const frc::Trajectory::State &target)
 
 frc::Pose2d Drivetrain::GetPose() const
 {
-    if (localization_flag_entry.GetBoolean(false) )
-    {
-        // return m_poseEstimator.GetEstimatedPosition();
+    // if (localization_flag_entry.GetBoolean(false) )
+    // {
+    //     // return m_poseEstimator.GetEstimatedPosition();
+    //     return m_odometry.GetPose();
+    // }
+    // else 
+    // {  
         return m_odometry.GetPose();
-    }
-    else 
-    {  
-        return m_odometry.GetPose();
-    }
+    // }
 }
 
 void Drivetrain::UpdateOdometryWithGlobalEstimate(frc::Pose2d globalEstimate, units::second_t estimateTime)
@@ -244,7 +244,7 @@ void Drivetrain::UpdateOdometry()
 
     // m_poseEstimator.Update(GetYaw(), frc::DifferentialDriveWheelSpeeds{leftV, rightV}, left, right);
 
-    m_fieldSim.SetRobotPose(GetPose()); // TEMP DEBUG OFFSET
+    m_fieldSim.SetRobotPose(GetPose());
 }
 
 void Drivetrain::ResetOdometry(const frc::Pose2d &pose)

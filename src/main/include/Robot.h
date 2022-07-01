@@ -59,12 +59,9 @@ private:
   frc::Timer intakeTimer;
   frc::Timer climberTimer; // Rhyme points
   bool climberTimerOS = false;
-  bool elShoot = false;
 
   vision::RJVisionPipeline::visionData prevData;
 
-  bool hoodOS = false;
-  bool hoodOS2 = false;
   bool manualJog = false;
   
   enum class ClimberShooterMode:uint8_t
@@ -82,13 +79,13 @@ private:
   static constexpr double kShooterRPMDefault = 2950;
   nt::NetworkTableEntry ntShooterRPM = frc::SmartDashboard::GetEntry("robot/shooterRPM");
   
-  static constexpr double kShooterRatioDefault = 1.0;
+  static constexpr double kShooterRatioDefault = 1.3;
   nt::NetworkTableEntry ntShooterRatio = frc::SmartDashboard::GetEntry("robot/ShooterRatio");
 
-  static constexpr double kFeederVoltageDefault = 2.0;
+  static constexpr double kFeederVoltageDefault = 6.0;
   nt::NetworkTableEntry ntFeederVoltage = frc::SmartDashboard::GetEntry("robot/feederVoltage");
 
-  static constexpr double kIndexerVoltageDefault = 3.0;
+  static constexpr double kIndexerVoltageDefault = 6.0;
   nt::NetworkTableEntry ntIndexerVoltage = frc::SmartDashboard::GetEntry("robot/indexerVoltage");
 
   static constexpr double kTurretTargetAngDefault = 0.0;
@@ -97,7 +94,7 @@ private:
   // Presets
   static constexpr double kPresetLeftDefault = 4500.0;
   nt::NetworkTableEntry ntPresetLeft = frc::SmartDashboard::GetEntry("robot/Preset/Wall");
-  static constexpr double kPresetRightDefault = 3850.0;
+  static constexpr double kPresetRightDefault = 2950.0;
   nt::NetworkTableEntry ntPresetRight = frc::SmartDashboard::GetEntry("robot/Preset/Tarmac");
   static constexpr double kPresetDownDefault = 1000.0;
   nt::NetworkTableEntry ntPresetDown = frc::SmartDashboard::GetEntry("robot/Preset/Fender");
@@ -105,7 +102,7 @@ private:
   nt::NetworkTableEntry ntPresetUp = frc::SmartDashboard::GetEntry("robot/Preset/Launchpad");
 
   //----------- rev color sensor stuff ----------
-  rev::ColorSensorV3 colorSensor{frc::I2C::Port::kMXP};
+  //rev::ColorSensorV3 colorSensor{frc::I2C::Port::kMXP};
 
   frc::Timer autoEjectTimer;
 
@@ -119,8 +116,8 @@ private:
   frc::Pose2d center_hub = frc::Pose2d{8.2296_m, 4.1148_m, 0_deg};
   static constexpr auto hub_upper_radius = 2_ft;
 
-  nt::NetworkTableEntry localization_flag_entry = frc::SmartDashboard::GetEntry("flags/alternate_localization");
+  // nt::NetworkTableEntry localization_flag_entry = frc::SmartDashboard::GetEntry("flags/alternate_localization");
 
   frc::Timer m_testTimer;
-  bool m_enablePassiveTurret = true;
+  // bool m_enablePassiveTurret = true;
 };
