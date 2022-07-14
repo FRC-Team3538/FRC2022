@@ -183,9 +183,10 @@ void Robot::TeleopPeriodic()
     // *** Automatic Aim and Shoot ***
 
     // If you forget to turn on the shooter, pick the default preset and shoot.
+    IO.shooter.SetFeeder(2_V);
     if (IO.shooter.GetShooterRPM() < 250.0_rpm)
     {
-      IO.shooter.SetShooterRPM(rpmRight); // Tarmac
+      IO.shooter.SetShooterRPM(2975_rpm); // Tarmac
     }
 
     climberTimerOS = false;
@@ -389,7 +390,7 @@ void Robot::TeleopPeriodic()
 
   case 90:
     // Tarmac 
-    IO.shooter.SetShooterRPM(rpmRight);
+    IO.shooter.SetShooterRPM(2975_rpm);
     m_csmode = ClimberShooterMode::Shooter;
     break;
 
