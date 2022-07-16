@@ -175,8 +175,8 @@ void Robot::TeleopPeriodic()
   auto rpmDown = units::revolutions_per_minute_t{ntPresetDown.GetDouble(kPresetDownDefault)};
   auto rpmLeft = units::revolutions_per_minute_t{ntPresetLeft.GetDouble(kPresetLeftDefault)};
   
-
-  //
+  auto turretOK = false;    //turret flag used for autoaim
+  auto flywheelOK = false;  //flywheel flag used for autoaim
   // *** VISION AND DRIVING ***
   //
   if (IO.mainController.GetR1Button() || IO.secondaryController.GetCircleButton()) // || IO.secondaryController.GetTriangleButton())
@@ -198,16 +198,9 @@ void Robot::TeleopPeriodic()
     if (data.filled)
     {
       // Calculate Turret
-      auto turretOK = IO.shooter.SetTurretAngle(data.turretAngle, 1.0_deg);
-      auto flywheelOK = IO.shooter.AtRPM(50_rpm);
-      frc::SmartDashboard::PutBoolean("flags/turretOk", turretOK);
-      frc::SmartDashboard::PutBoolean("flags/flywheelOK", flywheelOK);
-      shoot = turretOK && flywheelOK;
-      
-
-
-
-
+     turretOK = IO.shooter.SetTurretAngle(data.turretAngle, 1.0_deg);
+     flywheelOK = IO.shooter.AtRPM(50_rpm);
+     shoot = turretOK && flywheelOK;
     }
 
     vision::RJVisionPipeline::photonVisionResult result = IO.rjVision.RunPhotonVision();
@@ -251,6 +244,8 @@ void Robot::TeleopPeriodic()
 
       // m_enablePassiveTurret = true;
     }
+     frc::SmartDashboard::PutBoolean("flags/turretOk", turretOK); //outputting if we locked on turret
+     frc::SmartDashboard::PutBoolean("flags/flywheelOK", flywheelOK); //outputting if we are in margin of 50 rpm of target
   }
   else if (IO.secondaryController.GetSquareButton())
   {
