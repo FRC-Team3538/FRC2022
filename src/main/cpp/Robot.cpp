@@ -184,7 +184,6 @@ void Robot::TeleopPeriodic()
     // *** Automatic Aim and Shoot ***
 
     // If you forget to turn on the shooter, pick the default preset and shoot.
-    IO.shooter.SetFeeder(4_V);
     if (IO.shooter.GetShooterRPM() < 250.0_rpm)
     {
       IO.shooter.SetShooterRPM(2975_rpm); // Tarmac
@@ -200,7 +199,7 @@ void Robot::TeleopPeriodic()
     {
       // Calculate Turret
       auto turretOK = IO.shooter.SetTurretAngle(data.turretAngle, 1.0_deg);
-      auto flywheelOK = IO.shooter.AtRPM(30_rpm);
+      auto flywheelOK = IO.shooter.AtRPM(50_rpm);
       frc::SmartDashboard::PutBoolean("flags/turretOk", turretOK);
       frc::SmartDashboard::PutBoolean("flags/flywheelOK", flywheelOK);
       shoot = turretOK && flywheelOK;
