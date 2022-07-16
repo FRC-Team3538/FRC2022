@@ -174,6 +174,7 @@ void Robot::TeleopPeriodic()
   auto rpmRight = units::revolutions_per_minute_t{ntPresetRight.GetDouble(kPresetRightDefault)};
   auto rpmDown = units::revolutions_per_minute_t{ntPresetDown.GetDouble(kPresetDownDefault)};
   auto rpmLeft = units::revolutions_per_minute_t{ntPresetLeft.GetDouble(kPresetLeftDefault)};
+  
 
   //
   // *** VISION AND DRIVING ***
@@ -183,7 +184,7 @@ void Robot::TeleopPeriodic()
     // *** Automatic Aim and Shoot ***
 
     // If you forget to turn on the shooter, pick the default preset and shoot.
-    IO.shooter.SetFeeder(2_V);
+    IO.shooter.SetFeeder(4_V);
     if (IO.shooter.GetShooterRPM() < 250.0_rpm)
     {
       IO.shooter.SetShooterRPM(2975_rpm); // Tarmac
@@ -203,6 +204,11 @@ void Robot::TeleopPeriodic()
       frc::SmartDashboard::PutBoolean("flags/turretOk", turretOK);
       frc::SmartDashboard::PutBoolean("flags/flywheelOK", flywheelOK);
       shoot = turretOK && flywheelOK;
+      
+
+
+
+
     }
 
     vision::RJVisionPipeline::photonVisionResult result = IO.rjVision.RunPhotonVision();
@@ -402,7 +408,7 @@ void Robot::TeleopPeriodic()
 
   case 270:
     // Wall
-    IO.shooter.SetShooterRPM(rpmLeft);
+    IO.shooter.SetShooterRPM(3200_rpm);
     m_csmode = ClimberShooterMode::Shooter;
     break;
   }
