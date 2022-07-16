@@ -123,6 +123,8 @@ void Robot::RobotPeriodic()
   if (!IO.shooter.zeroed)
     IO.shooter.SetBlinkyZeroThing();
 
+  
+
   // touchpad to toggle between old odometry & limelight and new pose estimation / photon vision / turret fun
   // if (IO.secondaryController.IsConnected() && IO.secondaryController.GetTouchpadPressed())
   // {
@@ -244,8 +246,8 @@ void Robot::TeleopPeriodic()
 
       // m_enablePassiveTurret = true;
     }
-     frc::SmartDashboard::PutBoolean("flags/turretOk", turretOK); //outputting if we locked on turret
-     frc::SmartDashboard::PutBoolean("flags/flywheelOK", flywheelOK); //outputting if we are in margin of 50 rpm of target
+   // frc::SmartDashboard::PutBoolean("flags/turretOk", turretOK); //outputting if we locked on turret
+   // frc::SmartDashboard::PutBoolean("flags/flywheelOK", flywheelOK); //outputting if we are in margin of 50 rpm of target
   }
   else if (IO.secondaryController.GetSquareButton())
   {
@@ -570,6 +572,8 @@ void Robot::TeleopPeriodic()
   {
     IO.climber.SetSensorOverride(!IO.climber.GetSensorOverride());
   }
+    frc::SmartDashboard::PutBoolean("flags/turretOk", turretOK); //outputting if we locked on turret
+    frc::SmartDashboard::PutBoolean("flags/flywheelOK", flywheelOK); //outputting if we are in margin of 50 rpm of target
 }
 
 void Robot::DisabledInit()
