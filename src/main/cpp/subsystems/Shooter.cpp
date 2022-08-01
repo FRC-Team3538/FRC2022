@@ -48,11 +48,11 @@ Shooter::Shooter()
 
     // Closed Loop Configuration
     shooterA.GetSlotConfigs(shooterSlotConfig, 0);
-    shooterSlotConfig.kF = 0.056494409;
-    shooterSlotConfig.kP = 0.225;
-    shooterSlotConfig.kI = 0.0001;
-    shooterSlotConfig.kD = 6.000;
-    shooterSlotConfig.integralZone = 400.0;
+    shooterSlotConfig.kF = 0.04734993; // 
+    shooterSlotConfig.kP = 0.02999999;
+    shooterSlotConfig.kI = 0.00049996376;
+    shooterSlotConfig.kD = 1.5;
+    shooterSlotConfig.integralZone = 500.0;
 
     FalconSlotConfig(shooterA, 0, shooterSlotConfig);
     FalconSlotConfig(shooterB, 0, shooterSlotConfig);

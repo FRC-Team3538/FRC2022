@@ -70,6 +70,7 @@ void Robot::RobotInit()
 
   ntVisionAngleTol.ForceSetDouble(ntVisionAngleTol.GetDouble(kVisionAngleTolDefault));
   ntVisionAngleTol.SetPersistent();
+  
 
   ntShooterRPM.ForceSetDouble(ntShooterRPM.GetDouble(kShooterRPMDefault));
   ntShooterRPM.SetPersistent();
@@ -81,6 +82,7 @@ void Robot::RobotInit()
   ntIndexerVoltage.SetPersistent();
   ntTurretTargetAng.ForceSetDouble(ntTurretTargetAng.GetDouble(kTurretTargetAngDefault));
   ntTurretTargetAng.SetPersistent();
+
   
   // Presets
   ntPresetLeft.ForceSetDouble(ntPresetLeft.GetDouble(kPresetLeftDefault));
@@ -184,7 +186,7 @@ void Robot::TeleopPeriodic()
   if (IO.mainController.GetR1Button() || IO.secondaryController.GetCircleButton()) // || IO.secondaryController.GetTriangleButton())
   {
     // *** Automatic Aim and Shoot ***
-
+  
     // If you forget to turn on the shooter, pick the default preset and shoot.
     if (IO.shooter.GetShooterRPM() < 250.0_rpm)
     {
