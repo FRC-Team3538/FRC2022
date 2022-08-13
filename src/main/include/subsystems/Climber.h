@@ -6,7 +6,7 @@
 #include <wpi/sendable/SendableHelper.h>                // for SendableHelper
 #include <string>                                       // for string
 
-#include "Subsystem.hpp"                                // for Subsystem
+#include "Subsystem.h"                                // for Subsystem
 #include "frc/PneumaticsModuleType.h"                   // for PneumaticsMod...
 #include "units/voltage.h"                              // for volt_t
 #include "wpi/sendable/Sendable.h"                      // for Sendable
@@ -31,7 +31,7 @@ public:
         Down
     };
 
-    
+
 
     Climber();
 

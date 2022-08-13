@@ -9,14 +9,13 @@
 #include <frc/smartdashboard/SmartDashboard.h>  // for SmartDashboard
 #include <rev/ColorSensorV3.h>                  // for ColorSensorV3
 #include <stdint.h>                             // for uint8_t
-#include "Robotmap.hpp"                         // for Robotmap
-#include "auto/AutoPrograms.hpp"                // for AutoPrograms
+#include "Robotmap.h"                         // for Robotmap
+#include "auto/AutoPrograms.h"                // for AutoPrograms
 #include "frc/I2C.h"                            // for I2C, I2C::Port, I2C::...
 #include "frc/Timer.h"                          // for Timer
 #include "frc/geometry/Pose2d.h"                // for Pose2d
 #include "frc/geometry/Rotation2d.h"            // for Rotation2d
 #include "networktables/NetworkTableEntry.h"    // for NetworkTableEntry
-#include "subsystems/RJVisionPipeline.hpp"      // for RJVisionPipeline, RJV...
 #include "units/angle.h"                        // for operator""_deg
 #include "units/length.h"                       // for operator""_in, operat...
 #include "lib/Logging.h"
@@ -57,28 +56,18 @@ private:
   frc::Timer shotTimer;
   frc::Timer brakeTimer;
   frc::Timer intakeTimer;
-  frc::Timer climberTimer; // Rhyme points
-  bool climberTimerOS = false;
-
-  vision::RJVisionPipeline::visionData prevData;
 
   bool manualJog = false;
-  
-  enum class ClimberShooterMode:uint8_t
-  {
-    Shooter = 0,
-    Climber
-  } m_csmode;
 
   // Smartdash
   nt::NetworkTableEntry ntRobotName = frc::SmartDashboard::GetEntry("robot/RobotName");
 
   static constexpr double kVisionAngleTolDefault = 0.5;
   nt::NetworkTableEntry ntVisionAngleTol = frc::SmartDashboard::GetEntry("robot/visionAngleTol");
-  
+
   static constexpr double kShooterRPMDefault = 2950;
   nt::NetworkTableEntry ntShooterRPM = frc::SmartDashboard::GetEntry("robot/shooterRPM");
-  
+
   static constexpr double kShooterRatioDefault = 1.3;
   nt::NetworkTableEntry ntShooterRatio = frc::SmartDashboard::GetEntry("robot/ShooterRatio");
 

@@ -1,4 +1,4 @@
-#include <lib/PneumaticHub.hpp>
+#include <lib/PneumaticHub.h>
 #include "frc/PneumaticHub.h"              // for PneumaticHub
 #include "units/current.h"                 // for ampere_t
 #include "units/pressure.h"                // for pounds_per_square_inch_t
@@ -34,14 +34,14 @@ void RJ::PneumaticHub::InitSendable(wpi::SendableBuilder& builder)
         "CompressorCurrent", [this] { return GetCompressorCurrent().value(); }, nullptr);
 
     builder.AddDoubleProperty(
-        "Faults", [this] { 
+        "Faults", [this] {
             u_faults u{GetFaults()};
-            return u.uint32_faults; 
+            return u.uint32_faults;
             }, nullptr);
 
     builder.AddDoubleProperty(
-        "StickyFaults", [this] { 
+        "StickyFaults", [this] {
             u_stickyfaults u{GetStickyFaults()};
-            return u.uint32_stickyfaults; 
+            return u.uint32_stickyfaults;
             }, nullptr);
 }

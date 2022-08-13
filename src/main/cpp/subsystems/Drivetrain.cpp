@@ -2,7 +2,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-#include "subsystems/Drivetrain.hpp"
+#include "subsystems/Drivetrain.h"
 
 #include <frc/Timer.h>                                       // for Timer
 
@@ -210,8 +210,8 @@ frc::Pose2d Drivetrain::GetPose() const
     //     // return m_poseEstimator.GetEstimatedPosition();
     //     return m_odometry.GetPose();
     // }
-    // else 
-    // {  
+    // else
+    // {
         return m_odometry.GetPose();
     // }
 }
@@ -464,7 +464,7 @@ void Drivetrain::InitSendable(wpi::SendableBuilder &builder)
     // doing this because I want yaw within -pi, pi
     builder.AddDoubleProperty(
         "IMU/yaw", [this]
-        { 
+        {
             auto yaw =  GetYaw();
             return frc::Rotation2d(yaw.Cos(), yaw.Sin()).Radians().value(); },
         nullptr);

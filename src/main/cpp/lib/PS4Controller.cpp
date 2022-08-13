@@ -1,5 +1,5 @@
 
-#include <lib/PS4Controller.hpp>
+#include <lib/PS4Controller.h>
 #include "frc/PS4Controller.h"             // for PS4Controller
 #include "wpi/sendable/SendableBuilder.h"  // for SendableBuilder
 

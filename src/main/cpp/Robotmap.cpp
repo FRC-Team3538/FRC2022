@@ -1,11 +1,7 @@
-#include "Robotmap.hpp"
+#include "Robotmap.h"
 #include <iostream>                         // for operator<<, endl, basic_o...
 #include "frc/PowerDistribution.h"          // for PowerDistribution
-#include "subsystems/Climber.hpp"           // for Climber
-#include "subsystems/Drivetrain.hpp"        // for Drivetrain
-#include "subsystems/RJVisionPipeline.hpp"  // for RJVisionPipeline
-#include "subsystems/Shooter.hpp"           // for Shooter
-#include "subsystems/Subsystem.hpp"         // for Subsystem
+#include "subsystems/Subsystem.h"         // for Subsystem
 
 #include <wpi/DataLog.h>
 
@@ -13,10 +9,7 @@
 // *** ALSO PUT SUBSYSTEMS HERE ***
 Robotmap::Robotmap()
 {
-    subsystems.push_back(&drivetrain);
-    subsystems.push_back(&shooter);
-    subsystems.push_back(&rjVision);
-    subsystems.push_back(&climber);
+
 }
 
 /**
@@ -94,7 +87,7 @@ void Robotmap::LogDataEntries(wpi::log::DataLog &log)
 {
     // log.AppendDouble(data_entries["PDH/Voltage"], pdp.GetVoltage(), 0);
     // log.AppendDouble(data_entries["PDH/Temperature"], pdp.GetTemperature(), 0);
-    // // log.AppendDoubleArray(data_entries["PDH/Current"], 0.0, 0); 
+    // // log.AppendDoubleArray(data_entries["PDH/Current"], 0.0, 0);
     // log.AppendDouble(data_entries["PDH/TotalCurrent"], pdp.GetTotalCurrent(), 0);
     // log.AppendDouble(data_entries["PDH/TotalPower"], pdp.GetTotalPower(), 0);
     // log.AppendDouble(data_entries["PDH/TotalEnergy"], pdp.GetTotalEnergy(), 0);

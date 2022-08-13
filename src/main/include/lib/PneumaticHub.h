@@ -12,7 +12,7 @@ namespace RJ {
 class PneumaticHub : public frc::PneumaticHub,
                       public wpi::Sendable,
                       public wpi::SendableHelper<RJ::PneumaticHub>
-{    
+{
 public:
     explicit PneumaticHub(int module = frc::SensorUtil::GetDefaultREVPHModule());
 

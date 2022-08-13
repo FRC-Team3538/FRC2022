@@ -37,7 +37,7 @@ PathPlannerTrajectory::PathPlannerTrajectory(std::vector<PathPlannerState> state
 }
 
 PathPlannerTrajectory::PathPlannerTrajectory(){
-    
+
 }
 
 std::vector<PathPlannerTrajectory::PathPlannerState> PathPlannerTrajectory::joinSplines(std::vector<PathPlannerTrajectory::Waypoint> pathPoints, units::meters_per_second_t maxVel, double step){

@@ -1,4 +1,4 @@
-#include "subsystems/Shooter.hpp"
+#include "subsystems/Shooter.h"
 
 #include <cmath>
 #include <wpi/DataLog.h>
@@ -48,7 +48,7 @@ Shooter::Shooter()
 
     // Closed Loop Configuration
     shooterA.GetSlotConfigs(shooterSlotConfig, 0);
-    shooterSlotConfig.kF = 0.04734993; // 
+    shooterSlotConfig.kF = 0.04734993; //
     shooterSlotConfig.kP = 0.02999999;
     shooterSlotConfig.kI = 0.00049996376;
     shooterSlotConfig.kD = 1.5;
@@ -108,11 +108,11 @@ void Shooter::UpdateTelemetry()
     frc::SmartDashboard::PutNumber("Turret Angle Kekw", GetTurretAngle().value());
 
     double shooterRatio;
-    if (shooterA.GetSelectedSensorVelocity() == 0) 
+    if (shooterA.GetSelectedSensorVelocity() == 0)
     {
         shooterRatio = 0;
-    } 
-    else 
+    }
+    else
     {
         shooterRatio = shooterB.GetSelectedSensorVelocity() / shooterA.GetSelectedSensorVelocity();
     }
@@ -584,8 +584,8 @@ void Shooter::RegisterDataEntries(wpi::log::DataLog &log)
     FalconEntryStartHelper(log, "Shooter/shooterB", true);
     FalconEntryStartHelper(log, "Shooter/turret");
     // FalconEntryStartHelper(log, "Shooter/hood");
-    
-    
+
+
     // Shooter PID
     RegisterDataEntry(log, "Shooter/turret/goal", "double");
     RegisterDataEntry(log, "Shooter/turret/position", "double");

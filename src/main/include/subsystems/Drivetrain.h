@@ -23,7 +23,7 @@
 #include <units/voltage.h>                                  // for volt_t
 #include <wpi/sendable/SendableHelper.h>                    // for SendableH...
 
-#include "Subsystem.hpp"                                    // for Subsystem
+#include "Subsystem.h"                                    // for Subsystem
 #include "frc/geometry/Pose2d.h"                            // for Pose2d
 #include "frc/geometry/Rotation2d.h"                        // for Rotation2d
 #include "frc/motorcontrol/MotorControllerGroup.inc"        // for MotorCont...
@@ -128,7 +128,7 @@ private:
     static constexpr auto kBatteryResistance = 0.03;
 
     // Distance Per Pulse (Scale Factor)
-    static constexpr auto kDPP = (2 * kWheelRadius * M_PI) / kGearRatio / kEncoderResolution; 
+    static constexpr auto kDPP = (2 * kWheelRadius * M_PI) / kGearRatio / kEncoderResolution;
 
 public:
     // Teleop Values
@@ -170,8 +170,8 @@ private:
     frc::DifferentialDriveKinematics m_kinematics{kTrackWidth};
     frc::DifferentialDriveOdometry m_odometry{GetYaw()};
     // frc::DifferentialDrivePoseEstimator m_poseEstimator{
-    //     GetYaw(), 
-    //     frc::Pose2d{}, 
+    //     GetYaw(),
+    //     frc::Pose2d{},
     //     {0.002, 0.002, 0.0001, 0.5, 0.5},
     //     {0.005, 0.005, 0.0001},
     //     {0.2, 0.2, 0.1}};
@@ -198,7 +198,7 @@ private:
             kVlinear, kAlinear,
             kVangular, kAangular, kTrackWidth);
 
-    frc::LinearPlantInversionFeedforward<2, 2> m_drivetrainFeedForward = 
+    frc::LinearPlantInversionFeedforward<2, 2> m_drivetrainFeedForward =
         frc::LinearPlantInversionFeedforward<2, 2>{m_drivetrainSystem, 0.02_s};
 
 #ifndef __FRC_ROBORIO__

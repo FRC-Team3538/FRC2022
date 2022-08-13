@@ -1,4 +1,4 @@
-#include "subsystems/Subsystem.hpp"
+#include "subsystems/Subsystem.h"
 
 #include "ctre/phoenix/motorcontrol/ControlMode.h"
 #include "ctre/phoenix/motorcontrol/StatusFrame.h"
@@ -10,7 +10,7 @@ using namespace ctre::phoenix::motorcontrol::can;
 using namespace ctre::phoenix::motorcontrol;
 
 /*
-Trust me when I say this is a good thing - 
+Trust me when I say this is a good thing -
 use coprimes for status frames to minimize collision
 if you would like to generate more, see find_coprime_set_fast.py
 [255, 254, 253, 251, 247, 241, 239, 233, 229, 227, 223, 217, 211, 199, 197]

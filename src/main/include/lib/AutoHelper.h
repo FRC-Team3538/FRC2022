@@ -5,7 +5,7 @@ namespace frc { class TrajectoryConfig; }
 
 namespace rj {
 class AutoHelper {
-public: 
+public:
     static frc::Trajectory LoadTrajectory(std::string name, frc::TrajectoryConfig *config);
     static std::vector<frc::Trajectory> LoadTrajectorySplit(std::string name, frc::TrajectoryConfig *config);
 };

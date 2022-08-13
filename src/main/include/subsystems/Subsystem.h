@@ -22,14 +22,14 @@ using namespace ctre::phoenix::motorcontrol::can;
 
 /**
  * Subsystem Interface
- * 
+ *
  * Has UpdateTelemetry() and ConfigureMotors() functions
  * Just trying this out because it seems convenient
  */
 class Subsystem
 {
 public:
-    virtual void UpdateTelemetry() = 0; 
+    virtual void UpdateTelemetry() = 0;
     virtual void ConfigureSystem() = 0;
     virtual void RegisterDataEntries(wpi::log::DataLog &log) = 0;
     virtual void LogDataEntries(wpi::log::DataLog &log) = 0;

@@ -1,10 +1,10 @@
 #pragma once
 
-#include <frc/smartdashboard/SendableChooser.h>  // for SendableChooser
-#include <string>                                // for string
-#include "networktables/NetworkTableEntry.inc"   // for NetworkTableEntry::S...
-#include "wpi/SmallVector.h"                     // for SmallVector
-#include "wpi/StringMap.h"                       // for StringMap
+#include "networktables/NetworkTableEntry.inc"
+#include "wpi/SmallVector.h"
+#include "wpi/StringMap.h"
+#include <frc/smartdashboard/SendableChooser.h>
+#include <string>
 
 class AutoInterface;
 class Robotmap;

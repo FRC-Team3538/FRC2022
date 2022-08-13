@@ -10,7 +10,7 @@ namespace RJ {
 class PS4Controller : public frc::PS4Controller,
                       public wpi::Sendable,
                       public wpi::SendableHelper<RJ::PS4Controller>
-{    
+{
 public:
     explicit PS4Controller(int port);
 

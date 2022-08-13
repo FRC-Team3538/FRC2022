@@ -7,7 +7,7 @@
 #include <units/length.h>                    // for inch_t, operator""_in
 #include <list>                              // for list
 #include <memory>                            // for shared_ptr
-#include "Subsystem.hpp"                     // for Subsystem
+#include "Subsystem.h"                     // for Subsystem
 #include "photonlib/PhotonPipelineResult.h"  // for PhotonPipelineResult
 #include "units/base.h"                      // for operator*
 #include "units/time.h"                      // for second_t, millisecond_t

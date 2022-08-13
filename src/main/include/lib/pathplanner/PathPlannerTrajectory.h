@@ -50,7 +50,7 @@ namespace pathplanner{
                         this->isReversal = isReversal;
                     }
             };
-        
+
         private:
             std::vector<PathPlannerState> states;
             std::vector<PathPlannerState> joinSplines(std::vector<Waypoint> pathPoints, units::meters_per_second_t maxVel, double step);
@@ -58,7 +58,7 @@ namespace pathplanner{
             void calculateVelocity(std::vector<PathPlannerState> *states, std::vector<Waypoint> pathPoints, units::meters_per_second_squared_t maxAccel);
             void recalculateValues(std::vector<PathPlannerState> *states, bool reversed);
             units::meter_t calculateRadius(PathPlannerState s0, PathPlannerState s1, PathPlannerState s2);
-        
+
         public:
             PathPlannerTrajectory(std::vector<Waypoint> waypoints, units::meters_per_second_t maxVelocity, units::meters_per_second_squared_t maxAcceleration, bool reversed);
             PathPlannerTrajectory(std::vector<PathPlannerState> states);

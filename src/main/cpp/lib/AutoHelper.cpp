@@ -20,7 +20,7 @@ namespace rj
 {
 
     frc::Trajectory AutoHelper::LoadTrajectory(std::string name, frc::TrajectoryConfig *config)
-    {        
+    {
         // velocity, accel don't matter
         // but let's use the configured ones anyway
         pathplanner::PathPlannerTrajectory pp_traj = pathplanner::PathPlanner::loadPath(name, config->MaxVelocity(), config->MaxAcceleration(), config->IsReversed());
@@ -134,7 +134,7 @@ namespace rj
         bool invert = false;
         std::vector<frc::TrajectoryGenerator::PoseWithCurvature> current_path;
         current_path.reserve(251);
-        
+
         // handle all but final segment
         for (wpi::json::reference waypoint : pp_config.at("waypoints"))
         {
