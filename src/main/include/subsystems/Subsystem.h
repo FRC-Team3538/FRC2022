@@ -4,6 +4,8 @@
 #include <ctre/Phoenix.h>
 #include <unordered_map>
 #include <wpi/DataLog.h>
+#include <units/current.h>
+#include <units/voltage.h>
 
 #include "ctre/phoenix/motorcontrol/IMotorController.h"
 
@@ -33,6 +35,7 @@ public:
     virtual void ConfigureSystem() = 0;
     virtual void RegisterDataEntries(wpi::log::DataLog &log) = 0;
     virtual void LogDataEntries(wpi::log::DataLog &log) = 0;
+    virtual units::ampere_t SimPeriodic(units::volt_t battery) = 0;
 
     void SetStatusFrames(WPI_TalonFX &talon, uint8_t framePeriod);
 

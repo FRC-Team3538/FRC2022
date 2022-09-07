@@ -48,6 +48,7 @@ void Robot::RobotInit()
 
   ntRobotName.ForceSetString(ntRobotName.GetString("UnnamedRobot"));
   ntRobotName.SetPersistent();
+  frc::SmartDashboard::PutData("Drivetrain", &IO.drivetrain);
 
   // Logging Stuff
 #ifdef LOGGER
@@ -60,6 +61,8 @@ void Robot::RobotInit()
 
 void Robot::RobotPeriodic()
 {
+  IO.drivetrain.UpdateOdometry();
+
   IO.UpdateSmartDash();
   autoprograms.SmartDash();
 
@@ -86,11 +89,20 @@ void Robot::TeleopInit()
 
 void Robot::TeleopPeriodic()
 {
+    // DRIVE CODE
+    auto forward = -deadband(m_driver.GetLeftY(), 0.1, 1.0) * Drivetrain::kMaxSpeedLinear;
+    auto strafe = -deadband(m_driver.GetLeftX(), 0.1, 1.0) * Drivetrain::kMaxSpeedLinear;
+    auto rotate = -deadband(m_driver.GetRightX(), 0.1, 1.0) * Drivetrain::kMaxSpeedAngular * 0.75;
 
+    //std::cout << forward << ", " << strafe << ", " << rotate << std::endl;
+
+    IO.drivetrain.Drive(forward, strafe, rotate, true);
 }
 
 void Robot::DisabledInit()
 {
+  IO.drivetrain.Stop();
+  
   brakeTimer.Reset();
   brakeTimer.Start();
 }
@@ -104,7 +116,7 @@ void Robot::SimulationInit() {}
 
 void Robot::SimulationPeriodic()
 {
-
+  IO.SimPeriodic();
 }
 
 void Robot::TestInit()

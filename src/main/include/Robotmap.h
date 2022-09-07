@@ -19,6 +19,10 @@
 #include <frc/TimedRobot.h>
 #include <unordered_map>
 #include <wpi/DataLog.h>
+#include <subsystems/Drivetrain.h>
+#include <subsystems/RJVisionPipeline.h>
+
+#include <frc/simulation/BatterySim.h>
 
 class Subsystem;
 
@@ -38,6 +42,11 @@ public:
     frc::Watchdog watchdog{units::second_t{0.02}, test};
 
     // *** PUT SUBSYSTEMS HERE ***
+    Drivetrain drivetrain;
+    vision::RJVisionPipeline vision;
+
+    frc::sim::BatterySim battery;
+    units::volt_t battery_voltage;
 
     Robotmap();
 
@@ -46,6 +55,8 @@ public:
     void RegisterDataEntries(wpi::log::DataLog &log);
     void LogDataEntries(wpi::log::DataLog &log);
     void watchDog();
+
+    void SimPeriodic();
 
     // SmartDash Cycler
     size_t telemetryCt = 0;

@@ -52,13 +52,13 @@ namespace vision
         };
 
         // Init Stuff
-        RJVisionPipeline() = delete;
         RJVisionPipeline(FilterType filter = FilterType::EMAWithSpinup);
         void ConfigureSystem() override;
 
         // Periodic
         void Periodic();
         void UpdateTelemetry() override;
+        units::ampere_t SimPeriodic(units::volt_t volts);
 
         // Setter
         RJVisionPipeline::visionData Run();

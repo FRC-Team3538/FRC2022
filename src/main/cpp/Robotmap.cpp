@@ -9,7 +9,8 @@
 // *** ALSO PUT SUBSYSTEMS HERE ***
 Robotmap::Robotmap()
 {
-
+    subsystems.emplace_back(&drivetrain);
+    subsystems.emplace_back(&vision);
 }
 
 /**
@@ -122,4 +123,13 @@ void Robotmap::LogDataEntries(wpi::log::DataLog &log)
 void Robotmap::watchDog()
 {
     std::cout << "SAD WATCHDOG" << std::endl;
+}
+
+void Robotmap::SimPeriodic()
+{
+    units::ampere_t amps = 0_A;
+    for (auto system : subsystems) {
+        amps += system->SimPeriodic(battery_voltage);
+    }
+    battery_voltage = battery.Calculate({amps});
 }
