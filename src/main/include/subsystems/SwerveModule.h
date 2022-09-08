@@ -122,9 +122,9 @@ private:
         kWheelRadius,
         {0.1}};
 
-    ctre::phoenix::motorcontrol::TalonFXSimCollection m_driveMotorSim = m_driveMotor.GetSimCollection();
-    ctre::phoenix::motorcontrol::TalonFXSimCollection m_turnMotorSim = m_turningMotor.GetSimCollection();
-    ctre::phoenix::sensors::CANCoderSimCollection m_encoderSim = turningEncAbs.GetSimCollection();
+    ctre::phoenix::motorcontrol::TalonFXSimCollection *m_driveMotorSim = &m_driveMotor.GetSimCollection();
+    ctre::phoenix::motorcontrol::TalonFXSimCollection *m_turnMotorSim = &m_turningMotor.GetSimCollection();
+    ctre::phoenix::sensors::CANCoderSimCollection *m_encoderSim = &turningEncAbs.GetSimCollection();
 
     // Turn
     // frc::LinearSystem<2, 1, 1> m_turnPlant =
