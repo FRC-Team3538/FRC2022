@@ -106,13 +106,8 @@ private:
     //
     // Simulation
     //
-    bool m_isSimulation = false;
     units::volt_t m_driveVolts = 0_V;
     units::volt_t m_turnVolts = 0_V;
-
-    ctre::phoenix::motorcontrol::TalonFXSimCollection driveMotorSim = m_driveMotor.GetSimCollection();
-    ctre::phoenix::motorcontrol::TalonFXSimCollection turningMotorSim = m_turningMotor.GetSimCollection();
-    ctre::phoenix::sensors::CANCoderSimCollection encoderSim = turningEncAbs.GetSimCollection();
 
     // Drive
     frc::LinearSystem<1, 1, 1> m_drivePlant =
@@ -126,6 +121,10 @@ private:
         kDriveGearboxRatio,
         kWheelRadius,
         {0.1}};
+
+    ctre::phoenix::motorcontrol::TalonFXSimCollection m_driveMotorSim = m_driveMotor.GetSimCollection();
+    ctre::phoenix::motorcontrol::TalonFXSimCollection m_turnMotorSim = m_turningMotor.GetSimCollection();
+    ctre::phoenix::sensors::CANCoderSimCollection m_encoderSim = turningEncAbs.GetSimCollection();
 
     // Turn
     // frc::LinearSystem<2, 1, 1> m_turnPlant =
@@ -180,4 +179,7 @@ private:
         frc::DCMotor::Falcon500(),
         kTurnGearboxRatio,
         {0.01}};
+    
+    units::ampere_t SimDrive(units::volt_t battery);
+    units::ampere_t SimTurn(units::volt_t battery);
 };

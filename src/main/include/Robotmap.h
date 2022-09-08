@@ -1,28 +1,17 @@
 #pragma once
 
-#include <frc/PowerDistribution.h>          // for PowerDistribution
-#include <stddef.h>                         // for size_t
-#include <functional>                       // for _Bind_helper<>::type, bind
-#include <lib/PS4Controller.h>              // for PS4Controller
-#include <lib/PneumaticHub.h>               // for PneumaticHub
-#include <vector>                           // for vector
 #include "frc/Watchdog.h"                   // for Watchdog
 #include "units/time.h"                     // for second_t
-#include <vector>
-#include <functional>
-
-#include <lib/PS4Controller.h>
-
-#include <lib/PneumaticHub.h>
-
-#include <frc/PowerDistribution.h>
-#include <frc/TimedRobot.h>
-#include <unordered_map>
-#include <wpi/DataLog.h>
-#include <subsystems/Drivetrain.h>
-#include <subsystems/RJVisionPipeline.h>
-
+#include <frc/PowerDistribution.h>          // for PowerDistribution
 #include <frc/simulation/BatterySim.h>
+#include <frc/TimedRobot.h>
+#include <stddef.h>                         // for size_t
+#include <subsystems/Drivetrain.h>
+#include <unordered_map>
+#include <vector>                           // for vector
+#include <wpi/DataLog.h>
+#include <frc/PowerDistribution.h>
+#include <frc/PS4Controller.h>
 
 class Subsystem;
 
@@ -31,19 +20,14 @@ class Robotmap
 private:
     std::vector<Subsystem *> subsystems;
 
-    std::function<void(void)> test = std::bind(&Robotmap::watchDog, this);
-
 public:
-    RJ::PS4Controller mainController{0};
-    RJ::PS4Controller secondaryController{1};
-
-    frc::PowerDistribution pdp;
-    RJ::PneumaticHub ph;
-    frc::Watchdog watchdog{units::second_t{0.02}, test};
+    frc::PS4Controller mainController{0};
+    frc::PS4Controller secondaryController{1};
 
     // *** PUT SUBSYSTEMS HERE ***
     Drivetrain drivetrain;
-    vision::RJVisionPipeline vision;
+
+    frc::PowerDistribution pdp;
 
     frc::sim::BatterySim battery;
     units::volt_t battery_voltage;
@@ -54,7 +38,6 @@ public:
     void ConfigureSystem();
     void RegisterDataEntries(wpi::log::DataLog &log);
     void LogDataEntries(wpi::log::DataLog &log);
-    void watchDog();
 
     void SimPeriodic();
 

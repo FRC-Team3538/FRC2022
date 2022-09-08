@@ -16,6 +16,7 @@
 #include <wpi/sendable/Sendable.h>
 #include <wpi/sendable/SendableHelper.h>
 #include <lib/AlternativeSwerveKinematics.h>
+#include <units/angular_acceleration.h>
 
 class Drivetrain : public Subsystem, 
                    public wpi::Sendable
@@ -41,8 +42,6 @@ public:
     void ResetOdometry(const frc::Pose2d &pose);
     void UpdateOdometry();
     void Stop();
-
-    void Test(double y, double x);
 
     // Getters
     frc::Rotation2d GetYaw();
@@ -214,12 +213,6 @@ private:
         }
     };
 
-    // Heading Lock
-    bool m_YawLockActive = true;
-    frc2::PIDController m_yawLockPID{5.0, 0.0, 0.1};
-    frc::SendableChooser<std::string> yawLock;
-    bool yawLockEnabled = true;
-
     // Odometry
     frc::SwerveDriveKinematics<4> m_kinematics{
         frontLeftLocation,
@@ -250,16 +243,13 @@ private:
 
     // Swerve Modules
     SwerveModule m_frontLeft{"FL", 0, 1, 20, m_frontLeftConfig};
-    SwerveModule m_frontRight{"FR", 2, 3, 21, m_frontRightConfig};
-    SwerveModule m_backLeft{"BL", 4, 5, 22, m_backLeftConfig};
-    SwerveModule m_backRight{"BR", 6, 7, 23, m_backRightConfig};
+    // SwerveModule m_frontRight{"FR", 2, 3, 21, m_frontRightConfig};
+    // SwerveModule m_backLeft{"BL", 4, 5, 22, m_backLeftConfig};
+    // SwerveModule m_backRight{"BR", 6, 7, 23, m_backRightConfig};
 
     // Trajectory Following
     frc::HolonomicDriveController m_trajectoryController{
-        frc2::PIDController{2.0, 0.0, 0.0},                      // X-error
-        frc2::PIDController{2.0, 0.0, 0.0},                      // Y-error
-        frc::ProfiledPIDController<units::radian>{2.0, 0.0, 0.0, // Rotation-error
-                                                  frc::TrapezoidProfile<units::radian>::Constraints{
-                                                      360_deg_per_s,
-                                                      720_deg_per_s / 1_s}}};
+        {2.0, 0.0, 0.0}, // X-error
+        {2.0, 0.0, 0.0}, // Y-error
+        {2.0, 0.0, 0.0, {360_deg_per_s, 720_deg_per_s_sq}}}; // Rotation error
 };
