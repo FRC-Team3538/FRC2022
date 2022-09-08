@@ -25,12 +25,12 @@ void Drivetrain::LogDataEntries(wpi::log::DataLog &log)
 
   frc::SmartDashboard::PutNumber("Yaw", GetYaw().Degrees().value());
 
-  frc::SmartDashboard::PutNumber("Odometry X", m_odometry.GetPose().X().value());
+  // frc::SmartDashboard::PutNumber("Odometry X", m_odometry.GetPose().X().value());
 }
 
 void Drivetrain::ConfigureSystem()
 {
-  m_imu.ZeroGyroBiasNow();
+  // m_imu.ZeroGyroBiasNow();
   ResetYaw();
 
   // Display Robot position on field
@@ -44,12 +44,12 @@ void Drivetrain::ConfigureSystem()
 
 void Drivetrain::Drive(frc::Trajectory::State trajectoryState, units::radian_t yaw)
 {
-  const auto command = m_trajectoryController.Calculate(
-      m_odometry.GetPose(),
-      trajectoryState,
-      yaw);
+  // const auto command = m_trajectoryController.Calculate(
+  //     m_odometry.GetPose(),
+  //     trajectoryState,
+  //     yaw);
 
-  Drive(command.vx, command.vy, command.omega, false);
+  // Drive(command.vx, command.vy, command.omega, false);
 }
 
 void Drivetrain::Drive(units::meters_per_second_t xSpeed,
@@ -93,7 +93,7 @@ void Drivetrain::Stop()
 
 frc::Rotation2d Drivetrain::GetYaw()
 {
-  return frc::Rotation2d{units::degree_t{m_imu.GetYaw()}};
+  return frc::Rotation2d(); // frc::Rotation2d{units::degree_t{m_imu.GetYaw()}};
 }
 
 void Drivetrain::UpdateOdometry()
@@ -115,20 +115,20 @@ void Drivetrain::UpdateOdometry()
   //                                                 m_backLeft.GetState(),
   //                                                 m_backRight.GetState()});
 
-  auto p = m_odometry.GetPose();
-  frc::Pose2d fliperoo = {-p.Y(), p.X(), p.Rotation().RotateBy(90_deg)}; // Driver Station PoV
-  m_fieldDisplay.SetRobotPose(fliperoo);
+  // auto p = m_odometry.GetPose();
+  // frc::Pose2d fliperoo = {-p.Y(), p.X(), p.Rotation().RotateBy(90_deg)}; // Driver Station PoV
+  // m_fieldDisplay.SetRobotPose(fliperoo);
 }
 
 void Drivetrain::ResetYaw()
 {
-  m_imu.SetYaw(0.0);
+  // m_imu.SetYaw(0.0);
 }
 
 void Drivetrain::ResetOdometry(const frc::Pose2d &pose)
 {
-  m_odometry.ResetPosition(pose, GetYaw());
-  m_poseEstimator.ResetPosition(pose, GetYaw());
+  // m_odometry.ResetPosition(pose, GetYaw());
+  // m_poseEstimator.ResetPosition(pose, GetYaw());
 }
 
 frc::ChassisSpeeds Drivetrain::GetChassisSpeeds()
@@ -148,22 +148,22 @@ void Drivetrain::InitSendable(wpi::SendableBuilder &builder)
   // m_backRight.InitSendable(builder);
 
 
-  builder.AddDoubleProperty("gyro", [this] { return m_imu.GetYaw(); }, nullptr);
+  // builder.AddDoubleProperty("gyro", [this] { return m_imu.GetYaw(); }, nullptr);
   
-  // Pose
-  builder.AddDoubleProperty(
-      "poseEstimator/x", [this] { return m_poseEstimator.GetEstimatedPosition().X().value(); }, nullptr);
-  builder.AddDoubleProperty(
-      "poseEstimator/y", [this] { return m_poseEstimator.GetEstimatedPosition().Y().value(); }, nullptr);
-  builder.AddDoubleProperty(
-      "poseEstimator/yaw", [this] { return m_poseEstimator.GetEstimatedPosition().Rotation().Degrees().value(); }, nullptr);
+  // // Pose
+  // builder.AddDoubleProperty(
+  //     "poseEstimator/x", [this] { return m_poseEstimator.GetEstimatedPosition().X().value(); }, nullptr);
+  // builder.AddDoubleProperty(
+  //     "poseEstimator/y", [this] { return m_poseEstimator.GetEstimatedPosition().Y().value(); }, nullptr);
+  // builder.AddDoubleProperty(
+  //     "poseEstimator/yaw", [this] { return m_poseEstimator.GetEstimatedPosition().Rotation().Degrees().value(); }, nullptr);
 
-  builder.AddDoubleProperty(
-      "odometry/x", [this] { return m_odometry.GetPose().X().value(); }, nullptr);
-  builder.AddDoubleProperty(
-      "odometry/y", [this] { return m_odometry.GetPose().Y().value(); }, nullptr);
-  builder.AddDoubleProperty(
-      "odometry/yaw", [this] { return m_odometry.GetPose().Rotation().Degrees().value(); }, nullptr);
+  // builder.AddDoubleProperty(
+  //     "odometry/x", [this] { return m_odometry.GetPose().X().value(); }, nullptr);
+  // builder.AddDoubleProperty(
+  //     "odometry/y", [this] { return m_odometry.GetPose().Y().value(); }, nullptr);
+  // builder.AddDoubleProperty(
+  //     "odometry/yaw", [this] { return m_odometry.GetPose().Rotation().Degrees().value(); }, nullptr);
 
   // Velocity
   builder.AddDoubleProperty(
@@ -191,7 +191,7 @@ units::ampere_t Drivetrain::SimPeriodic(units::volt_t battery)
 
   // Simulated IMU
   // TODO
-  m_imuSimCollection.SetRawHeading(m_odometry.GetPose().Rotation().Degrees() / 1_deg);
+  // m_imuSimCollection.SetRawHeading(m_odometry.GetPose().Rotation().Degrees() / 1_deg);
 
   return m_frontLeft.SimPeriodic(battery); // +
     // m_frontRight.SimPeriodic(battery) +

@@ -117,101 +117,101 @@ private:
         }
     };
 
-    SwerveModuleConfig m_frontRightConfig{
-        75.938_deg,
-        {
-            1.89,
-            0.0,
-            0.0,
-            {
-                kMaxModuleLinearAcceleration,
-                kMaxModuleLinearJerk
-            }
-        },
-        {
-            1.44,   // 2.5179,
-            0.0,    // 0.0,
-            0.0125, // 0.15272,
-            {
-                kMaxModuleAngularVelocity,
-                kMaxModuleAngularAcceleration
-            }
-        },
-        {
-            0.607_V,
-            2.2_V / 1_mps,
-            0.199_V / 1_mps_sq
-        },
-        {
-            0.1_V,
-            0.12_V / 1_rad_per_s,
-            0.008_V / 1_rad_per_s_sq
-        }
-    };
+    // SwerveModuleConfig m_frontRightConfig{
+    //     75.938_deg,
+    //     {
+    //         1.89,
+    //         0.0,
+    //         0.0,
+    //         {
+    //             kMaxModuleLinearAcceleration,
+    //             kMaxModuleLinearJerk
+    //         }
+    //     },
+    //     {
+    //         1.44,   // 2.5179,
+    //         0.0,    // 0.0,
+    //         0.0125, // 0.15272,
+    //         {
+    //             kMaxModuleAngularVelocity,
+    //             kMaxModuleAngularAcceleration
+    //         }
+    //     },
+    //     {
+    //         0.607_V,
+    //         2.2_V / 1_mps,
+    //         0.199_V / 1_mps_sq
+    //     },
+    //     {
+    //         0.1_V,
+    //         0.12_V / 1_rad_per_s,
+    //         0.008_V / 1_rad_per_s_sq
+    //     }
+    // };
 
-    SwerveModuleConfig m_backLeftConfig{
-        -2.549_deg,
-        {
-            1.89,
-            0.0,
-            0.0,
-            {
-                kMaxModuleLinearAcceleration,
-                kMaxModuleLinearJerk
-            }
-        },
-        {
-            1.44,   // 2.5179,
-            0.0,    // 0.0,
-            0.0125, // 0.15272,
-            {
-                kMaxModuleAngularVelocity,
-                kMaxModuleAngularAcceleration
-            }
-        },
-        {
-            0.607_V,
-            2.2_V / 1_mps,
-            0.199_V / 1_mps_sq
-        },
-        {
-            0.1_V,
-            0.12_V / 1_rad_per_s,
-            0.008_V / 1_rad_per_s_sq
-        }
-    };
+    // SwerveModuleConfig m_backLeftConfig{
+    //     -2.549_deg,
+    //     {
+    //         1.89,
+    //         0.0,
+    //         0.0,
+    //         {
+    //             kMaxModuleLinearAcceleration,
+    //             kMaxModuleLinearJerk
+    //         }
+    //     },
+    //     {
+    //         1.44,   // 2.5179,
+    //         0.0,    // 0.0,
+    //         0.0125, // 0.15272,
+    //         {
+    //             kMaxModuleAngularVelocity,
+    //             kMaxModuleAngularAcceleration
+    //         }
+    //     },
+    //     {
+    //         0.607_V,
+    //         2.2_V / 1_mps,
+    //         0.199_V / 1_mps_sq
+    //     },
+    //     {
+    //         0.1_V,
+    //         0.12_V / 1_rad_per_s,
+    //         0.008_V / 1_rad_per_s_sq
+    //     }
+    // };
 
-    SwerveModuleConfig m_backRightConfig{
-        128.848_deg,
-        {
-            1.89,
-            0.0,
-            0.0,
-            {
-                kMaxModuleLinearAcceleration,
-                kMaxModuleLinearJerk
-            }
-        },
-        {
-            1.44,   // 2.5179,
-            0.0,    // 0.0,
-            0.0125, // 0.15272,
-            {
-                kMaxModuleAngularVelocity,
-                kMaxModuleAngularAcceleration
-            }
-        },
-        {
-            0.607_V,
-            2.2_V / 1_mps,
-            0.199_V / 1_mps_sq
-        },
-        {
-            0.1_V,
-            0.12_V / 1_rad_per_s,
-            0.008_V / 1_rad_per_s_sq
-        }
-    };
+    // SwerveModuleConfig m_backRightConfig{
+    //     128.848_deg,
+    //     {
+    //         1.89,
+    //         0.0,
+    //         0.0,
+    //         {
+    //             kMaxModuleLinearAcceleration,
+    //             kMaxModuleLinearJerk
+    //         }
+    //     },
+    //     {
+    //         1.44,   // 2.5179,
+    //         0.0,    // 0.0,
+    //         0.0125, // 0.15272,
+    //         {
+    //             kMaxModuleAngularVelocity,
+    //             kMaxModuleAngularAcceleration
+    //         }
+    //     },
+    //     {
+    //         0.607_V,
+    //         2.2_V / 1_mps,
+    //         0.199_V / 1_mps_sq
+    //     },
+    //     {
+    //         0.1_V,
+    //         0.12_V / 1_rad_per_s,
+    //         0.008_V / 1_rad_per_s_sq
+    //     }
+    // };
 
     // Odometry
     frc::SwerveDriveKinematics<4> m_kinematics{
@@ -220,36 +220,36 @@ private:
         backLeftLocation,
         backRightLocation};
     
-    AlternativeSwerveKinematics<4> m_altKinematics{
-        kMaxSpeedLinear,
-        kMaxSpeedAngular,
-        kMaxSpeedLinear
-    };
+    // AlternativeSwerveKinematics<4> m_altKinematics{
+    //     kMaxSpeedLinear,
+    //     kMaxSpeedAngular,
+    //     kMaxSpeedLinear
+    // };
 
-    frc::SwerveDriveOdometry<4> m_odometry{
-        m_kinematics,
-        frc::Rotation2d(),
-        frc::Pose2d()};
+    // frc::SwerveDriveOdometry<4> m_odometry{
+    //     m_kinematics,
+    //     frc::Rotation2d(),
+    //     frc::Pose2d()};
 
-    frc::SwerveDrivePoseEstimator<4> m_poseEstimator{
-        frc::Rotation2d(),
-        frc::Pose2d(),
-        m_kinematics,
-        {0.5, 0.5, 0.05},
-        {2.0},
-        {0.0, 0.0, 0.0}};
+    // frc::SwerveDrivePoseEstimator<4> m_poseEstimator{
+    //     frc::Rotation2d(),
+    //     frc::Pose2d(),
+    //     m_kinematics,
+    //     {0.5, 0.5, 0.05},
+    //     {2.0},
+    //     {0.0, 0.0, 0.0}};
 
     frc::ChassisSpeeds m_robotVelocity;
 
     // Swerve Modules
-    SwerveModule m_frontLeft{"FL", 0, 1, 20, m_frontLeftConfig};
+    SwerveModule m_frontLeft{"FL", 0, 1, 20}; //, m_frontLeftConfig};
     // SwerveModule m_frontRight{"FR", 2, 3, 21, m_frontRightConfig};
     // SwerveModule m_backLeft{"BL", 4, 5, 22, m_backLeftConfig};
     // SwerveModule m_backRight{"BR", 6, 7, 23, m_backRightConfig};
 
     // Trajectory Following
-    frc::HolonomicDriveController m_trajectoryController{
-        {2.0, 0.0, 0.0}, // X-error
-        {2.0, 0.0, 0.0}, // Y-error
-        {2.0, 0.0, 0.0, {360_deg_per_s, 720_deg_per_s_sq}}}; // Rotation error
+    // frc::HolonomicDriveController m_trajectoryController{
+    //     {2.0, 0.0, 0.0}, // X-error
+    //     {2.0, 0.0, 0.0}, // Y-error
+    //     {2.0, 0.0, 0.0, {360_deg_per_s, 720_deg_per_s_sq}}}; // Rotation error
 };
