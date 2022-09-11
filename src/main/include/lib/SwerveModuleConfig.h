@@ -32,7 +32,6 @@ public:
         return frc::ProfiledPIDController<Distance>(kP, kI, kD, constraints);
     }
 
-private:
     double kP;
     double kI;
     double kD;
@@ -71,7 +70,6 @@ public:
         return frc::SimpleMotorFeedforward<Distance>(kS, kV, kA);
     }
 
-private:
     units::volt_t kS;
     kV_t kV;
     kA_t kA;
@@ -94,31 +92,6 @@ public:
             turnFf(turnFf)
     {}
 
-    units::degree_t GetModuleOffset()
-    {
-        return angleOffset;
-    }
-
-    frc::ProfiledPIDController<units::meters_per_second> GetDrivePIDController()
-    {
-        return drivePID.GetPIDController();
-    }
-
-    constexpr frc::SimpleMotorFeedforward<units::meter> GetDriveFeedForward()
-    {
-        return driveFf.GetFeedForward();
-    }
-
-    frc::ProfiledPIDController<units::radian> GetTurnPIDController()
-    {
-        return turnPID.GetPIDController();
-    }
-
-    constexpr frc::SimpleMotorFeedforward<units::radian> GetTurnFeedForward()
-    {
-        return turnFf.GetFeedForward();
-    }
-private:
     units::degree_t angleOffset;
     PIDConfig<units::meters_per_second> drivePID;
     PIDConfig<units::radian> turnPID;

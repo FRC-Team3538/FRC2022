@@ -24,8 +24,6 @@
 // Simulation
 #include <frc/system/plant/LinearSystemId.h>
 #include <frc/simulation/LinearSystemSim.h>
-#include <frc/simulation/FlywheelSim.h>
-#include <frc/simulation/ElevatorSim.h>
 
 #include <subsystems/Subsystem.h>
 #include <wpi/sendable/Sendable.h>
@@ -36,6 +34,7 @@
 #include <lib/SwerveWheelSim.h>
 #include <frc/simulation/DCMotorSim.h>
 #include <lib/SwerveModuleConfig.h>
+#include <lib/TurretSim.h>
 
 class SwerveModule : public Subsystem, 
                      public wpi::Sendable
@@ -56,16 +55,22 @@ public:
     frc::SwerveModuleState GetState();
     units::meters_per_second_t GetVelocity();
     frc::Rotation2d GetAngle();
+    frc::Rotation2d GetMotorAngle();
 
     // Module Actions
-    void SetModule(const frc::SwerveModuleState &state);
+    void SetModule(const frc::SwerveModuleState &state, bool openLoop = false);
     void Stop();
 
     // Telemetry / Smartdash
     void InitSendable(wpi::SendableBuilder &builder) override;
 
     // Simulation
-    units::ampere_t SimPeriodic(units::volt_t volts);
+    void SimInit() override;
+    units::ampere_t SimPeriodic(units::volt_t volts) override;
+
+    ErrorCode SeedTurnMotor();
+
+    units::radians_per_second_t AngularVelocity();
 
 private:
     frc::SwerveModuleState currentState;
@@ -74,10 +79,12 @@ private:
 
     std::string moduleID;
 
+    SwerveModuleConfig config;
+
     // Hardware
     ctre::phoenix::motorcontrol::can::WPI_TalonFX m_driveMotor;
     ctre::phoenix::motorcontrol::can::WPI_TalonFX m_turningMotor;
-    CANCoder turningEncAbs;
+    CANCoder m_turnEncoder;
 
     // Configuration
     static constexpr auto kWheelRadius = 2.0_in;
@@ -86,7 +93,7 @@ private:
     static constexpr double kTurnGearboxRatio = 12.8;
 
     static constexpr auto kDriveScaleFactor =
-        (2 * units::constants::pi * kWheelRadius) / (kDriveGearboxRatio * kEncoderResolution);
+        (2 * units::constants::pi * kWheelRadius) / (1_tr * kDriveGearboxRatio);
 
     static constexpr auto kTurningMotorVoltageNominal = 12.8_V;
 
@@ -94,14 +101,14 @@ private:
     static constexpr auto kTurningMotorCurrentLimit = 30_A;
 
     // Control
-    frc::ProfiledPIDController<units::meters_per_second> m_drivePIDController;
-    frc::ProfiledPIDController<units::radians> m_turningPIDController;
 
     frc::SimpleMotorFeedforward<units::meters> m_driveFeedforward;
     frc::SimpleMotorFeedforward<units::radians> m_turnFeedforward;
 
     units::degree_t angle_offset;
 
+    SlotConfiguration driveSlotConfig = SlotConfiguration();
+    SlotConfiguration turnSlotConfig = SlotConfiguration();
 
     //
     // Simulation
@@ -112,72 +119,37 @@ private:
 
     ctre::phoenix::motorcontrol::TalonFXSimCollection driveMotorSim = m_driveMotor.GetSimCollection();
     ctre::phoenix::motorcontrol::TalonFXSimCollection turningMotorSim = m_turningMotor.GetSimCollection();
-    ctre::phoenix::sensors::CANCoderSimCollection encoderSim = turningEncAbs.GetSimCollection();
+    ctre::phoenix::sensors::CANCoderSimCollection encoderSim = m_turnEncoder.GetSimCollection();
 
     // Drive
     frc::LinearSystem<1, 1, 1> m_drivePlant =
-    frc::LinearSystemId::IdentifyVelocitySystem<units::meter>(
-        m_driveFeedforward.kV, 
-        m_driveFeedforward.kA);
+    frc::LinearSystemId::IdentifyVelocitySystem<units::radian>(
+        m_driveFeedforward.kV * kWheelRadius / 1_rad, 
+        m_driveFeedforward.kA * kWheelRadius / 1_rad);
 
     SwerveWheelSim m_driveSim{
         m_drivePlant,
         frc::DCMotor::Falcon500(),
         kDriveGearboxRatio,
         kWheelRadius,
-        {0.1}};
+        {0.0}};
 
     // Turn
-    // frc::LinearSystem<2, 1, 1> m_turnPlant =
-    // frc::LinearSystemId::IdentifyPositionSystem<units::radian>(
-    //     m_turnFeedforward.kV, 
-    //     m_turnFeedforward.kA);
+    frc::LinearSystem<2, 1, 1> m_turnPlant =
+    frc::LinearSystemId::IdentifyPositionSystem<units::radian>(
+        m_turnFeedforward.kV, 
+        m_turnFeedforward.kA);
 
-    // derived based on implementation of DCMotorSystem and PositionSystem
-    /*
-        1/kA = G * motor.Kt / (motor.R * J)
-        -kV / kA = -1 * G * G * motor.Kt / (motor.R * J)
-        -kV = -G # skip
-
-        1 / kA = G * motor.Kt / (motor.R * J)
-        J * motor.R = G * motor.kT * kA
-        J = G * motor.Kt * kA / motor.R
-
-        kA = 0.008_V / 1_rad_per_s_sq
-        kV = 0.12_V / 1_rad_per_s
-        G = 12.8
-        motor.Kt = stallTorque / stallCurrent
-        motor.kV = freeSpeed / (nominalVoltage - R * freeCurrent)
-        motor.R = nominalVoltage / stallCurrent
-
-        args:
-        - nominalVoltage = 12_V
-        - stallTorque = 4.69_Nm
-        - stallCurrent = 257_A
-        - freeCurrent = 1.5_A
-        - freeSpeed = 6380
-        - numMotors = 1
-
-        motor.R = 12_V / 257_A
-        motor.kV = 6380 / (12_V - motor.R * 1.5_A)
-        motor.Kt = 4.69_Nm / 257_A
-
-        J = G * motor.Kt * kA / motor.R
-        J = 12.8 * 4.69_Nm / 257_A * 0.008_V / 1_rad_per_s_sq / (12_V / 257_A)
-        = 12.8 * 4.69_Nm * 0.008_V * 257_A / 257_A / 1_rad_per_s_sq / 12_V
-        = 12.8 * 4.69_Nm * 0.008_V / (12_V * 1_rad_per_s_sq) 
-    */
-
-    frc::LinearSystem<2, 1, 2> m_turnPlant =
-    frc::LinearSystemId::DCMotorSystem(
-        frc::DCMotor::Falcon500(),
-        12.8 * 4.69_Nm * 0.008_V / (12_V * 1_rad_per_s_sq) * 1_rad,
-        kTurnGearboxRatio);
-
-
-    frc::sim::DCMotorSim m_turnSim{
+    
+    TurretSim m_turnSim{
         m_turnPlant,
         frc::DCMotor::Falcon500(),
         kTurnGearboxRatio,
-        {0.01}};
+        {0.0}};
+
+    units::ampere_t SimDrive(units::volt_t battery);
+    units::ampere_t SimTurn(units::volt_t battery);
+
+    void Drive(units::meters_per_second_t target, bool openLoop = false);
+    void Turn(frc::Rotation2d target);
 };

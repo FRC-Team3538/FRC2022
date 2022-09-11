@@ -21,6 +21,17 @@
 #include "lib/Logging.h"
 #include "frc/DataLogManager.h"
 
+// Keep this around, these are the units lib base units, in order in units::base_unit:
+// METERS
+// KILOGRAMS
+// SECONDS
+// RADIANS
+// AMPERES
+// KELVIN
+// MOLE
+// CANDELA
+// BYTE
+
 class Robot : public frc::TimedRobot
 {
 public:
@@ -58,6 +69,8 @@ private:
   frc::Timer shotTimer;
   frc::Timer brakeTimer;
   frc::Timer intakeTimer;
+
+  frc::Timer seedEncoderTimer;
 
   bool manualJog = false;
 

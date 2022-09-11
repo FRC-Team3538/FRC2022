@@ -44,17 +44,16 @@ public:
         auto rotationalK = units::math::abs(speeds.omega) / maxRotationalVelocity;
         auto k = units::math::max(translationalK, rotationalK);
 
-        auto realMaxSpeed = std::max_element(moduleStates.begin(), moduleStates.end(),
-                                        [](const auto& a, const auto& b) {
-                                            return units::math::abs(a.speed) <
-                                                units::math::abs(b.speed);
-                                        })
-                            ->speed;
-        
-        auto scale = units::math::min(k * maxModuleVelocity / realMaxSpeed, 1);
+        auto realMaxSpeed = 0_mps;
 
-        for (auto moduleState : moduleStates) {
-            moduleState->speed *= scale;
+        for (auto moduleState : *moduleStates) {
+            realMaxSpeed = units::math::max(units::math::abs(moduleState.speed), realMaxSpeed);
+        }
+        
+        auto scale = units::math::min(k * maxModuleVelocity / realMaxSpeed, units::scalar_t(1.0));
+
+        for (auto moduleState : *moduleStates) {
+            moduleState.speed *= scale;
         }
     }
 private:

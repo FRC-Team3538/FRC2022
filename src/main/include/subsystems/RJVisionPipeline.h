@@ -58,7 +58,8 @@ namespace vision
         // Periodic
         void Periodic();
         void UpdateTelemetry() override;
-        units::ampere_t SimPeriodic(units::volt_t volts);
+        void SimInit() override;
+        units::ampere_t SimPeriodic(units::volt_t volts) override;
 
         // Setter
         RJVisionPipeline::visionData Run();

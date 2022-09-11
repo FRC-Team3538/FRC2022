@@ -4,9 +4,9 @@
 #include "subsystems/SwerveModule.h"
 
 // Utilities
-#include <frc/kinematics/SwerveDriveKinematics.h>
-#include <frc/kinematics/SwerveDriveOdometry.h>
-#include <frc/estimator/SwerveDrivePoseEstimator.h>
+#include <lib/wpi/SwerveDriveKinematics.h>
+#include <lib/wpi/SwerveDriveOdometry.h>
+#include <lib/wpi/SwerveDrivePoseEstimator.h>
 #include <frc/smartdashboard/Field2d.h>
 #include <frc/controller/HolonomicDriveController.h>
 #include "Subsystem.h"
@@ -35,14 +35,14 @@ public:
     void Drive(units::meters_per_second_t xSpeed,
                units::meters_per_second_t ySpeed,
                units::radians_per_second_t rot,
-               bool fieldRelative = true);
+               bool fieldRelative = true,
+               bool openLoop = true);
     void Drive(frc::Trajectory::State trajectoryState, units::radian_t yaw = 0_rad);
     void ResetYaw();
     void ResetOdometry(const frc::Pose2d &pose);
     void UpdateOdometry();
     void Stop();
-
-    void Test(double y, double x);
+    ErrorCode SeedEncoders();
 
     // Getters
     frc::Rotation2d GetYaw();
@@ -52,12 +52,15 @@ public:
     void InitSendable(wpi::SendableBuilder &builder) override;
 
     // Simulation
-    units::ampere_t SimPeriodic(units::volt_t volts);
+    void SimInit() override;
+    units::ampere_t SimPeriodic(units::volt_t volts) override;
+
+    bool Active();
 
     // Public config values
     static constexpr units::meters_per_second_t kMaxSpeedLinear = 16_fps;
     static constexpr units::radians_per_second_t kMaxSpeedAngular = 360_deg_per_s;
-    static constexpr units::meters_per_second_squared_t kMaxAccelerationLinear = units::feet_per_second_squared_t(20.0);
+    static constexpr units::meters_per_second_squared_t kMaxAccelerationLinear = 20_fps_sq;
     static constexpr units::inch_t kWheelToWheel = 22_in;
 
 private:
@@ -89,7 +92,7 @@ private:
     SwerveModuleConfig m_frontLeftConfig{
         -123.135_deg,
         {
-            1.89,
+            1.3438,
             0.0,
             0.0,
             {
@@ -98,30 +101,30 @@ private:
             }
         },
         {
-            1.44,   // 2.5179,
-            0.0,    // 0.0,
-            0.0125, // 0.15272,
+            0.0044251,
+            0.0,
+            0.22827,
             {
                 kMaxModuleAngularVelocity,
                 kMaxModuleAngularAcceleration
             }
         },
         {
-            0.607_V,
-            2.2_V / 1_mps,
-            0.199_V / 1_mps_sq
+            0_V, //0.63309_V,
+            2.1613_V / 1_mps,
+            0.12711_V / 1_mps_sq
         },
         {
-            0.776_V,
-            0.232_V / 1_rad_per_s,
-            0.004_V / 1_rad_per_s_sq
+            0_V, // 0.76857_V,
+            0.23128_V / 1_rad_per_s,
+            0.0055795_V / 1_rad_per_s_sq
         }
     };
 
     SwerveModuleConfig m_frontRightConfig{
         75.938_deg,
         {
-            1.89,
+            1.3438,
             0.0,
             0.0,
             {
@@ -130,30 +133,30 @@ private:
             }
         },
         {
-            1.44,   // 2.5179,
-            0.0,    // 0.0,
-            0.0125, // 0.15272,
+            0.0044251,
+            0.0,
+            0.22827,
             {
                 kMaxModuleAngularVelocity,
                 kMaxModuleAngularAcceleration
             }
         },
         {
-            0.607_V,
-            2.2_V / 1_mps,
-            0.199_V / 1_mps_sq
+            0_V, //0.63309_V,
+            2.1613_V / 1_mps,
+            0.12711_V / 1_mps_sq
         },
         {
-            0.1_V,
-            0.12_V / 1_rad_per_s,
-            0.008_V / 1_rad_per_s_sq
+            0_V, // 0.76857_V,
+            0.23128_V / 1_rad_per_s,
+            0.0055795_V / 1_rad_per_s_sq
         }
     };
 
     SwerveModuleConfig m_backLeftConfig{
         -2.549_deg,
         {
-            1.89,
+            1.3438,
             0.0,
             0.0,
             {
@@ -162,30 +165,30 @@ private:
             }
         },
         {
-            1.44,   // 2.5179,
-            0.0,    // 0.0,
-            0.0125, // 0.15272,
+            0.0044251,
+            0.0,
+            0.22827,
             {
                 kMaxModuleAngularVelocity,
                 kMaxModuleAngularAcceleration
             }
         },
         {
-            0.607_V,
-            2.2_V / 1_mps,
-            0.199_V / 1_mps_sq
+            0_V, //0.63309_V,
+            2.1613_V / 1_mps,
+            0.12711_V / 1_mps_sq
         },
         {
-            0.1_V,
-            0.12_V / 1_rad_per_s,
-            0.008_V / 1_rad_per_s_sq
+            0_V, // 0.76857_V,
+            0.23128_V / 1_rad_per_s,
+            0.0055795_V / 1_rad_per_s_sq
         }
     };
 
     SwerveModuleConfig m_backRightConfig{
         128.848_deg,
         {
-            1.89,
+            1.3438,
             0.0,
             0.0,
             {
@@ -194,23 +197,23 @@ private:
             }
         },
         {
-            1.44,   // 2.5179,
-            0.0,    // 0.0,
-            0.0125, // 0.15272,
+            0.0044251,
+            0.0,
+            0.22827,
             {
                 kMaxModuleAngularVelocity,
                 kMaxModuleAngularAcceleration
             }
         },
         {
-            0.607_V,
-            2.2_V / 1_mps,
-            0.199_V / 1_mps_sq
+            0_V, //0.63309_V,
+            2.1613_V / 1_mps,
+            0.12711_V / 1_mps_sq
         },
         {
-            0.1_V,
-            0.12_V / 1_rad_per_s,
-            0.008_V / 1_rad_per_s_sq
+            0_V, // 0.76857_V,
+            0.23128_V / 1_rad_per_s,
+            0.0055795_V / 1_rad_per_s_sq
         }
     };
 

@@ -73,36 +73,37 @@ void Drivetrain::Drive(frc::Trajectory::State trajectoryState, units::radian_t y
 void Drivetrain::Drive(units::meters_per_second_t xSpeed,
                        units::meters_per_second_t ySpeed,
                        units::radians_per_second_t rot,
-                       bool fieldRelative)
+                       bool fieldRelative,
+                       bool openLoop)
 {
   // Remember the last operating mode, for smartdash display
   m_fieldRelative = fieldRelative;
 
   // Heading Lock
-  constexpr auto noRotThreshold = 0.1_deg_per_s;
-  if (units::math::abs(rot) > noRotThreshold)
-  {
-    // Disable YawLock as soon as any rotation command is received
-    m_YawLockActive = false;
-  }
-  else if (units::math::abs(rot) < noRotThreshold && units::math::abs(m_robotVelocity.omega) < 30_deg_per_s)
-  {
-    // Wait for the robot to stop spinning to enable Yaw Lock
-    m_YawLockActive = yawLockEnabled; //true
-  }
+  // constexpr auto noRotThreshold = 0.1_deg_per_s;
+  // if (units::math::abs(rot) > noRotThreshold)
+  // {
+  //   // Disable YawLock as soon as any rotation command is received
+  //   m_YawLockActive = false;
+  // }
+  // else if (units::math::abs(rot) < noRotThreshold && units::math::abs(m_robotVelocity.omega) < 30_deg_per_s)
+  // {
+  //   // Wait for the robot to stop spinning to enable Yaw Lock
+  //   m_YawLockActive = yawLockEnabled; //true
+  // }
 
-  if (m_YawLockActive)
-  {
-    // Robot will automatically maintain current yaw
-    auto r = m_yawLockPID.Calculate(GetYaw().Degrees().value());
-    rot = units::degrees_per_second_t{r};
-  }
-  else
-  {
-    // Manual control, save the current yaw.
-    m_yawLockPID.SetSetpoint(GetYaw().Degrees().value());
-    m_yawLockPID.Reset();
-  }
+  // if (m_YawLockActive)
+  // {
+  //   // Robot will automatically maintain current yaw
+  //   auto r = m_yawLockPID.Calculate(GetYaw().Degrees().value());
+  //   rot = units::degrees_per_second_t{r};
+  // }
+  // else
+  // {
+  //   // Manual control, save the current yaw.
+  //   m_yawLockPID.SetSetpoint(GetYaw().Degrees().value());
+  //   m_yawLockPID.Reset();
+  // }
 
   // Transform Field Oriented command to a Robot Relative Command
   if (fieldRelative)
@@ -121,10 +122,10 @@ void Drivetrain::Drive(units::meters_per_second_t xSpeed,
 
   // Set State of Each Module
   auto [fl, fr, bl, br] = states;
-  m_frontLeft.SetModule(fl);
-  m_frontRight.SetModule(fr);
-  m_backLeft.SetModule(bl);
-  m_backRight.SetModule(br);
+  m_frontLeft.SetModule(fl, openLoop);
+  m_frontRight.SetModule(fr, openLoop);
+  m_backLeft.SetModule(bl, openLoop);
+  m_backRight.SetModule(br, openLoop);
 }
 
 void Drivetrain::Stop()
@@ -133,15 +134,6 @@ void Drivetrain::Stop()
   m_frontRight.Stop();
   m_backLeft.Stop();
   m_backRight.Stop();
-}
-
-void Drivetrain::Test(double y, double x)
-{
-  frc::SwerveModuleState f1;
-  f1.speed = std::sqrt(std::pow(y, 2) + std::pow(x, 2)) * kMaxSpeedLinear;
-  f1.angle = frc::Rotation2d(units::radian_t(std::atan2(-x, y)));
-  m_frontLeft.SetModule(f1);
-  //std::cout << f1.angle.Degrees().value() << std::endl;
 }
 
 frc::Rotation2d Drivetrain::GetYaw()
@@ -205,12 +197,7 @@ void Drivetrain::InitSendable(wpi::SendableBuilder &builder)
   m_backLeft.InitSendable(builder);
   m_backRight.InitSendable(builder);
 
-  // m_yawLockPID.InitSendable(builder);
-
   builder.AddDoubleProperty("gyro", [this] { return m_imu.GetYaw(); }, nullptr);
-  //builder.AddDoubleProperty("pigeon/yaw", [this] { double ypr[3]; alt_imu.GetYawPitchRoll(ypr); return ypr[0]; }, nullptr);
-  //builder.AddDoubleProperty("pigeon/pitch", [this] { double ypr[3]; alt_imu.GetYawPitchRoll(ypr); return ypr[1]; }, nullptr);
-  //builder.AddDoubleProperty("pigeon/roll", [this] { double ypr[3]; alt_imu.GetYawPitchRoll(ypr); return ypr[2]; }, nullptr);
   
   // Pose
   builder.AddDoubleProperty(
@@ -243,17 +230,6 @@ void Drivetrain::InitSendable(wpi::SendableBuilder &builder)
   builder.AddDoubleProperty(
       "cmd/yaw", [this] { return units::degrees_per_second_t(m_command.omega).value(); }, nullptr);
 
-  // Heading Lock
-  builder.AddDoubleProperty(
-      "YawPID/kP", [this] { return m_yawLockPID.GetP(); }, [this](double value) { m_yawLockPID.SetP(value); });
-  builder.AddDoubleProperty(
-      "YawPID/kI", [this] { return m_yawLockPID.GetI(); }, [this](double value) { m_yawLockPID.SetI(value); });
-  builder.AddDoubleProperty(
-      "YawPID/kD", [this] { return m_yawLockPID.GetD(); }, [this](double value) { m_yawLockPID.SetD(value); });
-  builder.AddDoubleProperty(
-      "YawPID/SP",
-      [this] { return units::degree_t(m_yawLockPID.GetSetpoint()).value(); }, nullptr);
-
   // Operating Mode
   builder.AddBooleanProperty(
       "cmd/fieldRelative", [this] { return m_fieldRelative; }, nullptr);
@@ -263,10 +239,45 @@ units::ampere_t Drivetrain::SimPeriodic(units::volt_t battery)
 {
 
   // Simulated IMU
-  m_imuSimCollection.SetRawHeading(m_odometry.GetPose().Rotation().Degrees() / 1_deg);
+  m_imuSimCollection.AddHeading(GetChassisSpeeds().omega * 20_ms / 1_deg);
 
   return m_frontLeft.SimPeriodic(battery) +
     m_frontRight.SimPeriodic(battery) +
     m_backLeft.SimPeriodic(battery) +
     m_backRight.SimPeriodic(battery);
+}
+
+void Drivetrain::SimInit()
+{
+  m_frontLeft.SimInit();
+  m_frontRight.SimInit();
+  m_backLeft.SimInit();
+  m_backRight.SimInit();
+}
+
+ErrorCode Drivetrain::SeedEncoders() {
+  auto error = m_frontLeft.SeedTurnMotor();
+  if (error != ErrorCode::OK) {
+    return error;
+  }
+
+  error = m_frontRight.SeedTurnMotor();
+  if (error != ErrorCode::OK) {
+    return error;
+  }
+
+  error = m_backLeft.SeedTurnMotor();
+  if (error != ErrorCode::OK) {
+    return error;
+  }
+
+  return m_backRight.SeedTurnMotor();
+}
+
+bool Drivetrain::Active()
+{
+  return units::math::abs(m_frontLeft.AngularVelocity()) < 0.01_rad_per_s
+    && units::math::abs(m_frontRight.AngularVelocity()) < 0.01_rad_per_s
+    && units::math::abs(m_backLeft.AngularVelocity()) < 0.01_rad_per_s
+    && units::math::abs(m_backRight.AngularVelocity()) < 0.01_rad_per_s;
 }

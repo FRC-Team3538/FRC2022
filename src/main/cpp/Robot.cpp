@@ -4,34 +4,19 @@
 
 #include "Robot.h"
 
-#include <frc/DriverStation.h>                      // for DriverStation
-#include <frc/livewindow/LiveWindow.h>              // for LiveWindow
+#include <frc/livewindow/LiveWindow.h>
 #include <cmath>                                    // for abs, fabs
 #include <exception>                                // for exception
 #include <string>                                   // for string
-
 #include "frc/Errors.h"                             // for RuntimeError
-#include "frc/PowerDistribution.h"                  // for PowerDistribution
-#include "frc/RobotBase.h"                          // for StartRobot
-#include "frc/Watchdog.h"                           // for Watchdog
-#include "frc/smartdashboard/SmartDashboard.h"      // for SmartDashboard
-#include "frc/util/Color.h"                         // for Color
 #include "lib/PS4Controller.h"                    // for PS4Controller
 #include "lib/PneumaticHub.h"                     // for PneumaticHub
 #include "lib/pathplanner/PathPlannerTrajectory.h"  // for pathplanner
-#include "networktables/NetworkTableEntry.inc"      // for NetworkTableEntry...
-#include "rev/ColorSensorV3.h"                      // for ColorSensorV3
 #include "subsystems/Shooter.h"                   // for Shooter, Shooter:...
-#include "units/angular_velocity.h"                 // for operator""_rpm
 #include "units/base.h"                             // for unit_t, operator-
 #include "units/math.h"                             // for abs
-#include "units/pressure.h"                         // for pounds_per_square...
-#include "units/time.h"                             // for operator""_s, sec...
-#include "units/velocity.h"                         // for meters_per_second_t
-#include "units/voltage.h"                          // for operator""_V, volt_t
-#include <wpi/timestamp.h>
+#include "units/time.h"
 #include <iostream>
-#include <photonlib/PhotonUtils.h>
 #include <math.h>
 
 using namespace pathplanner;
@@ -43,7 +28,6 @@ void Robot::RobotInit()
   frc::LiveWindow::SetEnabled(false);
 
   // System Setup Stuff
-  IO.watchdog.Disable();
   IO.ConfigureSystem();
 
   ntRobotName.ForceSetString(ntRobotName.GetString("UnnamedRobot"));
@@ -57,6 +41,8 @@ void Robot::RobotInit()
   // arg bool - log joystick data if true
   frc::DriverStation::StartDataLog(log, true);
 #endif // LOGGER
+
+  seedEncoderTimer.Start();
 }
 
 void Robot::RobotPeriodic()
@@ -70,6 +56,11 @@ void Robot::RobotPeriodic()
 #ifdef LOGGER
   IO.LogDataEntries(log);
 #endif // LOGGER
+
+  if (!IO.drivetrain.Active() && seedEncoderTimer.Get() > 5_s) {
+      frc::SmartDashboard::PutNumber("Drivetrain/SeedEncoderLastResult", IO.drivetrain.SeedEncoders());
+      seedEncoderTimer.Reset();
+  }
 }
 
 void Robot::AutonomousInit()
@@ -96,7 +87,7 @@ void Robot::TeleopPeriodic()
 
     //std::cout << forward << ", " << strafe << ", " << rotate << std::endl;
 
-    IO.drivetrain.Drive(forward, strafe, rotate, true);
+    IO.drivetrain.Drive(forward, strafe, rotate, false, false);
 }
 
 void Robot::DisabledInit()
@@ -112,7 +103,9 @@ void Robot::DisabledPeriodic()
 
 }
 
-void Robot::SimulationInit() {}
+void Robot::SimulationInit() {
+  IO.SimInit();
+}
 
 void Robot::SimulationPeriodic()
 {

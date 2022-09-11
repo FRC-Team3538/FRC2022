@@ -2,6 +2,7 @@
 #include <iostream>                         // for operator<<, endl, basic_o...
 #include "frc/PowerDistribution.h"          // for PowerDistribution
 #include "subsystems/Subsystem.h"         // for Subsystem
+#include <frc/smartdashboard/SmartDashboard.h>
 
 #include <wpi/DataLog.h>
 
@@ -120,9 +121,11 @@ void Robotmap::LogDataEntries(wpi::log::DataLog &log)
         system->LogDataEntries(log);
 }
 
-void Robotmap::watchDog()
+void Robotmap::SimInit()
 {
-    std::cout << "SAD WATCHDOG" << std::endl;
+    for (auto system : subsystems) {
+        system->SimInit();
+    }
 }
 
 void Robotmap::SimPeriodic()
@@ -132,4 +135,5 @@ void Robotmap::SimPeriodic()
         amps += system->SimPeriodic(battery_voltage);
     }
     battery_voltage = battery.Calculate({amps});
+    frc::SmartDashboard::PutNumber("battery", battery_voltage / 1_V);
 }

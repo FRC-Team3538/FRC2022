@@ -300,6 +300,11 @@ namespace vision
         log.AppendDouble(GetDataEntry("Vision Dist"), estDist.value(), 0);
     }
 
+    void RJVisionPipeline::SimInit()
+    {
+        
+    }
+
     units::ampere_t RJVisionPipeline::SimPeriodic(units::volt_t battery)
     {
         return 0_A;
