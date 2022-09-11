@@ -1,6 +1,7 @@
 #include "subsystems/SwerveModule.h"
 #include <units/angle.h>
 #include <frc/smartdashboard/SmartDashboard.h>
+#include <frc/RobotBase.h>
 
 /**
  * Constructor for the SwerveModule class
@@ -121,6 +122,12 @@ void SwerveModule::Stop()
 
 void SwerveModule::ConfigureSystem()
 {
+  if (frc::RobotBase::IsSimulation())
+  {
+    m_driveFeedforward.kS = 0_V;
+    m_turnFeedforward.kS = 0_V;
+  }
+
   // Drive Motor Configuration
   m_driveMotor.ConfigFactoryDefault();
   m_driveMotor.SetInverted(true); // Remember: forward-positive!
