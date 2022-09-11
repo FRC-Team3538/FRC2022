@@ -75,7 +75,6 @@ private:
   bool manualJog = false;
 
   // Smartdash
-  nt::NetworkTableEntry ntRobotName = frc::SmartDashboard::GetEntry("robot/RobotName");
 
   static constexpr double kVisionAngleTolDefault = 0.5;
   nt::NetworkTableEntry ntVisionAngleTol = frc::SmartDashboard::GetEntry("robot/visionAngleTol");

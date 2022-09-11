@@ -30,8 +30,6 @@ void Robot::RobotInit()
   // System Setup Stuff
   IO.ConfigureSystem();
 
-  ntRobotName.ForceSetString(ntRobotName.GetString("UnnamedRobot"));
-  ntRobotName.SetPersistent();
   frc::SmartDashboard::PutData("Drivetrain", &IO.drivetrain);
 
   // Logging Stuff
