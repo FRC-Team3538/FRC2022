@@ -85,7 +85,7 @@ void Robot::TeleopPeriodic()
 
     //std::cout << forward << ", " << strafe << ", " << rotate << std::endl;
 
-    IO.drivetrain.Drive(forward, strafe, rotate, false, false);
+    IO.drivetrain.Drive(forward, strafe, rotate, true, true);
 }
 
 void Robot::DisabledInit()

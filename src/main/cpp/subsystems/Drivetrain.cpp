@@ -160,9 +160,9 @@ void Drivetrain::UpdateOdometry()
                                                   m_backLeft.GetState(),
                                                   m_backRight.GetState()});
 
-  auto p = m_odometry.GetPose();
-  frc::Pose2d fliperoo = {-p.Y(), p.X(), p.Rotation().RotateBy(90_deg)}; // Driver Station PoV
-  m_fieldDisplay.SetRobotPose(fliperoo);
+  // auto p = m_odometry.GetPose();
+  // frc::Pose2d fliperoo = {-p.Y(), p.X(), p.Rotation().RotateBy(90_deg)}; // Driver Station PoV
+  m_fieldDisplay.SetRobotPose(m_odometry.GetPose());
 }
 
 void Drivetrain::ResetYaw()

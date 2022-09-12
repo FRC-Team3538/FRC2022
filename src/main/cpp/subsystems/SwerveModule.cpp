@@ -2,6 +2,7 @@
 #include <units/angle.h>
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <frc/RobotBase.h>
+#include <iostream>
 
 /**
  * Constructor for the SwerveModule class
@@ -79,15 +80,28 @@ void SwerveModule::Drive(units::meters_per_second_t target, bool openLoop)
   if (openLoop) {
     m_driveMotor.SetVoltage(m_driveVolts);
   } else {
-    m_driveMotor.Set(ControlMode::Velocity, target_in_native_units, DemandType::DemandType_ArbitraryFeedForward, m_driveVolts / 12_V);
+    m_driveMotor.Set(TalonFXControlMode::Velocity, target_in_native_units, DemandType::DemandType_ArbitraryFeedForward, m_driveVolts / 12_V);
   }
+}
+
+double MakeTargetAngleCloseToCurrentAngle(double target, double current, double modulo)
+{
+  // Add modulo / 2 bc our circles are +- modulo/2, not 0..modulo
+  int current_rotations = (int)((current  + modulo / 2) / modulo);
+  int target_rotations = (int)((target + modulo / 2) / modulo);
+  
+  return target + modulo * (current_rotations - target_rotations);
 }
 
 void SwerveModule::Turn(frc::Rotation2d target)
 {
-  auto target_in_native_units = target.Radians() / 1_tr * kTurnGearboxRatio * 2048;  
+  auto target_in_unit_circle_native_units = target.Radians() / 1_tr * kTurnGearboxRatio * 2048;
 
-  m_turningMotor.Set(TalonFXControlMode::MotionMagic, target_in_native_units);
+  auto current_in_native_units = m_turningMotor.GetSelectedSensorPosition();
+
+  auto target_in_current_frame = MakeTargetAngleCloseToCurrentAngle(target_in_unit_circle_native_units, current_in_native_units, 2048 * kTurnGearboxRatio);
+
+  m_turningMotor.Set(TalonFXControlMode::Position, target_in_current_frame);
 }
 
 /**
@@ -135,20 +149,26 @@ void SwerveModule::ConfigureSystem()
   m_driveMotor.ConfigSupplyCurrentLimit(SupplyCurrentLimitConfiguration(true, kDriveMotorCurrentLimit.value(), kDriveMotorCurrentLimit.value(), 0.0));
   m_driveMotor.SetSensorPhase(false);
 
+  driveSlotConfig.kP = config.drivePID.kP;
+  driveSlotConfig.kD = config.drivePID.kD;
+
   {
     auto allSettings = TalonFXConfiguration();
     m_driveMotor.GetAllConfigs(allSettings);
 
     allSettings.supplyCurrLimit = {true, kDriveMotorCurrentLimit / 1_A, kDriveMotorCurrentLimit / 1_A, 0.0};
-    allSettings.slot0.kP = config.drivePID.kP;
-    allSettings.slot0.kD = config.drivePID.kD;
+    allSettings.slot0 = driveSlotConfig;
 
     auto accel_in_drive_motor_frame = config.drivePID.constraints.maxVelocity / kDriveScaleFactor;
     auto accel_in_drive_motor_units = accel_in_drive_motor_frame * 2048 / 1_tr * 100_ms * 1_s;
 
     allSettings.motionAcceleration = accel_in_drive_motor_units;
 
-    m_driveMotor.ConfigAllSettings(allSettings);
+    auto error = m_driveMotor.ConfigAllSettings(allSettings);
+
+    if (error != ErrorCode::OK) {
+      std::cout << "err on config drive motor: " << error << std::endl;
+    }
   }
 
 
@@ -157,13 +177,15 @@ void SwerveModule::ConfigureSystem()
   m_turningMotor.SetInverted(false); // Remember: forward-positive!
   m_turningMotor.SetNeutralMode(ctre::phoenix::motorcontrol::NeutralMode::Brake);
 
+  turnSlotConfig.kP = config.turnPID.kP;
+  turnSlotConfig.kD = config.turnPID.kD;
+
   {
     auto allSettings = TalonFXConfiguration();
     m_turningMotor.GetAllConfigs(allSettings);
 
     allSettings.supplyCurrLimit = {true, kTurningMotorCurrentLimit / 1_A, kTurningMotorCurrentLimit / 1_A, 0.0};
-    allSettings.slot0.kP = config.turnPID.kP;
-    allSettings.slot0.kD = config.turnPID.kD;
+    allSettings.slot0 = turnSlotConfig;
 
     auto vel_in_turn_motor_frame = config.turnPID.constraints.maxVelocity * kTurnGearboxRatio;
     auto vel_in_turn_motor_units = vel_in_turn_motor_frame * 2048 / 1_tr * 100_ms;
@@ -174,7 +196,11 @@ void SwerveModule::ConfigureSystem()
     allSettings.motionCruiseVelocity = vel_in_turn_motor_units;
     allSettings.motionAcceleration = accel_in_turn_motor_units;
 
-    m_turningMotor.ConfigAllSettings(allSettings);
+    auto error = m_turningMotor.ConfigAllSettings(allSettings);
+
+    if (error != ErrorCode::OK) {
+      std::cout << "err on config turn motor: " << error << std::endl;
+    }
   }
 
   // Turning Encoder Config
@@ -183,7 +209,10 @@ void SwerveModule::ConfigureSystem()
   encoderConfig.enableOptimizations = true;
   encoderConfig.initializationStrategy = ctre::phoenix::sensors::SensorInitializationStrategy::BootToAbsolutePosition;
   encoderConfig.absoluteSensorRange = ctre::phoenix::sensors::AbsoluteSensorRange::Signed_PlusMinus180;
-  // encoderConfig.magnetOffsetDegrees = angle_offset / 1_deg;
+  if (frc::RobotBase::IsReal())
+  {
+    encoderConfig.magnetOffsetDegrees = angle_offset / 1_deg;
+  }
   encoderConfig.sensorDirection = false;
   m_turnEncoder.ConfigAllSettings(encoderConfig);
 }
@@ -235,7 +264,7 @@ void SwerveModule::InitSendable(wpi::SendableBuilder &builder)
     moduleID + "/goal/angle", [this] {return targetState.angle.Radians() / 1_rad; }, nullptr);
 
   builder.AddDoubleProperty(moduleID + "/sim/speed", [this] { return m_driveSim.GetLinearVelocity() / 1_mps; }, nullptr);
-  builder.AddDoubleProperty(moduleID + "/sim/angular_speed", [this] { return m_driveSim.GetAngularVelocity() / 1_rad_per_s; }, nullptr);
+  builder.AddDoubleProperty(moduleID + "/sim/turret_speed", [this] { return m_turnSim.GetAngularVelocity() / 1_rad_per_s; }, nullptr);
   builder.AddDoubleProperty(moduleID + "/sim/angle", [this] { return m_turnSim.GetAngle() / 1_rad; }, nullptr);
 
   builder.AddDoubleProperty(moduleID + "/drive/PID/kP", [this] {
@@ -267,6 +296,13 @@ void SwerveModule::InitSendable(wpi::SendableBuilder &builder)
     turnSlotConfig.kD = val;
     m_turningMotor.ConfigureSlot(turnSlotConfig, 0, 0);
   });
+
+  builder.AddDoubleProperty(moduleID + "/turn/SensorVel", [this] { return m_turningMotor.GetSelectedSensorVelocity(0); }, nullptr);
+  builder.AddDoubleProperty(moduleID + "/turn/SensorPos", [this] { return m_turningMotor.GetSelectedSensorPosition(0); }, nullptr);
+  builder.AddDoubleProperty(moduleID + "/turn/MotorOutputPercent", [this] { return m_turningMotor.GetMotorOutputPercent(); }, nullptr);
+  builder.AddDoubleProperty(moduleID + "/turn/MotorOutputSimVoltage", [this] { return m_turningMotor.GetSimCollection().GetMotorOutputLeadVoltage(); }, nullptr);
+  builder.AddDoubleProperty(moduleID + "/turn/ClosedLoopError", [this] { return m_turningMotor.GetClosedLoopError(0); }, nullptr);
+  builder.AddDoubleProperty(moduleID + "/turn/ClosedLoopTarget", [this] { return m_turningMotor.GetClosedLoopTarget(0); }, nullptr);
 }
 
 units::ampere_t SwerveModule::SimDrive(units::volt_t battery)
@@ -283,7 +319,7 @@ units::ampere_t SwerveModule::SimDrive(units::volt_t battery)
   auto rpm_at_motor = rpm_at_wheel * kDriveGearboxRatio;
   auto rpm_in_native_units = rpm_at_motor / 1_tr * 2048 * 100_ms;
 
-  driveMotorSim.SetIntegratedSensorVelocity(rpm_in_native_units);
+  driveMotorSim.SetIntegratedSensorVelocity(-rpm_in_native_units);
 
   return m_driveSim.GetCurrentDraw();
 }

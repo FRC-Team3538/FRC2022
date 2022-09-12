@@ -101,9 +101,9 @@ private:
             }
         },
         {
-            0.0044251,
+            0.05525,
             0.0,
-            0.22827,
+            0.61762,
             {
                 kMaxModuleAngularVelocity,
                 kMaxModuleAngularAcceleration
@@ -133,9 +133,9 @@ private:
             }
         },
         {
-            0.0044251,
+            0.05525,
             0.0,
-            0.22827,
+            0.61762,
             {
                 kMaxModuleAngularVelocity,
                 kMaxModuleAngularAcceleration
@@ -165,9 +165,9 @@ private:
             }
         },
         {
-            0.0044251,
+            0.05525,
             0.0,
-            0.22827,
+            0.61762,
             {
                 kMaxModuleAngularVelocity,
                 kMaxModuleAngularAcceleration
@@ -197,9 +197,9 @@ private:
             }
         },
         {
-            0.0044251,
+            0.05525,
             0.0,
-            0.22827,
+            0.61762,
             {
                 kMaxModuleAngularVelocity,
                 kMaxModuleAngularAcceleration

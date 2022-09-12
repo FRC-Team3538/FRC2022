@@ -2,6 +2,6 @@
 
 #ifdef __FRC_ROBORIO__
 
-#define LOGGER
+// #define LOGGER
 
 #endif // __FRC_ROBORIO
