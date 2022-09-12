@@ -56,6 +56,7 @@ void Robot::RobotPeriodic()
 #endif // LOGGER
 
   if (!IO.drivetrain.Active() && seedEncoderTimer.Get() > 5_s) {
+      std::cout << "seeding encoders" << std::endl;
       frc::SmartDashboard::PutNumber("Drivetrain/SeedEncoderLastResult", IO.drivetrain.SeedEncoders());
       seedEncoderTimer.Reset();
   }
@@ -85,7 +86,7 @@ void Robot::TeleopPeriodic()
 
     //std::cout << forward << ", " << strafe << ", " << rotate << std::endl;
 
-    IO.drivetrain.Drive(forward, strafe, rotate, true, true);
+    IO.drivetrain.Drive(forward, strafe, rotate, true, false);
 }
 
 void Robot::DisabledInit()

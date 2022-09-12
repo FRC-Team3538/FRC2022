@@ -66,9 +66,7 @@ frc::Rotation2d SwerveModule::GetAngle()
  */
 frc::Rotation2d SwerveModule::GetMotorAngle()
 {
-  auto pos_at_motor = frc::Rotation2d((units::radian_t) (m_turningMotor.GetSelectedSensorPosition() / 2048 / kTurnGearboxRatio * 1_tr));
-
-  return frc::Rotation2d(pos_at_motor.Cos(), pos_at_motor.Sin());
+  return frc::Rotation2d(m_turningMotor.GetSelectedSensorPosition() / 2048 / kTurnGearboxRatio * 2 * units::constants::pi * 1_rad);
 }
 
 void SwerveModule::Drive(units::meters_per_second_t target, bool openLoop)
@@ -84,24 +82,20 @@ void SwerveModule::Drive(units::meters_per_second_t target, bool openLoop)
   }
 }
 
-double MakeTargetAngleCloseToCurrentAngle(double target, double current, double modulo)
-{
-  // Add modulo / 2 bc our circles are +- modulo/2, not 0..modulo
-  int current_rotations = (int)((current  + modulo / 2) / modulo);
-  int target_rotations = (int)((target + modulo / 2) / modulo);
-  
-  return target + modulo * (current_rotations - target_rotations);
-}
-
 void SwerveModule::Turn(frc::Rotation2d target)
 {
-  auto target_in_unit_circle_native_units = target.Radians() / 1_tr * kTurnGearboxRatio * 2048;
+  auto normalized_target_angle = frc::Rotation2d(target.Cos(), target.Sin());
 
-  auto current_in_native_units = m_turningMotor.GetSelectedSensorPosition();
+  auto normalized_current_angle = GetState().angle;
+  auto actual_current_angle = GetMotorAngle();
 
-  auto target_in_current_frame = MakeTargetAngleCloseToCurrentAngle(target_in_unit_circle_native_units, current_in_native_units, 2048 * kTurnGearboxRatio);
+  auto target_diff = (normalized_target_angle - normalized_current_angle).Radians();
 
-  m_turningMotor.Set(TalonFXControlMode::Position, target_in_current_frame);
+  auto actual_target_angle = actual_current_angle.Radians() + target_diff;
+
+  auto target_in_native_units = actual_target_angle * kTurnGearboxRatio * 2048 / 1_tr;
+
+  m_turningMotor.Set(TalonFXControlMode::Position, target_in_native_units);
 }
 
 /**
@@ -303,6 +297,13 @@ void SwerveModule::InitSendable(wpi::SendableBuilder &builder)
   builder.AddDoubleProperty(moduleID + "/turn/MotorOutputSimVoltage", [this] { return m_turningMotor.GetSimCollection().GetMotorOutputLeadVoltage(); }, nullptr);
   builder.AddDoubleProperty(moduleID + "/turn/ClosedLoopError", [this] { return m_turningMotor.GetClosedLoopError(0); }, nullptr);
   builder.AddDoubleProperty(moduleID + "/turn/ClosedLoopTarget", [this] { return m_turningMotor.GetClosedLoopTarget(0); }, nullptr);
+
+  builder.AddDoubleProperty(moduleID + "/drive/SensorVel", [this] { return m_driveMotor.GetSelectedSensorVelocity(0); }, nullptr);
+  builder.AddDoubleProperty(moduleID + "/drive/SensorPos", [this] { return m_driveMotor.GetSelectedSensorPosition(0); }, nullptr);
+  builder.AddDoubleProperty(moduleID + "/drive/MotorOutputPercent", [this] { return m_driveMotor.GetMotorOutputPercent(); }, nullptr);
+  builder.AddDoubleProperty(moduleID + "/drive/MotorOutputSimVoltage", [this] { return m_driveMotor.GetSimCollection().GetMotorOutputLeadVoltage(); }, nullptr);
+  builder.AddDoubleProperty(moduleID + "/drive/ClosedLoopError", [this] { return m_driveMotor.GetClosedLoopError(0); }, nullptr);
+  builder.AddDoubleProperty(moduleID + "/drive/ClosedLoopTarget", [this] { return m_driveMotor.GetClosedLoopTarget(0); }, nullptr);
 }
 
 units::ampere_t SwerveModule::SimDrive(units::volt_t battery)
@@ -371,6 +372,12 @@ ErrorCode SwerveModule::SeedTurnMotor()
   auto position_at_motor = position_at_cancoder / 1_tr * kTurnGearboxRatio * 2048;
 
   auto error = m_turnEncoder.GetLastError();
+  if (error != ErrorCode::OK) {
+    return error;
+  }
+
+  m_turningMotor.Set(TalonFXControlMode::Disabled, 0);
+  error = m_turningMotor.GetLastError();
   if (error != ErrorCode::OK) {
     return error;
   }

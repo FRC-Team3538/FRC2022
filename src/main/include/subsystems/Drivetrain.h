@@ -92,7 +92,7 @@ private:
     SwerveModuleConfig m_frontLeftConfig{
         -123.135_deg,
         {
-            1.3438,
+            0.200000,
             0.0,
             0.0,
             {
@@ -124,7 +124,7 @@ private:
     SwerveModuleConfig m_frontRightConfig{
         75.938_deg,
         {
-            1.3438,
+            0.200000,
             0.0,
             0.0,
             {
@@ -156,7 +156,7 @@ private:
     SwerveModuleConfig m_backLeftConfig{
         -2.549_deg,
         {
-            1.3438,
+            0.200000,
             0.0,
             0.0,
             {
@@ -188,7 +188,7 @@ private:
     SwerveModuleConfig m_backRightConfig{
         128.848_deg,
         {
-            1.3438,
+            0.200000,
             0.0,
             0.0,
             {

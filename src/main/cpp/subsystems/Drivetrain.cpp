@@ -276,8 +276,8 @@ ErrorCode Drivetrain::SeedEncoders() {
 
 bool Drivetrain::Active()
 {
-  return units::math::abs(m_frontLeft.AngularVelocity()) < 0.01_rad_per_s
-    && units::math::abs(m_frontRight.AngularVelocity()) < 0.01_rad_per_s
-    && units::math::abs(m_backLeft.AngularVelocity()) < 0.01_rad_per_s
-    && units::math::abs(m_backRight.AngularVelocity()) < 0.01_rad_per_s;
+  return units::math::abs(m_frontLeft.AngularVelocity()) > 0.01_rad_per_s
+    || units::math::abs(m_frontRight.AngularVelocity()) > 0.01_rad_per_s
+    || units::math::abs(m_backLeft.AngularVelocity()) > 0.01_rad_per_s
+    || units::math::abs(m_backRight.AngularVelocity()) > 0.01_rad_per_s;
 }
