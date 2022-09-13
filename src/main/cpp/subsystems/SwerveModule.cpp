@@ -55,7 +55,7 @@ units::meters_per_second_t SwerveModule::GetVelocity()
 frc::Rotation2d SwerveModule::GetAngle()
 {
   // Real Hardware
-  auto un_normalized = frc::Rotation2d(units::degree_t(m_turnEncoder.GetAbsolutePosition()));
+  auto un_normalized = frc::Rotation2d(m_turnEncoder.GetAbsolutePosition() * 1_deg);
   return frc::Rotation2d(un_normalized.Cos(), un_normalized.Sin());
 }
 

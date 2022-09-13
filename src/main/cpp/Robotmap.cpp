@@ -12,6 +12,7 @@ Robotmap::Robotmap()
 {
     subsystems.emplace_back(&drivetrain);
     subsystems.emplace_back(&vision);
+    subsystems.emplace_back(&shooter);
 }
 
 /**

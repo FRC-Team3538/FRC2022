@@ -47,6 +47,7 @@ public:
     // Getters
     frc::Rotation2d GetYaw();
     frc::ChassisSpeeds GetChassisSpeeds();
+    frc::Pose2d GetPose();
 
     // Telemetry / Smartdash
     void InitSendable(wpi::SendableBuilder &builder) override;

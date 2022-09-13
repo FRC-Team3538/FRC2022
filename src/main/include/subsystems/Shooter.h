@@ -63,6 +63,8 @@ public:
     void RegisterDataEntries(wpi::log::DataLog &log);
     void LogDataEntries(wpi::log::DataLog &log);
 
+    void SimInit();
+    units::ampere_t SimPeriodic(units::volt_t battery);
     void Periodic();
 
     // *** SETTERS ***

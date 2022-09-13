@@ -71,6 +71,8 @@ private:
   frc::Timer intakeTimer;
 
   frc::Timer seedEncoderTimer;
+  vision::RJVisionPipeline::visionData prevData;
+
 
   bool manualJog = false;
 

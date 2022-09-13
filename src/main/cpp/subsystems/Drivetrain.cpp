@@ -80,30 +80,30 @@ void Drivetrain::Drive(units::meters_per_second_t xSpeed,
   m_fieldRelative = fieldRelative;
 
   // Heading Lock
-  // constexpr auto noRotThreshold = 0.1_deg_per_s;
-  // if (units::math::abs(rot) > noRotThreshold)
-  // {
-  //   // Disable YawLock as soon as any rotation command is received
-  //   m_YawLockActive = false;
-  // }
-  // else if (units::math::abs(rot) < noRotThreshold && units::math::abs(m_robotVelocity.omega) < 30_deg_per_s)
-  // {
-  //   // Wait for the robot to stop spinning to enable Yaw Lock
-  //   m_YawLockActive = yawLockEnabled; //true
-  // }
+  constexpr auto noRotThreshold = 0.1_deg_per_s;
+  if (units::math::abs(rot) > noRotThreshold)
+  {
+    // Disable YawLock as soon as any rotation command is received
+    m_YawLockActive = false;
+  }
+  else if (units::math::abs(rot) < noRotThreshold && units::math::abs(m_robotVelocity.omega) < 10_deg_per_s)
+  {
+    // Wait for the robot to stop spinning to enable Yaw Lock
+    m_YawLockActive = true; //true
+  }
 
-  // if (m_YawLockActive)
-  // {
-  //   // Robot will automatically maintain current yaw
-  //   auto r = m_yawLockPID.Calculate(GetYaw().Degrees().value());
-  //   rot = units::degrees_per_second_t{r};
-  // }
-  // else
-  // {
-  //   // Manual control, save the current yaw.
-  //   m_yawLockPID.SetSetpoint(GetYaw().Degrees().value());
-  //   m_yawLockPID.Reset();
-  // }
+  if (m_YawLockActive)
+  {
+    // Robot will automatically maintain current yaw
+    auto r = m_yawLockPID.Calculate(GetYaw().Degrees().value());
+    rot = units::degrees_per_second_t{r};
+  }
+  else
+  {
+    // Manual control, save the current yaw.
+    m_yawLockPID.SetSetpoint(GetYaw().Degrees().value());
+    m_yawLockPID.Reset();
+  }
 
   // Transform Field Oriented command to a Robot Relative Command
   if (fieldRelative)
@@ -119,6 +119,8 @@ void Drivetrain::Drive(units::meters_per_second_t xSpeed,
   auto states = m_kinematics.ToSwerveModuleStates(m_command);
   m_kinematics.DesaturateWheelSpeeds(&states, kMaxSpeedLinear);
   // m_altKinematics.NormalizeWheelSpeeds(&states, m_command);
+
+  m_command = m_kinematics.ToChassisSpeeds(states);
 
   // Set State of Each Module
   auto [fl, fr, bl, br] = states;
@@ -224,11 +226,19 @@ void Drivetrain::InitSendable(wpi::SendableBuilder &builder)
 
   // Command
   builder.AddDoubleProperty(
-      "cmd/x", [this] { return m_command.vx.value(); }, nullptr);
+      "cmd/x", [this] { return m_command.vx / 1_mps; }, nullptr);
   builder.AddDoubleProperty(
-      "cmd/y", [this] { return m_command.vy.value(); }, nullptr);
+      "cmd/y", [this] { return m_command.vy / 1_mps; }, nullptr);
   builder.AddDoubleProperty(
-      "cmd/yaw", [this] { return units::degrees_per_second_t(m_command.omega).value(); }, nullptr);
+      "cmd/yaw", [this] { return m_command.omega / 1_rad_per_s; }, nullptr);
+
+  // State
+    builder.AddDoubleProperty(
+      "state/x", [this] { return m_robotVelocity.vx / 1_mps; }, nullptr);
+  builder.AddDoubleProperty(
+      "state/y", [this] { return m_robotVelocity.vy / 1_mps; }, nullptr);
+  builder.AddDoubleProperty(
+      "state/yaw", [this] { return m_robotVelocity.omega / 1_rad_per_s; }, nullptr);
 
   // Operating Mode
   builder.AddBooleanProperty(
@@ -280,4 +290,9 @@ bool Drivetrain::Active()
     || units::math::abs(m_frontRight.AngularVelocity()) > 0.01_rad_per_s
     || units::math::abs(m_backLeft.AngularVelocity()) > 0.01_rad_per_s
     || units::math::abs(m_backRight.AngularVelocity()) > 0.01_rad_per_s;
+}
+
+frc::Pose2d Drivetrain::GetPose()
+{
+  return m_odometry.GetPose();
 }

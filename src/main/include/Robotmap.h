@@ -20,6 +20,7 @@
 #include <wpi/DataLog.h>
 #include <subsystems/Drivetrain.h>
 #include <subsystems/RJVisionPipeline.h>
+#include <subsystems/Shooter.h>
 
 #include <frc/simulation/BatterySim.h>
 
@@ -40,6 +41,7 @@ public:
     // *** PUT SUBSYSTEMS HERE ***
     Drivetrain drivetrain;
     vision::RJVisionPipeline vision;
+    Shooter shooter;
 
     frc::sim::BatterySim battery;
     units::volt_t battery_voltage;
