@@ -16,7 +16,7 @@
 #include "frc/estimator/UnscentedKalmanFilter.h"
 #include "frc/geometry/Pose2d.h"
 #include "frc/geometry/Rotation2d.h"
-#include "frc/interpolation/TimeInterpolatableBuffer.h"
+#include "lib/wpi/TimeInterpolatableBuffer.h"
 #include "lib/wpi/SwerveDriveKinematics.h"
 #include "units/time.h"
 
