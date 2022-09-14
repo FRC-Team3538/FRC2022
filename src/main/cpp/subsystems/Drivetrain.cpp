@@ -18,30 +18,7 @@ void Drivetrain::RegisterDataEntries(wpi::log::DataLog &log)
 
 void Drivetrain::LogDataEntries(wpi::log::DataLog &log)
 {
-  frc::SmartDashboard::PutNumber("Front Left Ang", m_frontLeft.GetAngle().Degrees().value());
-  frc::SmartDashboard::PutNumber("Front Right Ang", m_frontRight.GetAngle().Degrees().value());
-  frc::SmartDashboard::PutNumber("Back Left Ang", m_backLeft.GetAngle().Degrees().value());
-  frc::SmartDashboard::PutNumber("Back Right Ang", m_backRight.GetAngle().Degrees().value());
 
-  frc::SmartDashboard::PutNumber("Yaw", GetYaw().Degrees().value());
-  frc::SmartDashboard::PutBoolean("Yaw Lock", m_YawLockActive);
-
-  yawLock.SetDefaultOption("Enabled", "Enabled");
-  yawLock.AddOption("Disabled", "Disabled");
-  if (yawLock.GetSelected() == "Enabled")
-  {
-    yawLockEnabled = true;
-  }
-  else if (yawLock.GetSelected() == "Disabled")
-  {
-    yawLockEnabled = false;
-  }
-
-  frc::SmartDashboard::PutData("Yaw Lock PID", &yawLock);
-  std::string name = yawLock.GetSelected();
-  frc::SmartDashboard::PutString("Yaw Lock PID", name);
-
-  frc::SmartDashboard::PutNumber("Odometry X", m_odometry.GetPose().X().value());
 }
 
 void Drivetrain::ConfigureSystem()
@@ -63,7 +40,7 @@ void Drivetrain::ConfigureSystem()
 void Drivetrain::Drive(frc::Trajectory::State trajectoryState, units::radian_t yaw)
 {
   const auto command = m_trajectoryController.Calculate(
-      m_odometry.GetPose(),
+      m_poseEstimator.GetEstimatedPosition(),
       trajectoryState,
       yaw);
 
@@ -145,18 +122,18 @@ frc::Rotation2d Drivetrain::GetYaw()
 
 void Drivetrain::UpdateOdometry()
 {
-  m_odometry.Update(GetYaw(),
-                    m_frontLeft.GetState(),
-                    m_frontRight.GetState(),
-                    m_backLeft.GetState(),
-                    m_backRight.GetState());
+//   auto odoPose = m_odometry.Update(GetYaw(),
+//                     m_frontLeft.GetState(),
+//                     m_frontRight.GetState(),
+//                     m_backLeft.GetState(),
+//                     m_backRight.GetState());
 
-  m_poseEstimator.Update(GetYaw(),
+  auto estPose = m_poseEstimator.Update(GetYaw(),
                          m_frontLeft.GetState(),
                          m_frontRight.GetState(),
                          m_backLeft.GetState(),
                          m_backRight.GetState());
-
+  
   m_robotVelocity = m_kinematics.ToChassisSpeeds({m_frontLeft.GetState(),
                                                   m_frontRight.GetState(),
                                                   m_backLeft.GetState(),
@@ -164,7 +141,8 @@ void Drivetrain::UpdateOdometry()
 
   // auto p = m_odometry.GetPose();
   // frc::Pose2d fliperoo = {-p.Y(), p.X(), p.Rotation().RotateBy(90_deg)}; // Driver Station PoV
-  m_fieldDisplay.SetRobotPose(m_odometry.GetPose());
+  // m_odometryPose->SetPose(odoPose);
+  m_estimatedPose->SetPose(estPose);
 }
 
 void Drivetrain::ResetYaw()
@@ -177,7 +155,7 @@ void Drivetrain::ResetYaw()
 
 void Drivetrain::ResetOdometry(const frc::Pose2d &pose)
 {
-  m_odometry.ResetPosition(pose, GetYaw());
+  //m_odometry.ResetPosition(pose, GetYaw());
   m_poseEstimator.ResetPosition(pose, GetYaw());
   m_yawLockPID.SetSetpoint(GetYaw().Degrees().value());
   m_yawLockPID.Reset();
@@ -209,12 +187,12 @@ void Drivetrain::InitSendable(wpi::SendableBuilder &builder)
   builder.AddDoubleProperty(
       "poseEstimator/yaw", [this] { return m_poseEstimator.GetEstimatedPosition().Rotation().Degrees().value(); }, nullptr);
 
-  builder.AddDoubleProperty(
-      "odometry/x", [this] { return m_odometry.GetPose().X().value(); }, nullptr);
-  builder.AddDoubleProperty(
-      "odometry/y", [this] { return m_odometry.GetPose().Y().value(); }, nullptr);
-  builder.AddDoubleProperty(
-      "odometry/yaw", [this] { return m_odometry.GetPose().Rotation().Degrees().value(); }, nullptr);
+  // builder.AddDoubleProperty(
+  //     "odometry/x", [this] { return m_odometry.GetPose().X().value(); }, nullptr);
+  // builder.AddDoubleProperty(
+  //     "odometry/y", [this] { return m_odometry.GetPose().Y().value(); }, nullptr);
+  // builder.AddDoubleProperty(
+  //     "odometry/yaw", [this] { return m_odometry.GetPose().Rotation().Degrees().value(); }, nullptr);
 
   // Velocity
   builder.AddDoubleProperty(
@@ -294,5 +272,5 @@ bool Drivetrain::Active()
 
 frc::Pose2d Drivetrain::GetPose()
 {
-  return m_odometry.GetPose();
+  return m_poseEstimator.GetEstimatedPosition();
 }

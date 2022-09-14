@@ -94,7 +94,7 @@ void Robot::RobotPeriodic()
       seedEncoderTimer.Reset();
   }
 
-    IO.vision.SetTurretAngle(IO.shooter.GetTurretAngle());
+  IO.vision.SetTurretAngle(IO.shooter.GetTurretAngle());
   IO.vision.Periodic();
   
   frc::SmartDashboard::PutNumber("robot/MatchTime", frc::DriverStation::GetMatchTime());
@@ -136,7 +136,7 @@ void Robot::TeleopPeriodic()
     // DRIVE CODE
     auto forward = -deadband(m_driver.GetLeftY(), 0.1, 1.0) * Drivetrain::kMaxSpeedLinear;
     auto strafe = -deadband(m_driver.GetLeftX(), 0.1, 1.0) * Drivetrain::kMaxSpeedLinear;
-    auto rotate = -deadband(m_driver.GetRightX(), 0.1, 1.0) * Drivetrain::kMaxSpeedAngular * 0.75;
+    auto rotate = -deadband(m_driver.GetRightX(), 0.1, 1.0) * Drivetrain::kMaxSpeedAngular;
 
     //std::cout << forward << ", " << strafe << ", " << rotate << std::endl;
 

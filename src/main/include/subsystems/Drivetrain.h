@@ -62,7 +62,7 @@ public:
     static constexpr units::meters_per_second_t kMaxSpeedLinear = 16_fps;
     static constexpr units::radians_per_second_t kMaxSpeedAngular = 360_deg_per_s;
     static constexpr units::meters_per_second_squared_t kMaxAccelerationLinear = 20_fps_sq;
-    static constexpr units::inch_t kWheelToWheel = 22_in;
+    static constexpr units::inch_t kWheelToWheel = 20.5_in;
 
 private:
     bool m_fieldRelative;
@@ -80,6 +80,8 @@ private:
 
     // Odomoetry
     frc::Field2d m_fieldDisplay;
+    frc::FieldObject2d* m_estimatedPose = m_fieldDisplay.GetObject("SwerveDrivePoseEstimator");
+    // frc::FieldObject2d* m_odometryPose = m_fieldDisplay.GetObject("SwerveDriveOdometry");
 
     // Control
     frc::ChassisSpeeds m_command;
@@ -87,11 +89,11 @@ private:
     static constexpr auto kMaxModuleLinearAcceleration = 80.0_mps_sq;
     static constexpr auto kMaxModuleLinearJerk = 200.0_mps_sq / 1_s;
 
-    static constexpr auto kMaxModuleAngularVelocity = 18_rad_per_s;
-    static constexpr auto kMaxModuleAngularAcceleration = 200_rad_per_s_sq;
+    static constexpr auto kMaxModuleAngularVelocity = 36_rad_per_s;
+    static constexpr auto kMaxModuleAngularAcceleration = 1000_rad_per_s_sq;
 
     SwerveModuleConfig m_frontLeftConfig{
-        -123.135_deg,
+        -128.496_deg,
         {
             0.200000,
             0.0,
@@ -102,28 +104,28 @@ private:
             }
         },
         {
-            0.05525,
+            0.098996,
             0.0,
-            0.61762,
+            0.00055669,
             {
                 kMaxModuleAngularVelocity,
                 kMaxModuleAngularAcceleration
             }
         },
         {
-            0.63309_V,
-            2.1613_V / 1_mps,
-            0.12711_V / 1_mps_sq
+            0.66323_V,
+            2.1798_V / 1_mps,
+            0.15467_V / 1_mps_sq
         },
         {
-            0.76857_V,
-            0.23128_V / 1_rad_per_s,
-            0.0055795_V / 1_rad_per_s_sq
+            0.72584_V,
+            0.21377_V / 1_rad_per_s,
+            0.0027946_V / 1_rad_per_s_sq
         }
     };
 
     SwerveModuleConfig m_frontRightConfig{
-        75.938_deg,
+        78.838_deg,
         {
             0.200000,
             0.0,
@@ -134,28 +136,28 @@ private:
             }
         },
         {
-            0.05525,
+            0.098996,
             0.0,
-            0.61762,
+            0.00055669,
             {
                 kMaxModuleAngularVelocity,
                 kMaxModuleAngularAcceleration
             }
         },
         {
-            0.63309_V,
-            2.1613_V / 1_mps,
-            0.12711_V / 1_mps_sq
+            0.66323_V,
+            2.1798_V / 1_mps,
+            0.15467_V / 1_mps_sq
         },
         {
-            0.76857_V,
-            0.23128_V / 1_rad_per_s,
-            0.0055795_V / 1_rad_per_s_sq
+            0.72584_V,
+            0.21377_V / 1_rad_per_s,
+            0.0027946_V / 1_rad_per_s_sq
         }
     };
 
     SwerveModuleConfig m_backLeftConfig{
-        -2.549_deg,
+        -4.219_deg,
         {
             0.200000,
             0.0,
@@ -166,28 +168,28 @@ private:
             }
         },
         {
-            0.05525,
+            0.098996,
             0.0,
-            0.61762,
+            0.00055669,
             {
                 kMaxModuleAngularVelocity,
                 kMaxModuleAngularAcceleration
             }
         },
         {
-            0.63309_V,
-            2.1613_V / 1_mps,
-            0.12711_V / 1_mps_sq
+            0.66323_V,
+            2.1798_V / 1_mps,
+            0.15467_V / 1_mps_sq
         },
         {
-            0.76857_V,
-            0.23128_V / 1_rad_per_s,
-            0.0055795_V / 1_rad_per_s_sq
+            0.72584_V,
+            0.21377_V / 1_rad_per_s,
+            0.0027946_V / 1_rad_per_s_sq
         }
     };
 
     SwerveModuleConfig m_backRightConfig{
-        128.848_deg,
+        -60.645_deg,
         {
             0.200000,
             0.0,
@@ -198,23 +200,23 @@ private:
             }
         },
         {
-            0.05525,
+            0.098996,
             0.0,
-            0.61762,
+            0.00055669,
             {
                 kMaxModuleAngularVelocity,
                 kMaxModuleAngularAcceleration
             }
         },
         {
-            0.63309_V,
-            2.1613_V / 1_mps,
-            0.12711_V / 1_mps_sq
+            0.66323_V,
+            2.1798_V / 1_mps,
+            0.15467_V / 1_mps_sq
         },
         {
-            0.76857_V,
-            0.23128_V / 1_rad_per_s,
-            0.0055795_V / 1_rad_per_s_sq
+            0.72584_V,
+            0.21377_V / 1_rad_per_s,
+            0.0027946_V / 1_rad_per_s_sq
         }
     };
 
@@ -231,24 +233,24 @@ private:
         backLeftLocation,
         backRightLocation};
     
-    AlternativeSwerveKinematics<4> m_altKinematics{
-        kMaxSpeedLinear,
-        kMaxSpeedAngular,
-        kMaxSpeedLinear
-    };
+    // AlternativeSwerveKinematics<4> m_altKinematics{
+    //     kMaxSpeedLinear,
+    //     kMaxSpeedAngular,
+    //     kMaxSpeedLinear
+    // };
 
-    frc::SwerveDriveOdometry<4> m_odometry{
-        m_kinematics,
-        frc::Rotation2d(),
-        frc::Pose2d()};
+    // frc::SwerveDriveOdometry<4> m_odometry{
+    //     m_kinematics,
+    //     frc::Rotation2d(),
+    //     frc::Pose2d()};
 
     frc::SwerveDrivePoseEstimator<4> m_poseEstimator{
         frc::Rotation2d(),
         frc::Pose2d(),
         m_kinematics,
-        {0.5, 0.5, 0.05},
-        {2.0},
-        {0.0, 0.0, 0.0}};
+        {0.01, 0.01, 0.1},
+        {0.01},
+        {0.1, 0.1, 0.2}};
 
     frc::ChassisSpeeds m_robotVelocity;
 

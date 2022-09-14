@@ -95,7 +95,7 @@ void SwerveModule::Turn(frc::Rotation2d target)
 
   auto target_in_native_units = actual_target_angle * kTurnGearboxRatio * 2048 / 1_tr;
 
-  m_turningMotor.Set(TalonFXControlMode::Position, target_in_native_units);
+  m_turningMotor.Set(TalonFXControlMode::MotionMagic, target_in_native_units);
 }
 
 /**
