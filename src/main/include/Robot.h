@@ -64,14 +64,15 @@ private:
   wpi::log::DataLog &log = frc::DataLogManager::GetLog();
 #endif
 
-  frc::PS4Controller m_driver{0};
-
   frc::Timer shotTimer;
   frc::Timer brakeTimer;
   frc::Timer intakeTimer;
 
   frc::Timer seedEncoderTimer;
   vision::RJVisionPipeline::visionData prevData;
+
+  nt::NetworkTableEntry entry = frc::SmartDashboard::GetEntry("Recalibrate");
+
 
 
   bool manualJog = false;

@@ -97,7 +97,7 @@ private:
 
     static constexpr auto kTurningMotorVoltageNominal = 12.8_V;
 
-    static constexpr auto kDriveMotorCurrentLimit = 55_A;
+    static constexpr auto kDriveMotorCurrentLimit = 40_A;
     static constexpr auto kTurningMotorCurrentLimit = 30_A;
 
     // Control

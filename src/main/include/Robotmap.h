@@ -3,14 +3,12 @@
 #include <frc/PowerDistribution.h>          // for PowerDistribution
 #include <stddef.h>                         // for size_t
 #include <functional>                       // for _Bind_helper<>::type, bind
-#include <lib/PS4Controller.h>              // for PS4Controller
+#include <frc/PS4Controller.h>              // for PS4Controller
 #include <lib/PneumaticHub.h>               // for PneumaticHub
 #include <vector>                           // for vector
 #include "units/time.h"                     // for second_t
 #include <vector>
 #include <functional>
-
-#include <lib/PS4Controller.h>
 
 #include <lib/PneumaticHub.h>
 
@@ -32,8 +30,8 @@ private:
     std::vector<Subsystem *> subsystems;
 
 public:
-    RJ::PS4Controller mainController{0};
-    RJ::PS4Controller secondaryController{1};
+    frc::PS4Controller mainController{0};
+    frc::PS4Controller secondaryController{1};
 
     frc::PowerDistribution pdp;
     RJ::PneumaticHub ph;

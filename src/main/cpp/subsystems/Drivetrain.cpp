@@ -23,10 +23,11 @@ void Drivetrain::LogDataEntries(wpi::log::DataLog &log)
 
 void Drivetrain::ConfigureSystem()
 {
-  m_imu.ZeroGyroBiasNow();
-  ResetYaw();
+  m_imu.ZeroGyroBiasNow(50);
+  ResetYaw(0_deg);
 
-  m_yawLockPID.EnableContinuousInput(-180, 180);
+  m_yawLockPID.EnableContinuousInput(-0.5_tr / 1_rad, 0.5_tr / 1_rad);
+  m_yawLockPID.SetTolerance(3_deg / 1_rad);
 
   // Display Robot position on field
   frc::SmartDashboard::PutData("Field", &m_fieldDisplay);
@@ -50,40 +51,35 @@ void Drivetrain::Drive(frc::Trajectory::State trajectoryState, units::radian_t y
 void Drivetrain::Drive(units::meters_per_second_t xSpeed,
                        units::meters_per_second_t ySpeed,
                        units::radians_per_second_t rot,
-                       bool fieldRelative,
                        bool openLoop)
 {
-  // Remember the last operating mode, for smartdash display
-  m_fieldRelative = fieldRelative;
 
   // Heading Lock
   constexpr auto noRotThreshold = 0.1_deg_per_s;
-  if (units::math::abs(rot) > noRotThreshold)
-  {
-    // Disable YawLock as soon as any rotation command is received
-    m_YawLockActive = false;
-  }
-  else if (units::math::abs(rot) < noRotThreshold && units::math::abs(m_robotVelocity.omega) < 10_deg_per_s)
-  {
-    // Wait for the robot to stop spinning to enable Yaw Lock
-    m_YawLockActive = true; //true
-  }
+  m_YawLockActive = units::math::abs(rot) < noRotThreshold;
 
-  if (m_YawLockActive)
+  const auto trans_mag = units::math::sqrt(xSpeed * xSpeed + ySpeed * ySpeed);
+  
+  if (m_YawLockActive && trans_mag > 0.1_mps)
   {
-    // Robot will automatically maintain current yaw
-    auto r = m_yawLockPID.Calculate(GetYaw().Degrees().value());
-    rot = units::degrees_per_second_t{r};
+    auto r = m_yawLockPID.Calculate(GetYaw().Radians() / 1_rad);
+    if (!m_yawLockPID.AtSetpoint())
+    {
+      // Robot will automatically maintain current yaw
+      rot = units::radians_per_second_t{-r};
+    } else {
+      m_yawLockPID.Reset();
+    }
   }
   else
   {
     // Manual control, save the current yaw.
-    m_yawLockPID.SetSetpoint(GetYaw().Degrees().value());
     m_yawLockPID.Reset();
+    m_yawLockPID.SetSetpoint(GetYaw().Radians() / 1_rad);
   }
 
   // Transform Field Oriented command to a Robot Relative Command
-  if (fieldRelative)
+  if (m_fieldRelative)
   {
     m_command = frc::ChassisSpeeds::FromFieldRelativeSpeeds(xSpeed, ySpeed, rot, GetYaw());
   }
@@ -91,6 +87,8 @@ void Drivetrain::Drive(units::meters_per_second_t xSpeed,
   {
     m_command = frc::ChassisSpeeds{xSpeed, ySpeed, rot};
   }
+
+  m_originalCommand = m_command;
 
   // Calculate desired swerve states
   auto states = m_kinematics.ToSwerveModuleStates(m_command);
@@ -145,20 +143,23 @@ void Drivetrain::UpdateOdometry()
   m_estimatedPose->SetPose(estPose);
 }
 
-void Drivetrain::ResetYaw()
+void Drivetrain::ResetYaw(units::radian_t heading)
 {
-  m_imu.SetYaw(0.0);
+  m_imu.SetYaw(heading / 1_deg, 50);
+  auto pose = frc::Pose2d(GetPose().Translation(), frc::Rotation2d{heading});
 
-  m_yawLockPID.SetSetpoint(GetYaw().Degrees().value());
+  m_poseEstimator.ResetPosition(pose, frc::Rotation2d{heading});
+
   m_yawLockPID.Reset();
+  m_yawLockPID.SetSetpoint(heading / 1_rad);
 }
 
 void Drivetrain::ResetOdometry(const frc::Pose2d &pose)
 {
   //m_odometry.ResetPosition(pose, GetYaw());
   m_poseEstimator.ResetPosition(pose, GetYaw());
-  m_yawLockPID.SetSetpoint(GetYaw().Degrees().value());
   m_yawLockPID.Reset();
+  m_yawLockPID.SetSetpoint(GetYaw().Radians() / 1_rad);
 }
 
 frc::ChassisSpeeds Drivetrain::GetChassisSpeeds()
@@ -172,12 +173,12 @@ void Drivetrain::InitSendable(wpi::SendableBuilder &builder)
   builder.SetActuator(true);
 
   // Modules
-  m_frontLeft.InitSendable(builder);
-  m_frontRight.InitSendable(builder);
-  m_backLeft.InitSendable(builder);
-  m_backRight.InitSendable(builder);
+  // m_frontLeft.InitSendable(builder);
+  // m_frontRight.InitSendable(builder);
+  // m_backLeft.InitSendable(builder);
+  // m_backRight.InitSendable(builder);
 
-  builder.AddDoubleProperty("gyro", [this] { return m_imu.GetYaw(); }, nullptr);
+  builder.AddDoubleProperty("gyro", [this] { return units::degree_t{m_imu.GetYaw()} / 1_rad; }, nullptr);
   
   // Pose
   builder.AddDoubleProperty(
@@ -194,14 +195,6 @@ void Drivetrain::InitSendable(wpi::SendableBuilder &builder)
   // builder.AddDoubleProperty(
   //     "odometry/yaw", [this] { return m_odometry.GetPose().Rotation().Degrees().value(); }, nullptr);
 
-  // Velocity
-  builder.AddDoubleProperty(
-      "vel/x", [this] { return m_robotVelocity.vx.value(); }, nullptr);
-  builder.AddDoubleProperty(
-      "vel/y", [this] { return m_robotVelocity.vy.value(); }, nullptr);
-  builder.AddDoubleProperty(
-      "vel/yaw", [this] { return units::degrees_per_second_t(m_robotVelocity.omega).value(); }, nullptr);
-
   // Command
   builder.AddDoubleProperty(
       "cmd/x", [this] { return m_command.vx / 1_mps; }, nullptr);
@@ -209,6 +202,13 @@ void Drivetrain::InitSendable(wpi::SendableBuilder &builder)
       "cmd/y", [this] { return m_command.vy / 1_mps; }, nullptr);
   builder.AddDoubleProperty(
       "cmd/yaw", [this] { return m_command.omega / 1_rad_per_s; }, nullptr);
+
+  builder.AddDoubleProperty(
+      "demand/x", [this] { return m_originalCommand.vx / 1_mps; }, nullptr);
+  builder.AddDoubleProperty(
+      "demand/y", [this] { return m_originalCommand.vy / 1_mps; }, nullptr);
+  builder.AddDoubleProperty(
+      "demand/yaw", [this] { return m_originalCommand.omega / 1_rad_per_s; }, nullptr);
 
   // State
     builder.AddDoubleProperty(
@@ -221,6 +221,13 @@ void Drivetrain::InitSendable(wpi::SendableBuilder &builder)
   // Operating Mode
   builder.AddBooleanProperty(
       "cmd/fieldRelative", [this] { return m_fieldRelative; }, nullptr);
+
+  builder.AddDoubleProperty(
+      "yawpid/setpoint", [this] { return m_yawLockPID.GetSetpoint(); }, nullptr); 
+  builder.AddDoubleProperty(
+      "yawpid/error", [this] { return m_yawLockPID.GetPositionError(); }, nullptr);
+  builder.AddBooleanProperty(
+      "yawpid/atSetpoint", [this] { return m_yawLockPID.AtSetpoint(); }, nullptr);
 }
 
 units::ampere_t Drivetrain::SimPeriodic(units::volt_t battery)
@@ -273,4 +280,14 @@ bool Drivetrain::Active()
 frc::Pose2d Drivetrain::GetPose()
 {
   return m_poseEstimator.GetEstimatedPosition();
+}
+
+bool Drivetrain::GetFieldCentric()
+{
+  return m_fieldRelative;
+}
+
+void Drivetrain::SetFieldCentric(bool fieldRelative)
+{
+  m_fieldRelative = fieldRelative;
 }

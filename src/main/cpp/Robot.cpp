@@ -20,6 +20,8 @@
 #include <math.h>
 #include <frc/DriverStation.h>
 #include <photonlib/PhotonUtils.h>
+#include <frc/smartdashboard/ListenerExecutor.h>
+#include <ntcore_c.h>
 
 using namespace pathplanner;
 
@@ -33,6 +35,14 @@ void Robot::RobotInit()
   IO.ConfigureSystem();
 
   frc::SmartDashboard::PutData("Drivetrain", &IO.drivetrain);
+
+  entry.SetBoolean(false);
+  entry.AddListener([this] (const nt::EntryNotification &event) {
+    if ((*event.value).GetBoolean()) {
+      IO.drivetrain.ConfigureSystem();
+      entry.SetBoolean(false);
+    }
+  }, NT_NOTIFY_UPDATE);
 
   // Logging Stuff
 #ifdef LOGGER
@@ -73,6 +83,8 @@ void Robot::RobotInit()
     IO.shooter.ZeroTurret();
   }
 
+  IO.drivetrain.ResetYaw(0_deg);
+
   // localization_flag_entry.SetDefaultBoolean(false);
 }
 
@@ -90,18 +102,29 @@ void Robot::RobotPeriodic()
 
   if (!IO.drivetrain.Active() && seedEncoderTimer.Get() > 5_s) {
       std::cout << "seeding encoders" << std::endl;
+
       frc::SmartDashboard::PutNumber("Drivetrain/SeedEncoderLastResult", IO.drivetrain.SeedEncoders());
       seedEncoderTimer.Reset();
   }
 
-  IO.vision.SetTurretAngle(IO.shooter.GetTurretAngle());
-  IO.vision.Periodic();
+  if (IO.mainController.GetOptionsButtonPressed())
+  {
+    IO.drivetrain.ResetYaw(0_deg);
+  }
+
+  if (IO.mainController.GetShareButtonPressed())
+  {
+    IO.drivetrain.SetFieldCentric(!IO.drivetrain.GetFieldCentric());
+  }
+
+  // IO.vision.SetTurretAngle(IO.shooter.GetTurretAngle());
+  // IO.vision.Periodic();
   
-  frc::SmartDashboard::PutNumber("robot/MatchTime", frc::DriverStation::GetMatchTime());
-  frc::SmartDashboard::PutNumber("robot/PressureHigh", IO.ph.GetPressure(0).value());
-  frc::SmartDashboard::PutNumber("robot/ShooterRPM", IO.shooter.GetShooterRPM().value());
-  if (!IO.shooter.zeroed)
-    IO.shooter.SetBlinkyZeroThing();
+  // frc::SmartDashboard::PutNumber("robot/MatchTime", frc::DriverStation::GetMatchTime());
+  // frc::SmartDashboard::PutNumber("robot/PressureHigh", IO.ph.GetPressure(0).value());
+  // frc::SmartDashboard::PutNumber("robot/ShooterRPM", IO.shooter.GetShooterRPM().value());
+  // if (!IO.shooter.zeroed)
+  //   IO.shooter.SetBlinkyZeroThing();
 
   
 
@@ -112,7 +135,7 @@ void Robot::RobotPeriodic()
   //   localization_flag_entry.SetBoolean(new_flag);
   // }
 
-  IO.shooter.SetShooterRatio(ntShooterRatio.GetDouble(kShooterRatioDefault));
+  // IO.shooter.SetShooterRatio(ntShooterRatio.GetDouble(kShooterRatioDefault));
 }
 
 void Robot::AutonomousInit()
@@ -129,20 +152,21 @@ void Robot::TeleopInit()
 {
   IO.shooter.SetTurretBrakeMode();
   IO.vision.SetLED(false);
+  IO.drivetrain.SetFieldCentric(true);
 }
 
 void Robot::TeleopPeriodic()
 {
-    // DRIVE CODE
-    auto forward = -deadband(m_driver.GetLeftY(), 0.1, 1.0) * Drivetrain::kMaxSpeedLinear;
-    auto strafe = -deadband(m_driver.GetLeftX(), 0.1, 1.0) * Drivetrain::kMaxSpeedLinear;
-    auto rotate = -deadband(m_driver.GetRightX(), 0.1, 1.0) * Drivetrain::kMaxSpeedAngular;
+  // DRIVE CODE
+  auto forward = deadband(IO.mainController.GetLeftY(), 0.1, 1.0) * Drivetrain::kMaxSpeedLinear;
+  auto strafe = deadband(IO.mainController.GetLeftX(), 0.1, 1.0) * Drivetrain::kMaxSpeedLinear;
+  auto rotate = deadband(IO.mainController.GetRightX(), 0.1, 1.0) * Drivetrain::kMaxSpeedAngular;
 
-    //std::cout << forward << ", " << strafe << ", " << rotate << std::endl;
+  // std::cout << (forward / 1_mps).value() << ", " << (strafe / 1_mps).value() << ", " << (rotate / 1_rad_per_s).value() << std::endl;
 
-    IO.drivetrain.Drive(forward, strafe, rotate, true, false);
+  IO.drivetrain.Drive(forward, strafe, rotate, false);
 
-    bool shoot = false;
+  bool shoot = false;
   // Shooter Presets
   auto s = units::revolutions_per_minute_t{ntShooterRPM.GetDouble(kShooterRPMDefault)};
   auto rpmUp = units::revolutions_per_minute_t{ntPresetUp.GetDouble(kPresetUpDefault)};

@@ -16,6 +16,7 @@
 #include <wpi/sendable/Sendable.h>
 #include <wpi/sendable/SendableHelper.h>
 #include <lib/AlternativeSwerveKinematics.h>
+#include <units/angular_acceleration.h>
 
 class Drivetrain : public Subsystem, 
                    public wpi::Sendable
@@ -35,10 +36,9 @@ public:
     void Drive(units::meters_per_second_t xSpeed,
                units::meters_per_second_t ySpeed,
                units::radians_per_second_t rot,
-               bool fieldRelative = true,
                bool openLoop = true);
     void Drive(frc::Trajectory::State trajectoryState, units::radian_t yaw = 0_rad);
-    void ResetYaw();
+    void ResetYaw(units::radian_t yaw);
     void ResetOdometry(const frc::Pose2d &pose);
     void UpdateOdometry();
     void Stop();
@@ -58,6 +58,9 @@ public:
 
     bool Active();
 
+    bool GetFieldCentric();
+    void SetFieldCentric(bool fieldCentric);
+
     // Public config values
     static constexpr units::meters_per_second_t kMaxSpeedLinear = 16_fps;
     static constexpr units::radians_per_second_t kMaxSpeedAngular = 360_deg_per_s;
@@ -65,7 +68,7 @@ public:
     static constexpr units::inch_t kWheelToWheel = 20.5_in;
 
 private:
-    bool m_fieldRelative;
+    bool m_fieldRelative = true;
 
     // Configuration
     static constexpr auto dist = kWheelToWheel / 2;
@@ -75,7 +78,7 @@ private:
     frc::Translation2d backRightLocation{-dist, -dist};
 
     
-    ctre::phoenix::sensors::WPI_Pigeon2 m_imu{19};
+    ctre::phoenix::sensors::WPI_Pigeon2 m_imu{30};
     ctre::phoenix::sensors::BasePigeonSimCollection m_imuSimCollection = m_imu.GetSimCollection();
 
     // Odomoetry
@@ -85,6 +88,7 @@ private:
 
     // Control
     frc::ChassisSpeeds m_command;
+    frc::ChassisSpeeds m_originalCommand;
 
     static constexpr auto kMaxModuleLinearAcceleration = 80.0_mps_sq;
     static constexpr auto kMaxModuleLinearJerk = 200.0_mps_sq / 1_s;
@@ -95,7 +99,7 @@ private:
     SwerveModuleConfig m_frontLeftConfig{
         -128.496_deg,
         {
-            0.200000,
+            0.0092534,
             0.0,
             0.0,
             {
@@ -127,7 +131,7 @@ private:
     SwerveModuleConfig m_frontRightConfig{
         78.838_deg,
         {
-            0.200000,
+            0.0092534,
             0.0,
             0.0,
             {
@@ -159,7 +163,7 @@ private:
     SwerveModuleConfig m_backLeftConfig{
         -4.219_deg,
         {
-            0.200000,
+            0.0092534,
             0.0,
             0.0,
             {
@@ -191,7 +195,7 @@ private:
     SwerveModuleConfig m_backRightConfig{
         -60.645_deg,
         {
-            0.200000,
+            0.0092534,
             0.0,
             0.0,
             {
@@ -222,7 +226,7 @@ private:
 
     // Heading Lock
     bool m_YawLockActive = true;
-    frc2::PIDController m_yawLockPID{5.0, 0.0, 0.1};
+    frc::PIDController m_yawLockPID {5, 0.0, 0.0};
     frc::SendableChooser<std::string> yawLock;
     bool yawLockEnabled = true;
 
@@ -233,11 +237,11 @@ private:
         backLeftLocation,
         backRightLocation};
     
-    // AlternativeSwerveKinematics<4> m_altKinematics{
-    //     kMaxSpeedLinear,
-    //     kMaxSpeedAngular,
-    //     kMaxSpeedLinear
-    // };
+    AlternativeSwerveKinematics<4> m_altKinematics{
+        kMaxSpeedLinear,
+        kMaxSpeedAngular,
+        kMaxSpeedLinear
+    };
 
     // frc::SwerveDriveOdometry<4> m_odometry{
     //     m_kinematics,
