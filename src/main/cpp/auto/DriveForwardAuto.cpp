@@ -27,3 +27,8 @@ void DriveForwardAuto::Run()
         IO.drivetrain.Drive(0_mps, 0_mps, 0_rad_per_s, false);
     }
 }
+
+std::string DriveForwardAuto::GetName()
+{
+    return "Drive Forward (Networktables config)";
+}

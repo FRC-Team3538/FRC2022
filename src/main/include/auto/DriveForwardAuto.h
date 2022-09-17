@@ -12,8 +12,6 @@ public:
     void Run() override;
     void UpdateSmartDash() override;
 
-    static std::string GetName();
-
 private:
     Robotmap &IO;
 
@@ -22,4 +20,6 @@ private:
     units::second_t duration = 0_s;
 
     frc::Timer timer;
+public:
+    static std::string GetName();
 };
