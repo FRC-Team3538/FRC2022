@@ -15,13 +15,13 @@
  */
 SwerveModule::SwerveModule(std::string moduleID, int driveMotorChannel, int turningMotorChannel, int turningEncoderChannel, SwerveModuleConfig config)
     : moduleID(moduleID),
+      config(config),
       m_driveMotor(driveMotorChannel),
       m_turningMotor(turningMotorChannel),
       m_turnEncoder(turningEncoderChannel),
       m_driveFeedforward{config.driveFf.GetFeedForward()},
       m_turnFeedforward{config.turnFf.GetFeedForward()},
-      angle_offset(config.angleOffset),
-      config(config)
+      angle_offset(config.angleOffset)
 {}
 
 /**

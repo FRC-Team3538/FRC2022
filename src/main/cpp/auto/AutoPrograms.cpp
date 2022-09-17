@@ -4,7 +4,7 @@
 #include "frc/smartdashboard/SendableChooser.h"   // for SendableChooser
 #include "frc/smartdashboard/SendableChooser.inc" // for SendableChooser::A...
 #include "frc/smartdashboard/SmartDashboard.h"    // for SmartDashboard
-//#include <auto/DriveForwardAuto.h>
+#include <auto/DriveForwardAuto.h>
 class Robotmap;
 
 // Constructor requires a reference to the robot map
@@ -12,7 +12,7 @@ AutoPrograms::AutoPrograms(Robotmap &IO) : IO(IO)
 {
     // SmartDash Chooser [List 2 of 3]
     m_chooser.SetDefaultOption("00 - None", "00 - None");
-    //m_chooser.AddOption(DriveForwardAuto::GetName(), DriveForwardAuto::GetName());
+    m_chooser.AddOption(DriveForwardAuto::GetName(), DriveForwardAuto::GetName());
     frc::SmartDashboard::PutData("Choose Auto", &m_chooser);
 }
 
@@ -28,9 +28,9 @@ void AutoPrograms::Init()
 
     // Create the Selected auto program [List 3 of 3]
 
-    //if (name == DriveForwardAuto::GetName())
+    if (name == DriveForwardAuto::GetName())
     {
-       // m_autoProgram = new DriveForwardAuto(IO);
+        m_autoProgram = new DriveForwardAuto(IO);
     }
 
     if (m_autoProgram != NULL)
