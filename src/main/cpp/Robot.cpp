@@ -27,6 +27,9 @@ using namespace pathplanner;
 
 void Robot::RobotInit()
 {
+  frc::SmartDashboard::PutNumber("auto/speed (feet per second)", 0);
+  frc::SmartDashboard::PutNumber("auto/heading (degrees)", 0);
+  frc::SmartDashboard::PutNumber("auto/duration (seconds)", 0);
   // Disable Live Window Stuff, we don't use it...
   frc::LiveWindow::DisableAllTelemetry();
   frc::LiveWindow::SetEnabled(false);
