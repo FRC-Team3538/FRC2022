@@ -27,13 +27,13 @@ import edu.wpi.first.y2023.math.kinematics.SwerveModuleState;
 import edu.wpi.first.y2023.math.system.LinearSystem;
 import edu.wpi.first.y2023.math.system.plant.DCMotor;
 import edu.wpi.first.y2023.math.system.plant.LinearSystemId;
-import edu.wpi.first.y2023.math.util.Units;
 import io.robojackets.config.SwerveModuleConfig;
+import io.robojackets.lib.UnitsConstants;
 import io.robojackets.sim.SwerveWheelSim;
 import io.robojackets.sim.TurretSim;
 
 public class SwerveModule extends Subsystem {
-  private static final double WHEEL_RADIUS_METERS = Units.inchesToMeters(2);
+  private static final double WHEEL_RADIUS_METERS = 2 * UnitsConstants.METERS_PER_INCH;
   private static final double DRIVE_GEARBOX_RATIO = 6.75;
   private static final double TURN_GEARBOX_RATIO = 12.8;
   private static final double DRIVE_SCALE_FACTOR = WHEEL_RADIUS_METERS / DRIVE_GEARBOX_RATIO;
@@ -102,7 +102,6 @@ public class SwerveModule extends Subsystem {
         LinearSystemId.identifyVelocitySystem(
             config.getDriveFeedForwardConfig().getKV() * WHEEL_RADIUS_METERS,
             config.getDriveFeedForwardConfig().getKA() * WHEEL_RADIUS_METERS);
-
     driveSim =
         new SwerveWheelSim(
             drivePlant,
@@ -120,7 +119,7 @@ public class SwerveModule extends Subsystem {
             turnPlant,
             DCMotor.getFalcon500(1),
             TURN_GEARBOX_RATIO,
-            Matrix.mat(Nat.N1(), Nat.N1()).fill(1.0));
+            Matrix.mat(Nat.N1(), Nat.N1()).fill(0.0));
   }
 
   public SwerveModuleState GetState() {
@@ -128,7 +127,11 @@ public class SwerveModule extends Subsystem {
   }
 
   public double GetVelocity() {
-    return driveMotor.getSelectedSensorVelocity() / 2048 * DRIVE_SCALE_FACTOR / 0.100;
+    return driveMotor.getSelectedSensorVelocity()
+        / 2048
+        * DRIVE_SCALE_FACTOR
+        / 0.100
+        * UnitsConstants.RADIANS_PER_ROTATION;
   }
 
   public Rotation2d GetAngle() {
@@ -166,7 +169,7 @@ public class SwerveModule extends Subsystem {
     double actual_target_angle = actual_current_angle.getRadians() + target_diff.getRadians();
 
     double target_in_native_units =
-        Units.radiansToRotations(actual_target_angle) * TURN_GEARBOX_RATIO * 2048;
+        actual_target_angle / UnitsConstants.RADIANS_PER_ROTATION * TURN_GEARBOX_RATIO * 2048;
 
     turnMotor.set(TalonFXControlMode.MotionMagic, target_in_native_units);
   }
@@ -256,6 +259,11 @@ public class SwerveModule extends Subsystem {
 
   @Override
   public void ConfigureSystem() {
+    System.out.println(
+        config.getDriveFeedForwardConfig().getKV()
+            * WHEEL_RADIUS_METERS
+            / UnitsConstants.METERS_PER_INCH);
+
     driveMotor.setSensorPhase(false);
     driveMotor.setInverted(TalonFXInvertType.Clockwise);
     driveMotor.setNeutralMode(NeutralMode.Brake);
@@ -288,15 +296,17 @@ public class SwerveModule extends Subsystem {
     double vel_in_turn_motor_frame =
         config.getMaxTurnVelocityRadiansPerSecond() * TURN_GEARBOX_RATIO;
     double vel_in_turn_motor_units =
-        Units.radiansToRotations(vel_in_turn_motor_frame) * 2048 * 0.100;
+        vel_in_turn_motor_frame / UnitsConstants.RADIANS_PER_ROTATION * 2048 * 0.100;
 
     double accel_in_turn_motor_frame =
         config.getMaxTurnAccelRadiansPerSecondPerSecond() * TURN_GEARBOX_RATIO;
     double accel_in_turn_motor_units =
-        Units.radiansToRotations(accel_in_turn_motor_frame) * 2048 * 0.100;
+        accel_in_turn_motor_frame / UnitsConstants.RADIANS_PER_ROTATION * 2048 * 0.100;
 
     turnSettings.motionCruiseVelocity = vel_in_turn_motor_units;
     turnSettings.motionAcceleration = accel_in_turn_motor_units;
+
+    // System.out.println(turnSettings);
 
     turnMotor.configAllSettings(turnSettings);
 
@@ -306,7 +316,7 @@ public class SwerveModule extends Subsystem {
     encoderSettings.initializationStrategy = SensorInitializationStrategy.BootToAbsolutePosition;
     encoderSettings.absoluteSensorRange = AbsoluteSensorRange.Signed_PlusMinus180;
     if (RobotBase.isReal()) {
-      encoderSettings.magnetOffsetDegrees = Units.radiansToDegrees(angleOffset);
+      encoderSettings.magnetOffsetDegrees = angleOffset * UnitsConstants.DEGREES_PER_RADIAN;
     }
 
     encoderSettings.sensorDirection = false;
@@ -342,13 +352,14 @@ public class SwerveModule extends Subsystem {
     driveMotorSim.setBusVoltage(12);
     driveSim.setInputVoltage(-driveMotorSim.getMotorOutputLeadVoltage());
 
-    driveSim.update(0.02);
+    driveSim.update(20 * UnitsConstants.MILLISECONDS);
 
     driveMotorSim.setStatorCurrent(driveSim.getCurrentDrawAmps());
 
-    double speed_at_wheel = driveSim.getAngularVelocityRadPerSec();
-    double speed_at_motor = speed_at_wheel * DRIVE_GEARBOX_RATIO;
-    double speed_in_native_units = Units.radiansToRotations(speed_at_motor) * 2048 * 0.100;
+    double speed_at_wheel_RadiansPerSecond = driveSim.getAngularVelocityRadPerSec();
+    double speed_at_motor_RadiansPerSecond = speed_at_wheel_RadiansPerSecond * DRIVE_GEARBOX_RATIO;
+    double speed_in_native_units =
+        speed_at_motor_RadiansPerSecond / UnitsConstants.RADIANS_PER_ROTATION * 2048 * 0.100;
 
     driveMotorSim.setIntegratedSensorVelocity(-(int) speed_in_native_units);
 
@@ -361,18 +372,22 @@ public class SwerveModule extends Subsystem {
 
     turnSim.setInputVoltage(turnMotorSim.getMotorOutputLeadVoltage());
 
+    turnSim.update(20 * UnitsConstants.MILLISECONDS);
+
     double angular_pos = turnSim.getAngleRadians();
     double angular_vel = turnSim.getAngularVelocityRadiansPerSecond();
 
-    double angular_pos_at_encoder = Units.radiansToRotations(angular_pos) * 4096;
-    double angular_vel_at_encoder = Units.radiansToRotations(angular_vel) * 4096 * 0.100;
+    double angular_pos_at_encoder = angular_pos / UnitsConstants.RADIANS_PER_ROTATION * 4096;
+    double angular_vel_at_encoder =
+        angular_vel / UnitsConstants.RADIANS_PER_ROTATION * 4096 * 0.100;
 
     turnEncoderSim.setRawPosition((int) angular_pos_at_encoder);
     turnEncoderSim.setVelocity((int) angular_vel_at_encoder);
 
-    double angular_pos_at_motor = Units.radiansToRotations(angular_pos) * TURN_GEARBOX_RATIO * 2048;
+    double angular_pos_at_motor =
+        angular_pos / UnitsConstants.RADIANS_PER_ROTATION * TURN_GEARBOX_RATIO * 2048;
     double angular_vel_at_motor =
-        Units.radiansToRotations(angular_vel) * TURN_GEARBOX_RATIO * 2048 * 0.100;
+        angular_vel / UnitsConstants.RADIANS_PER_ROTATION * TURN_GEARBOX_RATIO * 2048 * 0.100;
 
     turnMotorSim.setIntegratedSensorRawPosition((int) angular_pos_at_motor);
     turnMotorSim.setIntegratedSensorVelocity((int) angular_vel_at_motor);
@@ -381,7 +396,7 @@ public class SwerveModule extends Subsystem {
   }
 
   public ErrorCode SeedTurnMotor() {
-    double pos_at_encoder = Units.degreesToRotations(turnEncoder.getAbsolutePosition());
+    double pos_at_encoder = turnEncoder.getAbsolutePosition() / UnitsConstants.DEGREES_PER_ROTATION;
     double pos_at_motor = pos_at_encoder * TURN_GEARBOX_RATIO * 2048;
 
     turnMotor.stopMotor();
