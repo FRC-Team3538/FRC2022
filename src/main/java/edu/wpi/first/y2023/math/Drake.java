@@ -5,6 +5,7 @@
 package edu.wpi.first.y2023.math;
 
 import edu.wpi.first.math.Num;
+import edu.wpi.first.math.WPIMathJNI;
 import org.ejml.simple.SimpleMatrix;
 
 public final class Drake {

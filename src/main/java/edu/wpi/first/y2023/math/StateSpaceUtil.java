@@ -6,6 +6,7 @@ package edu.wpi.first.y2023.math;
 
 import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.Num;
+import edu.wpi.first.math.WPIMathJNI;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.numbers.N4;

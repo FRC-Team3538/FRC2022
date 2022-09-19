@@ -4,6 +4,7 @@
 
 package edu.wpi.first.y2023.math;
 
+import edu.wpi.first.math.WPIMathJNI;
 import java.util.function.BiFunction;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.NormOps_DDRM;

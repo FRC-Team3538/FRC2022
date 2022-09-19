@@ -14,7 +14,6 @@ import edu.wpi.first.y2023.math.system.Discretization;
 import edu.wpi.first.y2023.math.system.NumericalIntegration;
 import edu.wpi.first.y2023.math.system.NumericalJacobian;
 import java.util.function.BiFunction;
-import org.ejml.dense.row.decomposition.qr.QRDecompositionHouseholder_DDRM;
 import org.ejml.simple.SimpleMatrix;
 
 /**
@@ -34,9 +33,6 @@ import org.ejml.simple.SimpleMatrix;
  * <p>For more on the underlying math, read
  * https://file.tavsys.net/control/controls-engineering-in-frc.pdf chapter 9 "Stochastic control
  * theory".
- *
- * <p>This class implements a square-root-form unscented Kalman filter (SR-UKF). For more
- * information about the SR-UKF, see https://www.researchgate.net/publication/3908304.
  */
 @SuppressWarnings({"MemberName", "ClassTypeParameterName"})
 public class UnscentedKalmanFilter<States extends Num, Inputs extends Num, Outputs extends Num>
@@ -54,7 +50,7 @@ public class UnscentedKalmanFilter<States extends Num, Inputs extends Num, Outpu
   private BiFunction<Matrix<States, N1>, Matrix<States, N1>, Matrix<States, N1>> m_addFuncX;
 
   private Matrix<States, N1> m_xHat;
-  private Matrix<States, States> m_S;
+  private Matrix<States, States> m_P;
   private final Matrix<States, States> m_contQ;
   private final Matrix<Outputs, Outputs> m_contR;
   private Matrix<States, ?> m_sigmasF;
@@ -156,16 +152,14 @@ public class UnscentedKalmanFilter<States extends Num, Inputs extends Num, Outpu
   }
 
   @SuppressWarnings({"ParameterName", "LocalVariableName"})
-  static <S extends Num, C extends Num>
-      Pair<Matrix<C, N1>, Matrix<C, C>> squareRootUnscentedTransform(
-          Nat<S> s,
-          Nat<C> dim,
-          Matrix<C, ?> sigmas,
-          Matrix<?, N1> Wm,
-          Matrix<?, N1> Wc,
-          BiFunction<Matrix<C, ?>, Matrix<?, N1>, Matrix<C, N1>> meanFunc,
-          BiFunction<Matrix<C, N1>, Matrix<C, N1>, Matrix<C, N1>> residualFunc,
-          Matrix<C, C> squareRootR) {
+  static <S extends Num, C extends Num> Pair<Matrix<C, N1>, Matrix<C, C>> unscentedTransform(
+      Nat<S> s,
+      Nat<C> dim,
+      Matrix<C, ?> sigmas,
+      Matrix<?, N1> Wm,
+      Matrix<?, N1> Wc,
+      BiFunction<Matrix<C, ?>, Matrix<?, N1>, Matrix<C, N1>> meanFunc,
+      BiFunction<Matrix<C, N1>, Matrix<C, N1>, Matrix<C, N1>> residualFunc) {
     if (sigmas.getNumRows() != dim.getNum() || sigmas.getNumCols() != 2 * s.getNum() + 1) {
       throw new IllegalArgumentException(
           "Sigmas must be covDim by 2 * states + 1! Got "
@@ -190,64 +184,28 @@ public class UnscentedKalmanFilter<States extends Num, Inputs extends Num, Outpu
     //      k=1
     Matrix<C, N1> x = meanFunc.apply(sigmas, Wm);
 
-    Matrix<C, ?> Sbar = new Matrix<>(new SimpleMatrix(dim.getNum(), 2 * s.getNum() + dim.getNum()));
-    for (int i = 0; i < 2 * s.getNum(); i++) {
-      Sbar.setColumn(
-          i,
-          residualFunc.apply(sigmas.extractColumnVector(1 + i), x).times(Math.sqrt(Wc.get(1, 0))));
+    // New covariance is the sum of the outer product of the residuals times the
+    // weights
+    Matrix<C, ?> y = new Matrix<>(new SimpleMatrix(dim.getNum(), 2 * s.getNum() + 1));
+    for (int i = 0; i < 2 * s.getNum() + 1; i++) {
+      // y[:, i] = sigmas[:, i] - x
+      y.setColumn(i, residualFunc.apply(sigmas.extractColumnVector(i), x));
     }
-    Sbar.assignBlock(0, 2 * s.getNum(), squareRootR);
+    Matrix<C, C> P =
+        y.times(Matrix.changeBoundsUnchecked(Wc.diag()))
+            .times(Matrix.changeBoundsUnchecked(y.transpose()));
 
-    QRDecompositionHouseholder_DDRM qr = new QRDecompositionHouseholder_DDRM();
-    var qrStorage = Sbar.transpose().getStorage();
-
-    if (!qr.decompose(qrStorage.getDDRM())) {
-      throw new RuntimeException("QR decomposition failed! Input matrix:\n" + qrStorage.toString());
-    }
-
-    Matrix<C, C> newS = new Matrix<>(new SimpleMatrix(qr.getR(null, true)));
-    newS.rankUpdate(residualFunc.apply(sigmas.extractColumnVector(0), x), Wc.get(0, 0), false);
-
-    return new Pair<>(x, newS);
+    return new Pair<>(x, P);
   }
 
   /**
-   * Returns the square-root error covariance matrix S.
-   *
-   * @return the square-root error covariance matrix S.
-   */
-  public Matrix<States, States> getS() {
-    return m_S;
-  }
-
-  /**
-   * Returns an element of the square-root error covariance matrix S.
-   *
-   * @param row Row of S.
-   * @param col Column of S.
-   * @return the value of the square-root error covariance matrix S at (i, j).
-   */
-  public double getS(int row, int col) {
-    return m_S.get(row, col);
-  }
-
-  /**
-   * Sets the entire square-root error covariance matrix S.
-   *
-   * @param newS The new value of S to use.
-   */
-  public void setS(Matrix<States, States> newS) {
-    m_S = newS;
-  }
-
-  /**
-   * Returns the reconstructed error covariance matrix P.
+   * Returns the error covariance matrix P.
    *
    * @return the error covariance matrix P.
    */
   @Override
   public Matrix<States, States> getP() {
-    return m_S.transpose().times(m_S);
+    return m_P;
   }
 
   /**
@@ -256,12 +214,10 @@ public class UnscentedKalmanFilter<States extends Num, Inputs extends Num, Outpu
    * @param row Row of P.
    * @param col Column of P.
    * @return the value of the error covariance matrix P at (i, j).
-   * @throws UnsupportedOperationException indexing into the reconstructed P matrix is not supported
    */
   @Override
   public double getP(int row, int col) {
-    throw new UnsupportedOperationException(
-        "indexing into the reconstructed P matrix is not supported");
+    return m_P.get(row, col);
   }
 
   /**
@@ -271,7 +227,7 @@ public class UnscentedKalmanFilter<States extends Num, Inputs extends Num, Outpu
    */
   @Override
   public void setP(Matrix<States, States> newP) {
-    m_S = newP.lltDecompose(false);
+    m_P = newP;
   }
 
   /**
@@ -321,7 +277,7 @@ public class UnscentedKalmanFilter<States extends Num, Inputs extends Num, Outpu
   @Override
   public void reset() {
     m_xHat = new Matrix<>(m_states, Nat.N1());
-    m_S = new Matrix<>(m_states, m_states);
+    m_P = new Matrix<>(m_states, m_states);
     m_sigmasF = new Matrix<>(new SimpleMatrix(m_states.getNum(), 2 * m_states.getNum() + 1));
   }
 
@@ -338,9 +294,8 @@ public class UnscentedKalmanFilter<States extends Num, Inputs extends Num, Outpu
     Matrix<States, States> contA =
         NumericalJacobian.numericalJacobianX(m_states, m_states, m_f, m_xHat, u);
     var discQ = Discretization.discretizeAQTaylor(contA, m_contQ, dtSeconds).getSecond();
-    var squareRootDiscQ = discQ.lltDecompose(true);
 
-    var sigmas = m_pts.squareRootSigmaPoints(m_xHat, m_S);
+    var sigmas = m_pts.sigmaPoints(m_xHat, m_P);
 
     for (int i = 0; i < m_pts.getNumSigmas(); ++i) {
       Matrix<States, N1> x = sigmas.extractColumnVector(i);
@@ -349,18 +304,17 @@ public class UnscentedKalmanFilter<States extends Num, Inputs extends Num, Outpu
     }
 
     var ret =
-        squareRootUnscentedTransform(
+        unscentedTransform(
             m_states,
             m_states,
             m_sigmasF,
             m_pts.getWm(),
             m_pts.getWc(),
             m_meanFuncX,
-            m_residualFuncX,
-            squareRootDiscQ);
+            m_residualFuncX);
 
     m_xHat = ret.getFirst();
-    m_S = ret.getSecond();
+    m_P = ret.getSecond().plus(discQ);
     m_dtSeconds = dtSeconds;
   }
 
@@ -440,11 +394,10 @@ public class UnscentedKalmanFilter<States extends Num, Inputs extends Num, Outpu
       BiFunction<Matrix<States, N1>, Matrix<States, N1>, Matrix<States, N1>> residualFuncX,
       BiFunction<Matrix<States, N1>, Matrix<States, N1>, Matrix<States, N1>> addFuncX) {
     final var discR = Discretization.discretizeR(R, m_dtSeconds);
-    final var squareRootDiscR = discR.lltDecompose(true);
 
     // Transform sigma points into measurement space
     Matrix<R, ?> sigmasH = new Matrix<>(new SimpleMatrix(rows.getNum(), 2 * m_states.getNum() + 1));
-    var sigmas = m_pts.squareRootSigmaPoints(m_xHat, m_S);
+    var sigmas = m_pts.sigmaPoints(m_xHat, m_P);
     for (int i = 0; i < m_pts.getNumSigmas(); i++) {
       Matrix<R, N1> hRet = h.apply(sigmas.extractColumnVector(i), u);
       sigmasH.setColumn(i, hRet);
@@ -452,42 +405,22 @@ public class UnscentedKalmanFilter<States extends Num, Inputs extends Num, Outpu
 
     // Mean and covariance of prediction passed through unscented transform
     var transRet =
-        squareRootUnscentedTransform(
-            m_states,
-            rows,
-            sigmasH,
-            m_pts.getWm(),
-            m_pts.getWc(),
-            meanFuncY,
-            residualFuncY,
-            squareRootDiscR);
+        unscentedTransform(
+            m_states, rows, sigmasH, m_pts.getWm(), m_pts.getWc(), meanFuncY, residualFuncY);
     var yHat = transRet.getFirst();
-    var Sy = transRet.getSecond();
+    var Py = transRet.getSecond().plus(discR);
 
     // Compute cross covariance of the state and the measurements
     Matrix<States, R> Pxy = new Matrix<>(m_states, rows);
     for (int i = 0; i < m_pts.getNumSigmas(); i++) {
-      // Pxy += (sigmas_f[:, i] - xhat)(sigmas_h[:, i] - ŷ)<sup>T</sup> W_c[i]
       var dx = residualFuncX.apply(m_sigmasF.extractColumnVector(i), m_xHat);
       var dy = residualFuncY.apply(sigmasH.extractColumnVector(i), yHat).transpose();
 
       Pxy = Pxy.plus(dx.times(dy).times(m_pts.getWc(i)));
     }
 
-    // K = (P_{xy} / S_y<sup>T</sup>) / S_y
-    // K = (S_y \ P_{xy}<sup>T</sup>)<sup>T</sup> / S_y
-    // K = (S_y<sup>T</sup> \ (S_y \ P_{xy}<sup>T</sup>))<sup>T</sup>
-    Matrix<States, R> K =
-        Sy.transpose()
-            .solveFullPivHouseholderQr(Sy.solveFullPivHouseholderQr(Pxy.transpose()))
-            .transpose();
-
-    // xhat<sub>k+1</sub>+ = xhat<sub>k+1</sub>- + K(y − ŷ)
+    Matrix<States, R> K = new Matrix<>(Py.transpose().solve(Pxy.transpose()).transpose());
     m_xHat = addFuncX.apply(m_xHat, K.times(residualFuncY.apply(y, yHat)));
-
-    Matrix<States, R> U = K.times(Sy);
-    for (int i = 0; i < rows.getNum(); i++) {
-      m_S.rankUpdate(U.extractColumnVector(i), -1, false);
-    }
+    m_P = m_P.minus(K.times(Py).times(K.transpose()));
   }
 }

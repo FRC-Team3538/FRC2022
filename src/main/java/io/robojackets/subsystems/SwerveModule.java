@@ -46,8 +46,8 @@ public class SwerveModule extends Subsystem {
 
   private final double angleOffset;
 
-  private SwerveModuleState currentState;
-  private SwerveModuleState targetState;
+  private SwerveModuleState currentState = new SwerveModuleState();
+  private SwerveModuleState targetState = new SwerveModuleState();
 
   private final String moduleID;
 

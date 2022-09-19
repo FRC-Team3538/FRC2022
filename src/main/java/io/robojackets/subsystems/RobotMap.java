@@ -11,7 +11,7 @@ import edu.wpi.first.y2023.wpilibj.simulation.REVPHSim;
 import java.util.List;
 
 public class RobotMap extends Subsystem {
-  public Drivetrain drivetrain;
+  public Drivetrain drivetrain = new Drivetrain();
 
   public PS4Controller mainController = new PS4Controller(0);
   public PS4Controller secondaryController = new PS4Controller(1);

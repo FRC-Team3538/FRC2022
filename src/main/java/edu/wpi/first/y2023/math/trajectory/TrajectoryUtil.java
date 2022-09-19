@@ -4,7 +4,7 @@
 
 package edu.wpi.first.y2023.math.trajectory;
 
-import edu.wpi.first.y2023.math.WPIMathJNI;
+import edu.wpi.first.math.WPIMathJNI;
 import edu.wpi.first.y2023.math.geometry.Pose2d;
 import edu.wpi.first.y2023.math.geometry.Rotation2d;
 import java.io.IOException;

@@ -6,6 +6,7 @@ package edu.wpi.first.y2023.math;
 
 import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.Num;
+import edu.wpi.first.math.WPIMathJNI;
 import edu.wpi.first.math.numbers.N1;
 import java.util.Objects;
 import org.ejml.MatrixDimensionException;
@@ -347,19 +348,20 @@ public class Matrix<R extends Num, C extends Num> {
    * @param other The B matrix.
    * @return The solution matrix.
    */
-  public final <R2 extends Num, C2 extends Num> Matrix<C, C2> solveFullPivHouseholderQr(
-      Matrix<R2, C2> other) {
-    Matrix<C, C2> solution = new Matrix<>(new SimpleMatrix(this.getNumCols(), other.getNumCols()));
-    WPIMathJNI.solveFullPivHouseholderQr(
-        this.getData(),
-        this.getNumRows(),
-        this.getNumCols(),
-        other.getData(),
-        other.getNumRows(),
-        other.getNumCols(),
-        solution.getData());
-    return solution;
-  }
+  // public final <R2 extends Num, C2 extends Num> Matrix<C, C2> solveFullPivHouseholderQr(
+  //     Matrix<R2, C2> other) {
+  //   Matrix<C, C2> solution = new Matrix<>(new SimpleMatrix(this.getNumCols(),
+  // other.getNumCols()));
+  //   WPIMathJNI.solveFullPivHouseholderQr(
+  //       this.getData(),
+  //       this.getNumRows(),
+  //       this.getNumCols(),
+  //       other.getData(),
+  //       other.getNumRows(),
+  //       other.getNumCols(),
+  //       solution.getData());
+  //   return solution;
+  // }
 
   /**
    * Computes the matrix exponential using Eigen's solver. This method only works for square
@@ -716,9 +718,10 @@ public class Matrix<R extends Num, C extends Num> {
    * @param sigma Sigma to use for the update.
    * @param lowerTriangular Whether or not this matrix is lower triangular.
    */
-  public void rankUpdate(Matrix<R, N1> v, double sigma, boolean lowerTriangular) {
-    WPIMathJNI.rankUpdate(this.getData(), this.getNumRows(), v.getData(), sigma, lowerTriangular);
-  }
+  // public void rankUpdate(Matrix<R, N1> v, double sigma, boolean lowerTriangular) {
+  //   WPIMathJNI.rankUpdate(this.getData(), this.getNumRows(), v.getData(), sigma,
+  // lowerTriangular);
+  // }
 
   @Override
   public String toString() {

@@ -4,7 +4,16 @@
 
 package io.robojackets;
 
+import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.livewindow.LiveWindow;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.y2023.math.geometry.Rotation2d;
+import io.robojackets.auto.AutoPrograms;
+import io.robojackets.subsystems.Drivetrain;
+import io.robojackets.subsystems.RobotMap;
+import lombok.val;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -13,30 +22,105 @@ import edu.wpi.first.wpilibj.TimedRobot;
  * project.
  */
 public class Robot extends TimedRobot {
+  RobotMap IO = new RobotMap();
+  AutoPrograms auton = new AutoPrograms(IO);
+
+  Timer shotTimer = new Timer();
+  Timer brakeTimer = new Timer();
+  Timer intakeTimer = new Timer();
+
+  Timer seedEncoderTimer = new Timer();
+
+  NetworkTableEntry calibrationEntry = SmartDashboard.getEntry("Recalibrate");
+
+  boolean manualJog;
+
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
    */
   @Override
-  public void robotInit() {}
+  public void robotInit() {
+    LiveWindow.disableAllTelemetry();
+    LiveWindow.setEnabled(false);
+
+    IO.ConfigureSystem();
+
+    SmartDashboard.putData("Drivetrain", IO.drivetrain);
+
+    calibrationEntry.setBoolean(false);
+    calibrationEntry.addListener(
+        notif -> {
+          if (notif.value.getBoolean()) {
+            IO.drivetrain.ConfigureSystem();
+            calibrationEntry.setBoolean(false);
+          }
+        },
+        0x10);
+
+    seedEncoderTimer.start();
+
+    IO.drivetrain.ResetYaw(new Rotation2d());
+  }
 
   @Override
-  public void robotPeriodic() {}
+  public void robotPeriodic() {
+    IO.drivetrain.UpdateOdometry();
+
+    if (!IO.drivetrain.Active() && seedEncoderTimer.get() > 5) {
+      System.out.println("Seeding Encoders");
+
+      SmartDashboard.putNumber(
+          "Drivetrain/SeedEncoderLastResult", IO.drivetrain.SeedEncoders().value);
+      seedEncoderTimer.reset();
+    }
+
+    if (IO.mainController.getOptionsButtonPressed()) {
+      IO.drivetrain.ResetYaw(new Rotation2d());
+    }
+
+    if (IO.mainController.getShareButtonPressed()) {
+      IO.drivetrain.SetFieldCentric(!IO.drivetrain.GetFieldCentric());
+    }
+  }
 
   @Override
-  public void autonomousInit() {}
+  public void autonomousInit() {
+    auton.Init();
+  }
 
   @Override
-  public void autonomousPeriodic() {}
+  public void autonomousPeriodic() {
+    auton.Run();
+  }
 
   @Override
-  public void teleopInit() {}
+  public void teleopInit() {
+    IO.drivetrain.SetFieldCentric(true);
+  }
 
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+    double forward =
+        deadband(IO.mainController.getLeftY(), 0.1, 1.0)
+            * Drivetrain.kMaxSpeedLinearMetersPerSecond;
+    double strafe =
+        deadband(IO.mainController.getLeftX(), 0.1, 1.0)
+            * Drivetrain.kMaxSpeedLinearMetersPerSecond;
+    double rotate =
+        deadband(IO.mainController.getRightX(), 0.1, 1.0)
+            * Drivetrain.kMaxSpeedAngularRadiansPerSecond;
+
+    IO.drivetrain.Drive(forward, strafe, rotate, false);
+  }
 
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+    auton.End();
+    IO.drivetrain.Stop();
+    brakeTimer.reset();
+    brakeTimer.start();
+  }
 
   @Override
   public void disabledPeriodic() {}
@@ -48,8 +132,26 @@ public class Robot extends TimedRobot {
   public void testPeriodic() {}
 
   @Override
-  public void simulationInit() {}
+  public void simulationInit() {
+    IO.SimInit();
+  }
 
   @Override
-  public void simulationPeriodic() {}
+  public void simulationPeriodic() {
+    IO.SimPeriodic(0, null);
+  }
+
+  private double deadband(double val, double min, double max) {
+    if (val > max) {
+      return max;
+    } else if (val < -max) {
+      return -max;
+    } else if (Math.abs(val) < min) {
+      return 0;
+    } else {
+      double sign = Math.signum(val);
+
+      return sign * (Math.abs(val) - min) / (max - min) * max;
+    }
+  }
 }
