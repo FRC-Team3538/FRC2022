@@ -1,6 +1,6 @@
 package io.robojackets.lib;
 
-public class UnitsConstants {
+public class UnitConversion {
   public static final double RADIANS_PER_ROTATION = Math.PI * 2.0;
   public static final double DEGREES_PER_ROTATION = 360.0;
   public static final double DEGREES_PER_RADIAN = DEGREES_PER_ROTATION / RADIANS_PER_ROTATION;

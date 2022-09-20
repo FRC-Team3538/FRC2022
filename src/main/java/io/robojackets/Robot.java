@@ -5,6 +5,7 @@
 package io.robojackets;
 
 import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
@@ -13,7 +14,6 @@ import edu.wpi.first.y2023.math.geometry.Rotation2d;
 import io.robojackets.auto.AutoPrograms;
 import io.robojackets.subsystems.Drivetrain;
 import io.robojackets.subsystems.RobotMap;
-import lombok.val;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -67,7 +67,7 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {
     IO.drivetrain.UpdateOdometry();
 
-    if (!IO.drivetrain.Active() && seedEncoderTimer.get() > 5) {
+    if (!IO.drivetrain.Active() && seedEncoderTimer.get() > 5 && RobotBase.isReal()) {
       System.out.println("Seeding Encoders");
 
       SmartDashboard.putNumber(

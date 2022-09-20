@@ -25,15 +25,15 @@ import edu.wpi.first.y2023.math.trajectory.TrapezoidProfile;
 import io.robojackets.config.FeedForwardConfig;
 import io.robojackets.config.PIDConfig;
 import io.robojackets.config.SwerveModuleConfig;
-import io.robojackets.lib.UnitsConstants;
+import io.robojackets.lib.UnitConversion;
 
 public class Drivetrain extends Subsystem {
-  public static final double kMaxSpeedLinearMetersPerSecond = 16 * UnitsConstants.METERS_PER_FOOT;
+  public static final double kMaxSpeedLinearMetersPerSecond = 16 * UnitConversion.METERS_PER_FOOT;
   public static final double kMaxSpeedAngularRadiansPerSecond =
-      360 / UnitsConstants.DEGREES_PER_RADIAN;
+      360 / UnitConversion.DEGREES_PER_RADIAN;
   public static final double kMaxAccelerationLinearMetersPerSecondPerSecond =
-      20 * UnitsConstants.METERS_PER_FOOT;
-  public static final double kWheelDistance = 20.5 * UnitsConstants.METERS_PER_INCH;
+      20 * UnitConversion.METERS_PER_FOOT;
+  public static final double kWheelDistance = 20.5 * UnitConversion.METERS_PER_INCH;
 
   private boolean fieldRelative = true;
   Translation2d frontLeftLocation = new Translation2d(kWheelDistance / 2, kWheelDistance / 2);
@@ -69,7 +69,7 @@ public class Drivetrain extends Subsystem {
 
   SwerveModuleConfig frontLeftConfig =
       SwerveModuleConfig.builder()
-          .angleOffsetRadians(-128.496 / UnitsConstants.DEGREES_PER_RADIAN)
+          .angleOffsetRadians(-128.496 / UnitConversion.DEGREES_PER_RADIAN)
           .drivePIDConfig(PIDConfig.builder().kP(0.0092534).build())
           .turnPIDConfig(PIDConfig.builder().kP(0.098996).kD(0.00055669).build())
           .driveFeedForwardConfig(
@@ -82,7 +82,7 @@ public class Drivetrain extends Subsystem {
 
   SwerveModuleConfig frontRightConfig =
       SwerveModuleConfig.builder()
-          .angleOffsetRadians(78.838 / UnitsConstants.DEGREES_PER_RADIAN)
+          .angleOffsetRadians(78.838 / UnitConversion.DEGREES_PER_RADIAN)
           .drivePIDConfig(PIDConfig.builder().kP(0.0092534).build())
           .turnPIDConfig(PIDConfig.builder().kP(0.098996).kD(0.00055669).build())
           .driveFeedForwardConfig(
@@ -95,7 +95,7 @@ public class Drivetrain extends Subsystem {
 
   SwerveModuleConfig backLeftConfig =
       SwerveModuleConfig.builder()
-          .angleOffsetRadians(-4.219 / UnitsConstants.DEGREES_PER_RADIAN)
+          .angleOffsetRadians(-4.219 / UnitConversion.DEGREES_PER_RADIAN)
           .drivePIDConfig(PIDConfig.builder().kP(0.0092534).build())
           .turnPIDConfig(PIDConfig.builder().kP(0.098996).kD(0.00055669).build())
           .driveFeedForwardConfig(
@@ -108,7 +108,7 @@ public class Drivetrain extends Subsystem {
 
   SwerveModuleConfig backRightConfig =
       SwerveModuleConfig.builder()
-          .angleOffsetRadians(-60.645 / UnitsConstants.DEGREES_PER_RADIAN)
+          .angleOffsetRadians(-60.645 / UnitConversion.DEGREES_PER_RADIAN)
           .drivePIDConfig(PIDConfig.builder().kP(0.0092534).build())
           .turnPIDConfig(PIDConfig.builder().kP(0.098996).kD(0.00055669).build())
           .driveFeedForwardConfig(
@@ -133,8 +133,8 @@ public class Drivetrain extends Subsystem {
               0.0,
               0.0,
               new TrapezoidProfile.Constraints(
-                  360 / UnitsConstants.DEGREES_PER_RADIAN,
-                  720 / UnitsConstants.DEGREES_PER_RADIAN)));
+                  360 / UnitConversion.DEGREES_PER_RADIAN,
+                  720 / UnitConversion.DEGREES_PER_RADIAN)));
 
   public Rotation2d GetYaw() {
     return Rotation2d.fromDegrees(imu.getYaw());
@@ -213,7 +213,7 @@ public class Drivetrain extends Subsystem {
       double ySpeedMetersPerSecond,
       double rotationRadiansPerSecond,
       boolean openLoop) {
-    final double no_rotation_threshold_RadiansPerSecond = 0.1 / UnitsConstants.DEGREES_PER_RADIAN;
+    final double no_rotation_threshold_RadiansPerSecond = 0.1 / UnitConversion.DEGREES_PER_RADIAN;
     yawLockActive = Math.abs(rotationRadiansPerSecond) < no_rotation_threshold_RadiansPerSecond;
 
     double translation_magnitude_MetersPerSecond =
@@ -322,9 +322,9 @@ public class Drivetrain extends Subsystem {
   public void SimPeriodic(double battery, double[] currentDraw) {
     imuSim.addHeading(
         GetChassisSpeeds().omegaRadiansPerSecond
-            * UnitsConstants.DEGREES_PER_RADIAN
+            * UnitConversion.DEGREES_PER_RADIAN
             * 20
-            * UnitsConstants.MILLISECONDS);
+            * UnitConversion.MILLISECONDS);
 
     frontLeft.SimPeriodic(battery, currentDraw);
     frontRight.SimPeriodic(battery, currentDraw);
