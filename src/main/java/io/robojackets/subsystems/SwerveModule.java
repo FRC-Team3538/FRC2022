@@ -10,10 +10,10 @@ import com.ctre.phoenix.motorcontrol.TalonFXSimCollection;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix.sensors.AbsoluteSensorRange;
-import com.ctre.phoenix.sensors.CANCoder;
 import com.ctre.phoenix.sensors.CANCoderConfiguration;
 import com.ctre.phoenix.sensors.CANCoderSimCollection;
 import com.ctre.phoenix.sensors.SensorInitializationStrategy;
+import com.ctre.phoenix.sensors.WPI_CANCoder;
 import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N2;
@@ -57,7 +57,7 @@ public class SwerveModule extends Subsystem {
 
   private final WPI_TalonFX driveMotor;
   private final WPI_TalonFX turnMotor;
-  private final CANCoder turnEncoder;
+  private final WPI_CANCoder turnEncoder;
 
   private double driveVolts;
   private double turnVolts;
@@ -79,7 +79,7 @@ public class SwerveModule extends Subsystem {
     this.moduleID = moduleID;
     driveMotor = new WPI_TalonFX(driveID);
     turnMotor = new WPI_TalonFX(turnID);
-    turnEncoder = new CANCoder(encID);
+    turnEncoder = new WPI_CANCoder(encID);
 
     this.config = config;
 
