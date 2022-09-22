@@ -20,7 +20,6 @@ import edu.wpi.first.math.numbers.N2;
 import edu.wpi.first.util.datalog.DataLog;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.y2023.math.Matrix;
 import edu.wpi.first.y2023.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.y2023.math.geometry.Rotation2d;
@@ -170,12 +169,6 @@ public class SwerveModule extends Subsystem {
         new Rotation2d(actual_current_angle.getCos(), actual_current_angle.getSin());
 
     Rotation2d target_diff = normalized_target_angle.minus(normalized_actual_current_angle);
-    SmartDashboard.putNumber(moduleID + "wtf/diff", target_diff.getRadians());
-    SmartDashboard.putNumber(moduleID + "wtf/target", normalized_target_angle.getRadians());
-    SmartDashboard.putNumber(moduleID + "wtf/current", normalized_current_angle.getRadians());
-    SmartDashboard.putNumber(moduleID + "wtf/actual", normalized_actual_current_angle.getRadians());
-    SmartDashboard.putNumber(
-        moduleID + "wtf/encoder_ticks", normalized_current_angle.getRotations() * 4096);
 
     double actual_target_angle = actual_current_angle.getRadians() + target_diff.getRadians();
 
@@ -356,7 +349,6 @@ public class SwerveModule extends Subsystem {
   @Override
   public void SimInit() {
     // TODO Auto-generated method stub
-
   }
 
   @Override
@@ -407,9 +399,6 @@ public class SwerveModule extends Subsystem {
             * 4096
             * 100
             * UnitConversion.MILLISECONDS;
-
-    SmartDashboard.putNumber(moduleID + "wtf/sim_pos", angular_pos);
-    SmartDashboard.putNumber(moduleID + "wtf/sim_pos_encoder", angular_pos_at_encoder);
 
     turnEncoderSim.setRawPosition((int) angular_pos_at_encoder);
     turnEncoderSim.setVelocity((int) angular_vel_at_encoder);

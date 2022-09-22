@@ -120,9 +120,9 @@ public class Drivetrain extends Subsystem {
           .build();
 
   SwerveModule frontLeft = new SwerveModule("FL", 0, 1, 20, frontLeftConfig);
-  SwerveModule frontRight = new SwerveModule("FR", 2, 3, 20, frontRightConfig);
-  SwerveModule backLeft = new SwerveModule("BL", 4, 5, 20, backLeftConfig);
-  SwerveModule backRight = new SwerveModule("BR", 6, 7, 20, backRightConfig);
+  SwerveModule frontRight = new SwerveModule("FR", 2, 3, 21, frontRightConfig);
+  SwerveModule backLeft = new SwerveModule("BL", 4, 5, 22, backLeftConfig);
+  SwerveModule backRight = new SwerveModule("BR", 6, 7, 23, backRightConfig);
 
   HolonomicDriveController trajectoryController =
       new HolonomicDriveController(

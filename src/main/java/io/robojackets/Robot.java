@@ -5,7 +5,6 @@
 package io.robojackets;
 
 import edu.wpi.first.networktables.NetworkTableEntry;
-import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
@@ -67,7 +66,7 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {
     IO.drivetrain.UpdateOdometry();
 
-    if (!IO.drivetrain.Active() && seedEncoderTimer.get() > 5 && RobotBase.isReal()) {
+    if (!IO.drivetrain.Active() && seedEncoderTimer.get() > 5) {
       System.out.println("Seeding Encoders");
 
       SmartDashboard.putNumber(
