@@ -1,4 +1,4 @@
-#pragma once
+/*#pragma once
 
 #include <frc/Timer.h>                       // for Timer
 #include <stdint.h>                          // for uint8_t
@@ -23,7 +23,7 @@ namespace vision
      * RJVisionPipeline class.
      */
 
-    class RJVisionPipeline : public Subsystem
+  /*  class RJVisionPipeline : public Subsystem
     {
     public:
         enum class FilterType : uint8_t
@@ -120,3 +120,5 @@ namespace vision
         nt::NetworkTableEntry rawVisionEntry = nt::NetworkTableInstance::GetDefault().GetEntry("/photonvision/gloworm/rawBytes");
     };
 } // namespace vision
+
+*/

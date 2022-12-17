@@ -46,9 +46,9 @@ public:
 
     // *** PUT SUBSYSTEMS HERE ***
     Drivetrain drivetrain;
-    Shooter shooter;
-    vision::RJVisionPipeline rjVision {vision::RJVisionPipeline::FilterType::EMAWithSpinup};
-    Climber climber;
+   // Shooter shooter;
+   // vision::RJVisionPipeline rjVision {vision::RJVisionPipeline::FilterType::EMAWithSpinup};
+   /// Climber climber;
   
     Robotmap();
 

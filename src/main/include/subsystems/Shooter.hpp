@@ -1,4 +1,4 @@
-#pragma once
+/*#pragma once
 
 #include <frc/DigitalInput.h>                                   // for Digit...
 #include <frc/Solenoid.h>                                       // for Solenoid
@@ -170,3 +170,5 @@ private:
 
     units::degree_t goalAngle;
 };
+
+*/

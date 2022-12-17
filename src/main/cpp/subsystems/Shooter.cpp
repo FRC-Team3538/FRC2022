@@ -1,4 +1,4 @@
-#include "subsystems/Shooter.hpp"
+/*#include "subsystems/Shooter.hpp"
 
 #include <cmath>
 #include <wpi/DataLog.h>
@@ -538,7 +538,7 @@ void Shooter::InitSendable(wpi::SendableBuilder &builder)
         nullptr);
     */
 
-    builder.AddDoubleProperty("shooter/hp_filter_result", [this] { return m_latestFilterResult.value(); }, nullptr);
+  /*  builder.AddDoubleProperty("shooter/hp_filter_result", [this] { return m_latestFilterResult.value(); }, nullptr);
 }
 
 void Shooter::LogDataEntries(wpi::log::DataLog &log)
@@ -604,3 +604,4 @@ void Shooter::RegisterDataEntries(wpi::log::DataLog &log)
 
     RegisterDataEntry(log, "Shooter/shooter/hp_filter_result", "double");
 }
+*/

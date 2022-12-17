@@ -10,7 +10,7 @@
 #include <rev/ColorSensorV3.h>                  // for ColorSensorV3
 #include <stdint.h>                             // for uint8_t
 #include "Robotmap.hpp"                         // for Robotmap
-#include "auto/AutoPrograms.hpp"                // for AutoPrograms
+//#include "auto/AutoPrograms.hpp"                // for AutoPrograms
 #include "frc/I2C.h"                            // for I2C, I2C::Port, I2C::...
 #include "frc/Timer.h"                          // for Timer
 #include "frc/geometry/Pose2d.h"                // for Pose2d
@@ -48,7 +48,7 @@ private:
   double deadband(double val, double min = 0.10, double max = 1.0);
 
   Robotmap IO;
-  AutoPrograms autoprograms{IO};
+  //AutoPrograms autoprograms{IO};
 
 #ifdef LOGGER
   wpi::log::DataLog &log = frc::DataLogManager::GetLog();
@@ -60,7 +60,7 @@ private:
   frc::Timer climberTimer; // Rhyme points
   bool climberTimerOS = false;
 
-  vision::RJVisionPipeline::visionData prevData;
+  //vision::RJVisionPipeline::visionData prevData;
 
   bool manualJog = false;
   

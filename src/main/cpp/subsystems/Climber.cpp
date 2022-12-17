@@ -1,4 +1,4 @@
-#include "subsystems/Climber.hpp"
+/*#include "subsystems/Climber.hpp"
 
 #include "frc/Solenoid.h"                           // for Solenoid
 #include "frc/smartdashboard/SmartDashboard.h"      // for SmartDashboard
@@ -153,3 +153,4 @@ void Climber::LogDataEntries(wpi::log::DataLog &log)
     FalconEntryHelper(log, climberA, "Climber/elevatorA");
     FalconEntryHelper(log, climberB, "Climber/elevatorB");
 }
+*/

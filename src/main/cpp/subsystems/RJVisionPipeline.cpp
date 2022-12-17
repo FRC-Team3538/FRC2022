@@ -1,4 +1,4 @@
-#include "subsystems/RJVisionPipeline.hpp"
+/*#include "subsystems/RJVisionPipeline.h"
 
 
 #include "frc/smartdashboard/SmartDashboard.h"     // for SmartDashboard
@@ -12,7 +12,7 @@
 #include <wpi/DataLog.h>
 #include <wpi/timestamp.h>                         // for Now
 
-using namespace nt; 
+using namespace nt;
 
 namespace vision
 {
@@ -293,11 +293,22 @@ namespace vision
         RegisterDataEntry(log, "dx", "double");
         RegisterDataEntry(log, "Vision Dist", "double");
     }
-    
+
     void RJVisionPipeline::LogDataEntries(wpi::log::DataLog &log)
     {
         log.AppendDouble(GetDataEntry("dx"), dx, 0);
         log.AppendDouble(GetDataEntry("Vision Dist"), estDist.value(), 0);
     }
-    
+
+    void RJVisionPipeline::SimInit()
+    {
+        
+    }
+
+    units::ampere_t RJVisionPipeline::SimPeriodic(units::volt_t battery)
+    {
+        return 0_A;
+    }
+
 } // namespace vision
+*/

@@ -19,10 +19,10 @@ class SendableBuilder;
 
 using namespace ctre::phoenix::motorcontrol::can;
 
-class Climber : public Subsystem,
-                public wpi::Sendable,
-                public wpi::SendableHelper<Climber>
-{
+//class Climber : public Subsystem,
+//                public wpi::Sendable,
+//                public wpi::SendableHelper<Climber>
+/*
 public:
 
     enum class ClimbState:uint8_t
@@ -46,7 +46,7 @@ public:
 
     // *** GETTERS ***
 
-    ClimbState GetClimberState();
+ /*   ClimbState GetClimberState();
 
     bool GetSensorOverride();
 
@@ -68,3 +68,5 @@ private:
 
     frc::DigitalInput bottomMagSwitch {8};
 };
+*/
+
